@@ -1,0 +1,296 @@
+import 'dart:async';
+import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+class MatchOverlay extends StatefulWidget {
+  final Map<String, dynamic> matchedProfile;
+  final String? myAvatarUrl;
+  final VoidCallback onMessage;
+  final VoidCallback onKeepSwiping;
+
+  const MatchOverlay({
+    super.key,
+    required this.matchedProfile,
+    required this.myAvatarUrl,
+    required this.onMessage,
+    required this.onKeepSwiping,
+  });
+
+  @override
+  State<MatchOverlay> createState() => _MatchOverlayState();
+}
+
+class _MatchOverlayState extends State<MatchOverlay>
+    with TickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late AnimationController _confettiController;
+  late Animation<double> _pulseAnimation;
+  late List<_ConfettiDot> _dots;
+  Timer? _autoDismiss;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Pulse animation for heart icon
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+    _pulseAnimation =
+        Tween<double>(begin: 0.9, end: 1.1).animate(_pulseController);
+
+    // Confetti animation
+    _confettiController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+
+    // Generate confetti dots
+    final rand = Random();
+    _dots = List.generate(40, (i) {
+      const colors = [
+        Color(0xFFE8437A),
+        Color(0xFFF2C233),
+        Color(0xFF4CB572),
+        Color(0xFFA1D8B5),
+      ];
+      return _ConfettiDot(
+        x: rand.nextDouble(),
+        startY: -0.1 - rand.nextDouble() * 0.5,
+        size: 4 + rand.nextDouble() * 6,
+        color: colors[i % colors.length],
+        speed: 0.3 + rand.nextDouble() * 0.7,
+      );
+    });
+
+    // Auto dismiss after 8 seconds
+    _autoDismiss = Timer(const Duration(seconds: 8), () {
+      if (mounted) widget.onKeepSwiping();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _confettiController.dispose();
+    _autoDismiss?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final matchedName = widget.matchedProfile['name'] ?? 'your match';
+    final matchedAvatarUrl = widget.matchedProfile['avatar_url'] as String?;
+
+    return Material(
+      color: const Color(0xFF080F0C).withValues(alpha: 0.97),
+      child: Stack(
+        children: [
+          // Confetti layer
+          AnimatedBuilder(
+            animation: _confettiController,
+            builder: (_, __) {
+              return CustomPaint(
+                size: Size(size.width, size.height),
+                painter: _ConfettiPainter(
+                  dots: _dots,
+                  progress: _confettiController.value,
+                ),
+              );
+            },
+          ),
+
+          // Main content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Avatar pair
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildAvatar(widget.myAvatarUrl),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: ScaleTransition(
+                          scale: _pulseAnimation,
+                          child: const Icon(
+                            Icons.favorite,
+                            size: 32,
+                            color: Color(0xFFE8437A),
+                          ),
+                        ),
+                      ),
+                      _buildAvatar(matchedAvatarUrl),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // "IT'S A MATCH!" heading with gradient text
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [Color(0xFFE8437A), Color(0xFFF2C233)],
+                    ).createShader(bounds),
+                    child: Text(
+                      "IT'S A MATCH!",
+                      style: GoogleFonts.spaceGrotesk(
+                        fontSize: 42,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Subtext
+                  Text(
+                    'You and $matchedName both want to connect!',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+
+                  // Send Message button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFE8437A), Color(0xFFB43360)],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: TextButton(
+                        onPressed: widget.onMessage,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.chat_bubble_outline,
+                                size: 18, color: Colors.white),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Send a Message',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Keep Swiping button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: OutlinedButton(
+                      onPressed: widget.onKeepSwiping,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.08),
+                        side: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.15)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        'Keep Swiping',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvatar(String? url) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFF4CB572), width: 2),
+        color: const Color(0xFF152B1E),
+      ),
+      child: ClipOval(
+        child: url != null
+            ? CachedNetworkImage(
+                imageUrl: url,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) => const Icon(
+                  Icons.person,
+                  size: 40,
+                  color: Color(0xFF4CB572),
+                ),
+              )
+            : const Icon(
+                Icons.person,
+                size: 40,
+                color: Color(0xFF4CB572),
+              ),
+      ),
+    );
+  }
+}
+
+class _ConfettiDot {
+  final double x;
+  final double startY;
+  final double size;
+  final Color color;
+  final double speed;
+  _ConfettiDot(
+      {required this.x,
+      required this.startY,
+      required this.size,
+      required this.color,
+      required this.speed});
+}
+
+class _ConfettiPainter extends CustomPainter {
+  final List<_ConfettiDot> dots;
+  final double progress;
+
+  _ConfettiPainter({required this.dots, required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final dot in dots) {
+      final y = (dot.startY + progress * dot.speed * 1.3) % 1.1;
+      final paint = Paint()..color = dot.color.withValues(alpha: 0.7);
+      canvas.drawCircle(
+        Offset(dot.x * size.width, y * size.height),
+        dot.size,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ConfettiPainter old) =>
+      old.progress != progress;
+}
