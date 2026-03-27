@@ -3,8 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
-import 'setup_screen.dart';
-import '../../main/presentation/main_screen.dart';
+import '../../../core/router/auth_gate.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -41,26 +40,13 @@ class _SignInScreenState extends State<SignInScreen> {
       );
 
       if (mounted && response.user != null) {
-        try {
-          final profile = await Supabase.instance.client
-              .from('profiles')
-              .select('nationality')
-              .eq('id', response.user!.id)
-              .maybeSingle();
-
-          if (mounted) {
-            if (profile == null || profile['nationality'] == null) {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const SetupScreen()));
-            } else {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainScreen()));
-            }
-          }
-        } catch (e) {
-          // If profiles table doesn't exist or query fails, we route to SetupScreen for testing
-          debugPrint("Profiles query failed: $e");
-          if (mounted) {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const SetupScreen()));
-          }
+        // AuthGate will automatically handle the routing based on session state and profile
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const AuthGate()),
+            (route) => false,
+          );
         }
       }
     } on AuthException catch (e) {
