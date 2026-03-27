@@ -1,22 +1,24 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/supabase/supabase_config.dart';
+import '../../../shared/providers/navigation_provider.dart';
 import '../data/discover_repository.dart';
 import 'widgets/swipe_card.dart';
 import 'widgets/match_overlay.dart';
 import 'widgets/country_filter_sheet.dart';
 
-class DiscoverScreen extends StatefulWidget {
+class DiscoverScreen extends ConsumerStatefulWidget {
   const DiscoverScreen({super.key});
 
   @override
-  State<DiscoverScreen> createState() => _DiscoverScreenState();
+  ConsumerState<DiscoverScreen> createState() => _DiscoverScreenState();
 }
 
-class _DiscoverScreenState extends State<DiscoverScreen> {
+class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   final _repo = DiscoverRepository();
   final _swiperController = CardSwiperController();
 
@@ -468,7 +470,22 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             MatchOverlay(
               matchedProfile: _matchedProfile!,
               myAvatarUrl: _myAvatarUrl,
-              onMessage: () => setState(() => _showMatch = false),
+              onMessage: () {
+                // Pre-select the conversation and switch to Chat tab
+                ref.read(selectedMatchProvider.notifier).state = {
+                  'id': 'new-match-${_matchedProfile!['id']}',
+                  'user_a': SupabaseConfig.client.auth.currentUser?.id ?? 'me',
+                  'user_b': _matchedProfile!['id'],
+                  'created_at': DateTime.now().toIso8601String(),
+                  'status': 'active',
+                  'match_score': _matchedProfile!['match_score'] ?? 80,
+                  'other_user': _matchedProfile,
+                  'last_message': null,
+                  'unread_count': 0,
+                };
+                ref.read(currentTabProvider.notifier).state = 1;
+                setState(() => _showMatch = false);
+              },
               onKeepSwiping: () => setState(() => _showMatch = false),
             ),
         ],

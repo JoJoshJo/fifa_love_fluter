@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
 import 'core/supabase/supabase_config.dart';
@@ -13,7 +13,7 @@ void main() async {
     anonKey: SupabaseConfig.supabaseAnonKey,
   );
   
-  runApp(const FifaLoveApp());
+  runApp(const ProviderScope(child: FifaLoveApp()));
 }
 
 class FifaLoveApp extends StatelessWidget {
