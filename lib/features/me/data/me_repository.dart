@@ -1,0 +1,106 @@
+import 'dart:io';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/supabase/supabase_config.dart';
+
+class MeRepository {
+  final SupabaseClient _client = SupabaseConfig.client;
+
+  Future<Map<String, dynamic>> fetchProfile(String userId) async {
+    final res = await _client
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+    return res;
+  }
+
+  Future<void> updateProfile(
+      String userId, Map<String, dynamic> updates) async {
+    await _client.from('profiles').update(updates).eq('id', userId);
+  }
+
+  Future<String?> uploadAvatar(String userId, File imageFile) async {
+    final ext = imageFile.path.split('.').last;
+    final path = '$userId/avatar.$ext';
+
+    await _client.storage.from('avatars').upload(
+          path,
+          imageFile,
+          fileOptions: const FileOptions(upsert: true),
+        );
+
+    final url = _client.storage.from('avatars').getPublicUrl(path);
+    return url;
+  }
+
+  Future<void> signOut() async {
+    await _client.auth.signOut();
+  }
+
+  Future<void> deleteAccount(String userId) async {
+    await _client.from('profiles').delete().eq('id', userId);
+    await _client.auth.signOut();
+  }
+
+  Map<String, dynamic> calculateCompletion(Map<String, dynamic> profile) {
+    int score = 0;
+    final List<String> missing = [];
+
+    if (profile['avatar_url'] != null) {
+      score += 20;
+    } else {
+      missing.add('Add a profile photo');
+    }
+
+    final bio = profile['bio'] as String?;
+    if (bio != null && bio.length >= 20) {
+      score += 15;
+    } else {
+      missing.add('Write a bio');
+    }
+
+    if (profile['nationality'] != null) {
+      score += 10;
+    } else {
+      missing.add('Set your nationality');
+    }
+
+    final interests = profile['interests'] as List?;
+    if (interests != null && interests.length >= 3) {
+      score += 15;
+    } else {
+      missing.add('Add at least 3 interests');
+    }
+
+    final languages = profile['languages'] as List?;
+    if (languages != null && languages.isNotEmpty) {
+      score += 10;
+    } else {
+      missing.add('Add a language');
+    }
+
+    if (profile['team_supported'] != null) {
+      score += 10;
+    } else {
+      missing.add('Pick your team');
+    }
+
+    final countries = profile['countries_to_match'] as List?;
+    if (countries != null && countries.length >= 3) {
+      score += 15;
+    } else {
+      missing.add('Select countries to match');
+    }
+
+    if (profile['phone_number'] != null) {
+      score += 5;
+    } else {
+      missing.add('Add phone number');
+    }
+
+    return {
+      'score': score,
+      'missing': missing.take(3).toList(),
+    };
+  }
+}
