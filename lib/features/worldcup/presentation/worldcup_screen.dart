@@ -31,7 +31,7 @@ class WorldCupScreen extends StatelessWidget {
               'Schedule, food, safety, rides',
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withValues(alpha: 0.4),
               ),
             ),
           ],

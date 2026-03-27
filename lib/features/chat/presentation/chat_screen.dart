@@ -31,7 +31,7 @@ class ChatScreen extends StatelessWidget {
               'Your matches and conversations',
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withValues(alpha: 0.4),
               ),
             ),
           ],

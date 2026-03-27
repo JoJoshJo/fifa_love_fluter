@@ -32,7 +32,7 @@ class MeScreen extends StatelessWidget {
               'Your profile and settings',
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: Colors.white.withOpacity(0.4),
+                color: Colors.white.withValues(alpha: 0.4),
               ),
             ),
             const SizedBox(height: 48),
@@ -44,7 +44,7 @@ class MeScreen extends StatelessWidget {
                 'SIGN OUT',
                 style: GoogleFonts.spaceMono(
                   fontSize: 12,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   letterSpacing: 2,
                 ),
               ),

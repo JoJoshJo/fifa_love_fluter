@@ -49,7 +49,7 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
         color: const Color(0xFF0D1A13),
         border: Border(
           top: BorderSide(
-            color: Colors.white.withOpacity(0.08),
+            color: Colors.white.withValues(alpha: 0.08),
             width: 1,
           ),
         ),
@@ -99,7 +99,7 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
   }) {
     final isActive = widget.currentIndex == index;
     const activeColor = Color(0xFF4CB572);
-    final inactiveColor = Colors.white.withOpacity(0.28);
+    final inactiveColor = Colors.white.withValues(alpha: 0.28);
     final color = isActive ? activeColor : inactiveColor;
 
     return Expanded(
