@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'colors.dart';
+import '../constants/colors.dart';
 
 class AppTheme {
   static ThemeData get dark => ThemeData(
@@ -79,7 +79,7 @@ class AppTheme {
         fontSize: 14,
       ),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: FifaColors.cardSurface,
       elevation: 0,
       shape: RoundedRectangleBorder(
