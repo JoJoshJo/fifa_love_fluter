@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'signup_screen.dart';
+import 'signin_screen.dart';
+
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
 
@@ -79,8 +82,12 @@ class LandingScreen extends StatelessWidget {
                     // E) Create Account button
                     InkWell(
                       onTap: () {
-                        // ignore: avoid_print
-                        print("Create Account tapped");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignupScreen(),
+                          ),
+                        );
                       },
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
@@ -112,8 +119,12 @@ class LandingScreen extends StatelessWidget {
                     // G) Sign In button
                     InkWell(
                       onTap: () {
-                        // ignore: avoid_print
-                        print("Sign In tapped");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignInScreen(),
+                          ),
+                        );
                       },
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
