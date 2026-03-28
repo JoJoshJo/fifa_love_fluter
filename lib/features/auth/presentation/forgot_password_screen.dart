@@ -12,8 +12,8 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
-  bool _isLoading = false;
-  bool _sent = false;
+  bool _loading = false;
+  bool _emailSent = false;
 
   @override
   void dispose() {
@@ -25,35 +25,33 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email')),
+        const SnackBar(content: Text('Please enter your email address')),
       );
       return;
     }
 
-    setState(() => _isLoading = true);
-
+    setState(() => _loading = true);
     try {
-      await SupabaseConfig.client.auth.resetPasswordForEmail(
-        email,
-        redirectTo: 'io.fifalove.app://reset',
-      );
-      if (mounted) setState(() => _sent = true);
+      await SupabaseConfig.client.auth.resetPasswordForEmail(email);
+      if (mounted) setState(() => _emailSent = true);
     } on AuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message), backgroundColor: const Color(0xFFE83535)),
+          SnackBar(
+              content: Text(e.message),
+              backgroundColor: const Color(0xFFE83535)),
         );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Something went wrong — please try again'),
+              content: Text('Something went wrong. Please try again.'),
               backgroundColor: Color(0xFFE83535)),
         );
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -73,77 +71,78 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Back button
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        color: Colors.white.withValues(alpha: 0.6), size: 20),
-                    onPressed: () => Navigator.pop(context),
-                  ),
+                // A) Back button
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back_ios_new,
+                          size: 20,
+                          color: Colors.white.withValues(alpha: 0.6)),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Spacer(),
+                  ],
                 ),
 
-                // Icon
-                const SizedBox(height: 32),
+                // B) Top spacing
+                const SizedBox(height: 40),
+
+                // C) Icon
                 Center(
                   child: Container(
-                    width: 72,
-                    height: 72,
+                    width: 80,
+                    height: 80,
                     decoration: const BoxDecoration(
                       color: Color(0xFF135E4B),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.lock_reset_outlined,
-                        size: 32, color: Color(0xFF4CB572)),
+                        size: 36, color: Color(0xFF4CB572)),
                   ),
                 ),
 
+                // D) Heading + subtext
                 const SizedBox(height: 24),
-
-                // Heading
                 Text(
-                  'Reset Password',
+                  'Forgot Password?',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.spaceGrotesk(
-                    fontSize: 28,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
-                // Subtext
-                Text(
-                  'Enter your email and we will\nsend you a reset link',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.45),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    'No worries. Enter your email and we will send you a reset link.',
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.45),
+                    ),
                   ),
                 ),
 
                 const SizedBox(height: 40),
 
-                // Email label
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    'EMAIL',
-                    style: GoogleFonts.spaceMono(
-                      fontSize: 10,
-                      color: const Color(0xFF4CB572),
-                      letterSpacing: 2,
-                    ),
+                // E) Email field
+                Text(
+                  'EMAIL ADDRESS',
+                  style: GoogleFonts.spaceMono(
+                    fontSize: 9,
+                    color: const Color(0xFF4CB572),
+                    letterSpacing: 2,
                   ),
                 ),
-
-                // Email field
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -168,40 +167,45 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
-                // Send button or success state
-                if (_sent)
+                // F) Send button / success state
+                if (_emailSent)
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: const Color(0xFF135E4B).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color:
-                            const Color(0xFF4CB572).withValues(alpha: 0.4),
+                        color: const Color(0xFF4CB572).withValues(alpha: 0.4),
                       ),
                     ),
                     child: Row(
                       children: [
                         const Icon(Icons.check_circle_outline,
                             size: 20, color: Color(0xFF4CB572)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Reset link sent! Check your inbox.',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: Colors.white.withValues(alpha: 0.75),
-                            ),
-                          ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Reset link sent!',
+                                style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white)),
+                            Text('Check your inbox',
+                                style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    color: Colors.white
+                                        .withValues(alpha: 0.50))),
+                          ],
                         ),
                       ],
                     ),
                   )
                 else
                   InkWell(
-                    onTap: _isLoading ? null : _sendReset,
+                    onTap: _loading ? null : _sendReset,
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
                       height: 56,
@@ -214,36 +218,38 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           end: Alignment.centerRight,
                         ),
                       ),
-                      child: _isLoading
+                      child: _loading
                           ? const SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                   color: Colors.white, strokeWidth: 2),
                             )
-                          : Text(
-                              'Send Reset Link',
+                          : Text('Send Reset Link',
                               style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white)),
                     ),
                   ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
-                // Back to sign in
+                // G) Back to sign in
                 Center(
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Back to Sign In',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: const Color(0xFF4CB572),
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.arrow_back,
+                            size: 14, color: Color(0xFF4CB572)),
+                        const SizedBox(width: 6),
+                        Text('Back to Sign In',
+                            style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: const Color(0xFF4CB572))),
+                      ],
                     ),
                   ),
                 ),
