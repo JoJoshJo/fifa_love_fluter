@@ -62,9 +62,6 @@ dependencies:
   # Biometrics
   local_auth: ^2.0.0
   
-  # Push notifications
-  firebase_messaging: ^15.0.0
-  
   # Location
   geolocator: ^12.0.0
   
