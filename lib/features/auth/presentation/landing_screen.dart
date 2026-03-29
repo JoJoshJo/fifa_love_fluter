@@ -15,17 +15,11 @@ class LandingScreen extends StatelessWidget {
         children: [
           // LAYER 1 — Background
           Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.bottomCenter,
-                  radius: 1.5,
-                  colors: [
-                    const Color(0xFF135E4B).withValues(alpha: 0.4),
-                    const Color(0xFF080F0C),
-                  ],
-                ),
-              ),
+            child: Image.asset(
+              'assets/images/hero_couple.jpg',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
             ),
           ),
           
