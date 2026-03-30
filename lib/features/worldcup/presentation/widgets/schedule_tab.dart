@@ -96,11 +96,125 @@ class _ScheduleTabState extends State<ScheduleTab> {
     );
   }
 
+  Widget _buildQuickLinks() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              'EXPLORE MORE',
+              style: GoogleFonts.spaceMono(
+                fontSize: 9,
+                color: const Color(0xFF4CB572),
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 80,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0D1A13),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF4CB572).withValues(alpha: 0.15),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.confirmation_number, size: 24, color: Color(0xFF4CB572)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'FAN ZONE',
+                              style: GoogleFonts.spaceMono(
+                                fontSize: 8,
+                                color: const Color(0xFF4CB572),
+                              ),
+                            ),
+                            Text(
+                              'Ticket Marketplace',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  height: 80,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0D1A13),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF4CB572).withValues(alpha: 0.15),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.restaurant, size: 24, color: Color(0xFF4CB572)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'LOCAL EATS',
+                              style: GoogleFonts.spaceMono(
+                                fontSize: 8,
+                                color: const Color(0xFF4CB572),
+                              ),
+                            ),
+                            Text(
+                              'Stadium Food Guide',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final filtered = _filtered;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ─── Filter row ───
         Padding(
@@ -155,6 +269,18 @@ class _ScheduleTabState extends State<ScheduleTab> {
           ),
         ),
 
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: Text(
+            'UPCOMING FIXTURES',
+            style: GoogleFonts.spaceMono(
+              fontSize: 9,
+              color: const Color(0xFF4CB572),
+              letterSpacing: 2,
+            ),
+          ),
+        ),
+
         // ─── Match list ───
         Expanded(
           child: filtered.isEmpty
@@ -167,148 +293,163 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  itemCount: filtered.length,
+                  padding: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
+                  itemCount: filtered.length + 1,
                   itemBuilder: (context, index) {
+                    if (index == filtered.length) {
+                      return _buildQuickLinks();
+                    }
+
                     final m = filtered[index];
-                    final isFinal = m['stage'] == 'Final';
 
                     return Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                      margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: const Color(0xFF0D1A13),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isFinal
-                              ? const Color(0xFFF2C233).withValues(alpha: 0.4)
-                              : const Color(0xFF1E4A33),
+                          color: const Color(0xFF4CB572).withValues(alpha: 0.12),
                         ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Stage label
+                          // Stage pill + time
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                m['group'] as String,
-                                style: GoogleFonts.spaceMono(
-                                  fontSize: 9,
-                                  color: _stageColor(m['stage'] as String),
-                                  letterSpacing: 1.5,
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF4CB572).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  m['stage'] as String,
+                                  style: GoogleFonts.spaceMono(
+                                    fontSize: 9,
+                                    color: const Color(0xFF4CB572),
+                                  ),
                                 ),
                               ),
-                              if (isFinal) ...[
-                                const SizedBox(width: 6),
-                                const Text('🏆', style: TextStyle(fontSize: 12)),
-                              ],
+                              Text(
+                                m['time'] as String,
+                                style: GoogleFonts.spaceMono(
+                                  fontSize: 12,
+                                  color: const Color(0xFFF2C233),
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 12),
 
                           // Teams row
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               // Team A
-                              Expanded(
-                                child: Column(
-                                  children: [
-                                    Text(m['flag_a'] as String,
-                                        style: const TextStyle(fontSize: 36)),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      m['team_a'] as String,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // VS center
                               Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
+                                  Text(m['flag_a'] as String,
+                                      style: const TextStyle(fontSize: 40)),
+                                  const SizedBox(height: 6),
                                   Text(
-                                    'VS',
-                                    style: GoogleFonts.spaceGrotesk(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          Colors.white.withValues(alpha: 0.30),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    m['time'] as String,
-                                    style: GoogleFonts.spaceMono(
-                                      fontSize: 10,
-                                      color: const Color(0xFFF2C233),
+                                    (m['team_a'] as String).toUpperCase(), // Added uppercase to match both "Space Mono uppercase" and Inter font rule intent, keeping Inter for font
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ],
                               ),
 
-                              // Team B
-                              Expanded(
-                                child: Column(
-                                  children: [
-                                    Text(m['flag_b'] as String,
-                                        style: const TextStyle(fontSize: 36)),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      m['team_b'] as String,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
+                              // VS
+                              Text(
+                                'VS',
+                                style: GoogleFonts.spaceGrotesk(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFFEBF2EE).withValues(alpha: 0.2),
                                 ),
+                              ),
+
+                              // Team B
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(m['flag_b'] as String,
+                                      style: const TextStyle(fontSize: 40)),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    (m['team_b'] as String).toUpperCase(),
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
 
-                          // Divider
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 10),
-                            child: Divider(
-                              color: Colors.white.withValues(alpha: 0.08),
-                              height: 1,
-                            ),
+                          const SizedBox(height: 12),
+                          // Thin divider
+                          Divider(
+                            color: const Color(0xFF4CB572).withValues(alpha: 0.1),
+                            height: 1,
                           ),
+                          const SizedBox(height: 8),
 
-                          // Venue info
+                          // Venue & Date info
                           Row(
                             children: [
-                              Icon(Icons.location_on_outlined,
-                                  size: 12,
-                                  color: Colors.white.withValues(alpha: 0.35)),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  '${m['city']} · ${m['stadium']}',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    color: Colors.white.withValues(alpha: 0.45),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on_outlined,
+                                      size: 12,
+                                      color: const Color(0xFFEBF2EE).withValues(alpha: 0.3)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${m['city']} · ${m['stadium']}',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: const Color(0xFFEBF2EE).withValues(alpha: 0.4),
+                                    ),
                                   ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                ],
                               ),
-                              Text(
-                                _formatDate(m['date'] as String),
-                                style: GoogleFonts.spaceMono(
-                                  fontSize: 10,
-                                  color: Colors.white.withValues(alpha: 0.30),
+                              const Spacer(),
+                              Row(
+                                children: [
+                                  Icon(Icons.calendar_today_outlined,
+                                      size: 11,
+                                      color: const Color(0xFFEBF2EE).withValues(alpha: 0.3)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _formatDate(m['date'] as String),
+                                    style: GoogleFonts.spaceMono(
+                                      fontSize: 10,
+                                      color: const Color(0xFFEBF2EE).withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF152B1E),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: const Icon(
+                                  Icons.notifications_outlined,
+                                  size: 14,
+                                  color: Color(0xFF4CB572),
                                 ),
                               ),
                             ],

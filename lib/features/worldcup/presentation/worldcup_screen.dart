@@ -40,25 +40,39 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
         children: [
           // ─── Header ───
           Container(
-            padding: EdgeInsets.fromLTRB(16, topPad + 12, 16, 12),
+            padding: EdgeInsets.fromLTRB(16, topPad + 16, 16, 16),
             child: Row(
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'WORLD CUP',
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          'WORLD CUP',
+                          style: GoogleFonts.spaceGrotesk(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFFEBF2EE),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '2026',
+                          style: GoogleFonts.spaceMono(
+                            fontSize: 13,
+                            color: const Color(0xFF4CB572),
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 2),
                     Text(
-                      '2026',
+                      'THE ROAD TO THE FINALS',
                       style: GoogleFonts.spaceMono(
-                        fontSize: 11,
-                        color: const Color(0xFF4CB572),
+                        fontSize: 9,
+                        color: const Color(0xFF9BB3AF),
                         letterSpacing: 2,
                       ),
                     ),
@@ -68,17 +82,18 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
 
                 // Countdown
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF135E4B).withValues(alpha: 0.30),
+                    color: const Color(0xFF135E4B).withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                        color: const Color(0xFF4CB572).withValues(alpha: 0.40)),
+                        color: const Color(0xFF4CB572).withValues(alpha: 0.4)),
                   ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        _daysUntilKickoff(),
+                        _daysUntilKickoff().replaceAll(' 🔥', ''),
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -88,7 +103,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                       Text(
                         'DAYS LEFT',
                         style: GoogleFonts.spaceMono(
-                          fontSize: 8,
+                          fontSize: 7,
                           color: const Color(0xFF4CB572),
                           letterSpacing: 1,
                         ),
@@ -100,14 +115,100 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
             ),
           ),
 
+          // ─── Stadium Hero Image ───
+          Container(
+            height: 160,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFF135E4B),
+                          Color(0xFF080F0C),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Icon(
+                      Icons.stadium_outlined,
+                      size: 64,
+                      color: const Color(0xFF4CB572).withValues(alpha: 0.3),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            const Color(0xFF080F0C).withValues(alpha: 0.9),
+                          ],
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF2C233).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFFF2C233).withValues(alpha: 0.4),
+                              ),
+                            ),
+                            child: Text(
+                              'LIVE VENUE',
+                              style: GoogleFonts.spaceMono(
+                                fontSize: 8,
+                                color: const Color(0xFFF2C233),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'AT&T STADIUM, DALLAS',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+
           // ─── Tab bar ───
-          SizedBox(
-            height: 44,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: _tabs.length,
-              itemBuilder: (context, i) {
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: List.generate(_tabs.length, (i) {
                 final tab = _tabs[i];
                 final isActive = i == _activeTab;
 
@@ -116,7 +217,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
                       color: isActive
                           ? const Color(0xFF4CB572)
@@ -134,30 +235,31 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                           size: 14,
                           color: isActive
                               ? const Color(0xFF080F0C)
-                              : Colors.white.withValues(alpha: 0.40),
+                              : const Color(0xFFEBF2EE).withValues(alpha: 0.4),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 4),
                         Text(
                           tab['label'] as String,
                           style: GoogleFonts.spaceMono(
                             fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                             color: isActive
                                 ? const Color(0xFF080F0C)
-                                : Colors.white.withValues(alpha: 0.40),
+                                : const Color(0xFFEBF2EE).withValues(alpha: 0.4),
                           ),
                         ),
                       ],
                     ),
                   ),
                 );
-              },
+              }),
             ),
           ),
+          
+          const SizedBox(height: 8),
 
           // Divider
-          Divider(height: 1, color: Colors.white.withValues(alpha: 0.08)),
+          Divider(height: 1, color: const Color(0xFF4CB572).withValues(alpha: 0.1)),
 
           // ─── Tab content ───
           Expanded(
