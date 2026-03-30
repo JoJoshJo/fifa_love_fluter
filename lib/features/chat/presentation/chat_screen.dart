@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/supabase/supabase_config.dart';
@@ -109,26 +110,53 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 children: [
                   // Header
                   Container(
-                    padding: EdgeInsets.fromLTRB(16, topPad + 12, 16, 12),
-                    child: Row(
+                    padding: EdgeInsets.fromLTRB(16, topPad + 20, 16, 0),
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'CHAT',
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                          'YOUR CONNECTIONS',
+                          style: GoogleFonts.spaceMono(
+                            fontSize: 10,
+                            letterSpacing: 2,
+                            color: const Color(0xFF9BB3AF),
                           ),
                         ),
-                        const Spacer(),
-                        if (_matches.isNotEmpty)
-                          Text(
-                            '${_matches.length} MATCHES',
-                            style: GoogleFonts.spaceMono(
-                              fontSize: 10,
-                              color: Colors.white.withValues(alpha: 0.25),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                text: '${_matches.length} MATCHES',
+                                style: GoogleFonts.spaceGrotesk(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFFEBF2EE),
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: ' .',
+                                    style: GoogleFonts.spaceGrotesk(
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF4CB572),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                            const Spacer(),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Start a conversation',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
                           ),
+                        ),
                       ],
                     ),
                   ),
@@ -148,21 +176,116 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                 color: const Color(0xFF4CB572),
                                 backgroundColor: const Color(0xFF0D1A13),
                                 onRefresh: _loadMatches,
-                                child: ListView.builder(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  itemCount: _matches.length,
-                                  itemBuilder: (context, index) {
-                                    return MatchListItem(
-                                      match: _matches[index],
-                                      currentUserId:
-                                          _currentUserId ?? 'mock-user',
-                                      onTap: () {
-                                        setState(() => _selectedMatch =
-                                            _matches[index]);
+                                child: ListView(
+                                  padding: EdgeInsets.zero,
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  children: [
+                                    const SizedBox(height: 20),
+                                    SizedBox(
+                                      height: 100,
+                                      child: ListView(
+                                        scrollDirection: Axis.horizontal,
+                                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                                        children: [
+                                          ..._matches.take(3).map((match) {
+                                            final other = match['other_user'] as Map<String, dynamic>;
+                                            final avatarUrl = other['avatar_url'] as String?;
+                                            final name = other['name'] as String? ?? 'Unknown';
+                                            return Container(
+                                              margin: const EdgeInsets.only(right: 12),
+                                              width: 80,
+                                              height: 100,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(16),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(16),
+                                                child: Stack(
+                                                  fit: StackFit.expand,
+                                                  children: [
+                                                    if (avatarUrl != null)
+                                                      CachedNetworkImage(
+                                                        imageUrl: avatarUrl,
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    else
+                                                      Container(color: const Color(0xFF1E3D28)),
+                                                    Positioned(
+                                                      bottom: 0,
+                                                      left: 0,
+                                                      right: 0,
+                                                      child: Container(
+                                                        padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
+                                                        decoration: BoxDecoration(
+                                                          gradient: LinearGradient(
+                                                            begin: Alignment.bottomCenter,
+                                                            end: Alignment.topCenter,
+                                                            colors: [
+                                                              const Color(0xFF080F0C).withValues(alpha: 0.7),
+                                                              Colors.transparent,
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        child: Text(
+                                                          name.split(' ').first,
+                                                          style: GoogleFonts.inter(
+                                                            fontSize: 11,
+                                                            fontWeight: FontWeight.w600,
+                                                            color: Colors.white,
+                                                          ),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                          Container(
+                                            margin: const EdgeInsets.only(right: 12),
+                                            width: 80,
+                                            height: 100,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF152B1E),
+                                              borderRadius: BorderRadius.circular(16),
+                                              border: Border.all(
+                                                color: const Color(0xFF4CB572).withValues(alpha: 0.3),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: const Center(
+                                              child: Icon(Icons.add, size: 24, color: Color(0xFF4CB572)),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Container(
+                                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                                      height: 1,
+                                      color: const Color(0xFF4CB572).withValues(alpha: 0.1),
+                                    ),
+                                    ListView.builder(
+                                      padding: EdgeInsets.zero,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      shrinkWrap: true,
+                                      itemCount: _matches.length,
+                                      itemBuilder: (context, index) {
+                                        return MatchListItem(
+                                          match: _matches[index],
+                                          currentUserId:
+                                              _currentUserId ?? 'mock-user',
+                                          onTap: () {
+                                            setState(() => _selectedMatch =
+                                                _matches[index]);
+                                          },
+                                        );
                                       },
-                                    );
-                                  },
+                                    ),
+                                  ],
                                 ),
                               ),
                   ),
@@ -206,45 +329,61 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 64,
-            color: const Color(0xFF4CB572).withValues(alpha: 0.30),
+          const SizedBox(height: 60),
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: const Color(0xFF152B1E),
+              borderRadius: BorderRadius.circular(40),
+            ),
+            child: Center(
+              child: Icon(
+                Icons.chat_bubble_outline,
+                size: 36,
+                color: const Color(0xFF4CB572).withValues(alpha: 0.4),
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Text(
             'No matches yet',
             style: GoogleFonts.spaceGrotesk(
-              fontSize: 20,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withValues(alpha: 0.50),
+              color: const Color(0xFFEBF2EE).withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Start swiping to find your first match',
+            'Start swiping to find\nyour first match',
+            textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.30),
+              color: const Color(0xFFEBF2EE).withValues(alpha: 0.3),
             ),
           ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () {
-              // Switch to Discover tab
+          const SizedBox(height: 28),
+          GestureDetector(
+            onTap: () {
               ref.read(currentTabProvider.notifier).state = 0;
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF135E4B),
-              foregroundColor: Colors.white,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-            child: Text(
-              'Go to Discover',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
+                ),
+              ),
+              child: Text(
+                'Go to Discover',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ],

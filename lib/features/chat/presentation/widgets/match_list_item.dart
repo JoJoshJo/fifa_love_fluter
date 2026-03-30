@@ -53,178 +53,164 @@ class MatchListItem extends StatelessWidget {
 
     String previewText;
     TextStyle previewStyle;
+    bool isActive = false;
+    if (other['last_active'] != null) {
+      final lastActive = DateTime.tryParse(other['last_active'] as String);
+      if (lastActive != null && DateTime.now().difference(lastActive).inMinutes <= 30) {
+        isActive = true;
+      }
+    }
+
     if (lastMsg == null) {
       previewText = 'Say hello! 👋';
       previewStyle = GoogleFonts.inter(
         fontSize: 13,
-        color: Colors.white.withValues(alpha: 0.35),
+        color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
         fontStyle: FontStyle.italic,
       );
     } else if (lastMsg['sender_id'] == currentUserId) {
       previewText = 'You: ${lastMsg['content']}';
       previewStyle = GoogleFonts.inter(
         fontSize: 13,
-        color: Colors.white.withValues(alpha: 0.40),
+        color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
       );
     } else {
       previewText = lastMsg['content'] as String? ?? '';
       previewStyle = GoogleFonts.inter(
         fontSize: 13,
-        color: Colors.white.withValues(alpha: unread > 0 ? 0.80 : 0.45),
-        fontWeight: unread > 0 ? FontWeight.w500 : FontWeight.normal,
+        color: const Color(0xFFEBF2EE).withValues(alpha: unread > 0 ? 0.70 : 0.35),
       );
     }
 
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        height: 80,
-        child: Column(
-          children: [
-            Expanded(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                // Avatar
+                Stack(
                   children: [
-                    // Avatar
-                    Stack(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF1E3D28),
+                      ),
+                      child: ClipOval(
+                        child: avatarUrl != null
+                            ? CachedNetworkImage(
+                                imageUrl: avatarUrl,
+                                fit: BoxFit.cover,
+                                errorWidget: (_, __, ___) => _fallbackAvatar(
+                                    other['name'] as String? ?? '?'),
+                              )
+                            : _fallbackAvatar(
+                                other['name'] as String? ?? '?'),
+                      ),
+                    ),
+                    if (isActive)
+                      Positioned(
+                        bottom: 2,
+                        right: 2,
+                        child: Container(
+                          width: 10,
+                          height: 10,
                           decoration: BoxDecoration(
+                            color: const Color(0xFF4CB572),
                             shape: BoxShape.circle,
                             border: Border.all(
+                                color: const Color(0xFF080F0C), width: 1.5),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            other['name'] as String? ?? 'Unknown',
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFFEBF2EE),
+                            ),
+                          ),
+                          if (isVerified) ...[
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.verified,
+                              size: 12,
+                              color: Color(0xFF4CB572),
+                            ),
+                          ],
+                          const Spacer(),
+                          Text(
+                            timeStr,
+                            style: GoogleFonts.spaceMono(
+                              fontSize: 10,
                               color: unread > 0
                                   ? const Color(0xFF4CB572)
-                                  : Colors.transparent,
-                              width: 2,
-                            ),
-                            color: const Color(0xFF1E3D28),
-                          ),
-                          child: ClipOval(
-                            child: avatarUrl != null
-                                ? CachedNetworkImage(
-                                    imageUrl: avatarUrl,
-                                    fit: BoxFit.cover,
-                                    errorWidget: (_, __, ___) => _fallbackAvatar(
-                                        other['name'] as String? ?? '?'),
-                                  )
-                                : _fallbackAvatar(
-                                    other['name'] as String? ?? '?'),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF0D1A13),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                  color: const Color(0xFF0D1A13), width: 1),
-                            ),
-                            child: Center(
-                              child: Text(
-                                _flagEmoji(nationality),
-                                style: const TextStyle(fontSize: 11),
-                              ),
+                                  : const Color(0xFFEBF2EE).withValues(alpha: 0.3),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 12),
-
-                    // Name + preview
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                other['name'] as String? ?? 'Unknown',
-                                style: GoogleFonts.inter(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              if (isVerified) ...[
-                                const SizedBox(width: 4),
-                                const Icon(
-                                  Icons.verified,
-                                  size: 12,
-                                  color: Color(0xFF4CB572),
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
                             previewText,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: previewStyle,
-                          ),
-                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Unread badge
+                if (unread > 0)
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE8437A),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        unread > 9 ? '9+' : unread.toString(),
+                        style: GoogleFonts.spaceMono(
+                          fontSize: 9,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-
-                    // Time + badge
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          timeStr,
-                          style: GoogleFonts.spaceMono(
-                            fontSize: 10,
-                            color: Colors.white.withValues(alpha: 0.30),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        if (unread > 0)
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFE8437A),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                unread > 9 ? '9+' : unread.toString(),
-                                style: GoogleFonts.spaceMono(
-                                  fontSize: 9,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          const SizedBox(width: 20, height: 20),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+              ],
             ),
-            Divider(
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 80),
+            child: Divider(
               height: 1,
-              color: Colors.white.withValues(alpha: 0.06),
-              indent: 72,
+              color: const Color(0xFF4CB572).withValues(alpha: 0.08),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -232,12 +218,12 @@ class MatchListItem extends StatelessWidget {
   Widget _fallbackAvatar(String name) {
     final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
     return Container(
-      color: const Color(0xFF1E4A33),
+      color: const Color(0xFF152B1E),
       child: Center(
         child: Text(
           initials,
-          style: const TextStyle(
-            color: Color(0xFF4CB572),
+          style: GoogleFonts.spaceGrotesk(
+            color: const Color(0xFF4CB572),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
