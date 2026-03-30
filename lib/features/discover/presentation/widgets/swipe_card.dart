@@ -89,7 +89,7 @@ class SwipeCard extends StatelessWidget {
     final superOpacity = isFront ? (-dragVertical).clamp(0.0, 1.0) : 0.0;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(24),
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -122,10 +122,10 @@ class SwipeCard extends StatelessWidget {
                   colors: [
                     Colors.transparent,
                     Colors.transparent,
-                    const Color(0xFF080F0C).withValues(alpha: 0.6),
-                    const Color(0xFF080F0C).withValues(alpha: 0.95),
+                    const Color(0xFF080F0C).withValues(alpha: 0.5),
+                    const Color(0xFF080F0C).withValues(alpha: 0.98),
                   ],
-                  stops: const [0.0, 0.4, 0.75, 1.0],
+                  stops: const [0.0, 0.45, 0.70, 1.0],
                 ),
               ),
             ),
@@ -133,110 +133,126 @@ class SwipeCard extends StatelessWidget {
 
           // Layer 3 — Profile info
           Positioned(
-            bottom: 20,
-            left: 20,
-            right: 20,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Name + age
-                      Row(
-                        children: [
-                          Text(
-                            name,
-                            style: GoogleFonts.spaceGrotesk(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    const Color(0xFF0D1A13).withValues(alpha: 0.92),
+                  ],
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Name + age
+                        Row(
+                          children: [
+                            Text(
+                              name,
+                              style: GoogleFonts.spaceGrotesk(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFFEBF2EE),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            age?.toString() ?? '',
-                            style: GoogleFonts.inter(
-                              fontSize: 22,
-                              color: Colors.white.withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      // Nationality + city
-                      Row(
-                        children: [
-                          Text(
-                            '${_flagEmoji(nationality)} ${nationality ?? ''}',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: Colors.white.withValues(alpha: 0.7),
-                            ),
-                          ),
-                          if (city != null) ...[
                             const SizedBox(width: 8),
                             Text(
-                              '· $city',
+                              age?.toString() ?? '',
                               style: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: Colors.white.withValues(alpha: 0.5),
+                                fontSize: 22,
+                                color: const Color(0xFFEBF2EE).withValues(alpha: 0.6),
                               ),
                             ),
                           ],
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // Interest chips (max 3)
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 4,
-                        children: interests.take(3).map((interest) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.2),
-                              ),
-                            ),
-                            child: Text(
-                              interest,
+                        ),
+                        const SizedBox(height: 4),
+                        // Nationality + city
+                        Row(
+                          children: [
+                            Text(
+                              '${_flagEmoji(nationality)} ${nationality ?? ''}',
                               style: GoogleFonts.inter(
-                                fontSize: 11,
-                                color: Colors.white.withValues(alpha: 0.85),
+                                fontSize: 13,
+                                color: const Color(0xFF9BB3AF),
                               ),
                             ),
-                          );
-                        }).toList(),
+                            if (city != null) ...[
+                              Text(
+                                ' · ',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  color: const Color(0xFF9BB3AF),
+                                ),
+                              ),
+                              Text(
+                                city,
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  color: const Color(0xFFEBF2EE).withValues(alpha: 0.4),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        // Interest chips (max 3)
+                        Row(
+                          children: interests.take(3).map((interest) {
+                            return Container(
+                              margin: const EdgeInsets.only(right: 6),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4CB572).withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(13),
+                                border: Border.all(
+                                  color: const Color(0xFF4CB572).withValues(alpha: 0.25),
+                                ),
+                              ),
+                              child: Text(
+                                interest,
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  color: const Color(0xFFA1D8B5),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Score gauge
+                  Column(
+                    children: [
+                      SizedBox(
+                        width: 64,
+                        child: ScoreGauge(
+                          score: score,
+                          size: 64,
+                          profile: isFront ? profile : null,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                // Score gauge
-                Column(
-                  children: [
-                    ScoreGauge(
-                      score: score,
-                      size: 64,
-                      profile: isFront ? profile : null,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'MATCH',
-                      style: GoogleFonts.spaceMono(
-                        fontSize: 8,
-                        color: Colors.white.withValues(alpha: 0.4),
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -247,7 +263,7 @@ class SwipeCard extends StatelessWidget {
               right: 16,
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
                   color: const Color(0xFF135E4B),
                   borderRadius: BorderRadius.circular(20),
@@ -256,7 +272,7 @@ class SwipeCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.verified,
+                    const Icon(Icons.check,
                         size: 12, color: Color(0xFF4CB572)),
                     const SizedBox(width: 4),
                     Text(
@@ -291,10 +307,10 @@ class SwipeCard extends StatelessWidget {
                     child: Text(
                       'LIKE',
                       style: GoogleFonts.spaceGrotesk(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF4CB572),
-                        letterSpacing: 3,
+                        letterSpacing: 2,
                       ),
                     ),
                   ),
@@ -322,10 +338,10 @@ class SwipeCard extends StatelessWidget {
                     child: Text(
                       'NOPE',
                       style: GoogleFonts.spaceGrotesk(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFFE83535),
-                        letterSpacing: 3,
+                        letterSpacing: 2,
                       ),
                     ),
                   ),
@@ -353,10 +369,10 @@ class SwipeCard extends StatelessWidget {
                     child: Text(
                       'SUPER ⚡',
                       style: GoogleFonts.spaceGrotesk(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFFF2C233),
-                        letterSpacing: 3,
+                        letterSpacing: 2,
                       ),
                     ),
                   ),

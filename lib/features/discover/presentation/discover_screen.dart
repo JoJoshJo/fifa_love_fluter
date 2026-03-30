@@ -234,18 +234,13 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                       horizontal: 16, vertical: 12),
                   child: Row(
                     children: [
-                      // App name gradient
-                      ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Color(0xFFF2C233), Color(0xFFE8C06A)],
-                        ).createShader(bounds),
-                        child: Text(
-                          'FIFA LOVE',
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                      // App name
+                      Text(
+                        'FIFA LOVE',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFF2C233),
                         ),
                       ),
                       const Spacer(),
@@ -278,14 +273,13 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color: const Color(0xFF4CB572)
-                                  .withValues(alpha: 0.4),
+                                  .withValues(alpha: 0.6),
                             ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.public_outlined,
-                                  size: 16, color: Color(0xFF4CB572)),
+                              const Text('🌍', style: TextStyle(fontSize: 14)),
                               const SizedBox(width: 4),
                               Text(
                                 _selectedCountries.isEmpty
@@ -356,57 +350,61 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                         )
                       : remaining <= 0
                           ? _buildEmptyState()
-                          : CardSwiper(
-                              controller: _swiperController,
-                              cardsCount: min(3, remaining),
-                              numberOfCardsDisplayed: min(3, remaining),
-                              backCardOffset: const Offset(0, -16),
-                              scale: 0.95,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              onSwipe: (prevIndex, currentIndex, direction) {
-                                String action = 'nope';
-                                if (direction ==
-                                    CardSwiperDirection.right) {
-                                  action = 'like';
-                                } else if (direction ==
-                                    CardSwiperDirection.top) {
-                                  action = 'superlike';
-                                }
-                                _handleSwipe(
-                                    action, _profiles[_currentIndex + prevIndex]);
-                                return true;
-                              },
-                              cardBuilder: (context, index,
-                                  percentThresholdX, percentThresholdY) {
-                                final profileIndex = _currentIndex + index;
-                                if (profileIndex >= _profiles.length) {
-                                  return const SizedBox.shrink();
-                                }
-                                return SwipeCard(
-                                  profile: _profiles[profileIndex],
-                                  isFront: index == 0,
-                                  stackPosition: index,
-                                  dragOffset:
-                                      index == 0 ? percentThresholdX / 100 : 0,
-                                  dragVertical:
-                                      index == 0 ? percentThresholdY / 100 : 0,
-                                );
-                              },
+                          : Center(
+                              child: SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.68,
+                                width: MediaQuery.of(context).size.width - 32,
+                                child: CardSwiper(
+                                  controller: _swiperController,
+                                  cardsCount: min(3, remaining),
+                                  numberOfCardsDisplayed: min(3, remaining),
+                                  backCardOffset: const Offset(0, -16),
+                                  scale: 0.95,
+                                  padding: EdgeInsets.zero,
+                                  onSwipe: (prevIndex, currentIndex, direction) {
+                                    String action = 'nope';
+                                    if (direction ==
+                                        CardSwiperDirection.right) {
+                                      action = 'like';
+                                    } else if (direction ==
+                                        CardSwiperDirection.top) {
+                                      action = 'superlike';
+                                    }
+                                    _handleSwipe(
+                                        action, _profiles[_currentIndex + prevIndex]);
+                                    return true;
+                                  },
+                                  cardBuilder: (context, index,
+                                      percentThresholdX, percentThresholdY) {
+                                    final profileIndex = _currentIndex + index;
+                                    if (profileIndex >= _profiles.length) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return SwipeCard(
+                                      profile: _profiles[profileIndex],
+                                      isFront: index == 0,
+                                      stackPosition: index,
+                                      dragOffset:
+                                          index == 0 ? percentThresholdX / 100 : 0,
+                                      dragVertical:
+                                          index == 0 ? percentThresholdY / 100 : 0,
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
                 ),
 
                 // ── Action buttons ──────────────────────────────
                 if (!_loading && remaining > 0)
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 8, 32, 16),
+                    padding: const EdgeInsets.fromLTRB(48, 8, 48, 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         // NOPE
                         GestureDetector(
-                          onTap: () => _swiperController.swipe(
-                              CardSwiperDirection.left),
+                          onTap: () => _swiperController.swipe(CardSwiperDirection.left),
                           child: Container(
                             width: 56,
                             height: 56,
@@ -414,18 +412,16 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                               color: const Color(0xFF152B1E),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFFE83535)
-                                    .withValues(alpha: 0.5),
+                                color: const Color(0xFFE8437A).withValues(alpha: 0.5),
+                                width: 1.5,
                               ),
                             ),
-                            child: const Icon(Icons.close,
-                                size: 28, color: Color(0xFFE83535)),
+                            child: const Icon(Icons.close, size: 24, color: Color(0xFFE8437A)),
                           ),
                         ),
                         // SUPERLIKE
                         GestureDetector(
-                          onTap: () => _swiperController.swipe(
-                              CardSwiperDirection.top),
+                          onTap: () => _swiperController.swipe(CardSwiperDirection.top),
                           child: Container(
                             width: 48,
                             height: 48,
@@ -433,18 +429,16 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                               color: const Color(0xFF152B1E),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFFF2C233)
-                                    .withValues(alpha: 0.5),
+                                color: const Color(0xFFF2C233).withValues(alpha: 0.5),
+                                width: 1.5,
                               ),
                             ),
-                            child: const Icon(Icons.star_outline,
-                                size: 22, color: Color(0xFFF2C233)),
+                            child: const Icon(Icons.star_outline, size: 22, color: Color(0xFFF2C233)),
                           ),
                         ),
                         // LIKE
                         GestureDetector(
-                          onTap: () => _swiperController.swipe(
-                              CardSwiperDirection.right),
+                          onTap: () => _swiperController.swipe(CardSwiperDirection.right),
                           child: Container(
                             width: 56,
                             height: 56,
@@ -452,10 +446,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                               color: const Color(0xFF135E4B),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                  color: const Color(0xFF4CB572)),
+                                color: const Color(0xFF4CB572),
+                                width: 1.5,
+                              ),
                             ),
-                            child: const Icon(Icons.favorite_outline,
-                                size: 28, color: Color(0xFF4CB572)),
+                            child: const Icon(Icons.favorite_outline, size: 24, color: Color(0xFF4CB572)),
                           ),
                         ),
                       ],
