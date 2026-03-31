@@ -72,13 +72,30 @@ class _ConversationViewState extends State<ConversationView> {
   Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
     if (content.isEmpty) return;
+
+    final originalText = _messageController.text;
     _messageController.clear();
-    await _repo.sendMessage(
-      matchId: widget.match['id'] as String,
-      senderId: widget.currentUserId,
-      content: content,
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+
+    try {
+      await _repo.sendMessage(
+        matchId: widget.match['id'] as String,
+        senderId: widget.currentUserId,
+        content: content,
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    } catch (e) {
+      // Restore text if failed
+      _messageController.text = originalText;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to send message: ${e.toString().split(':').last.trim()}'),
+            backgroundColor: const Color(0xFFE83535),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   bool _shouldShowTime(List<Map<String, dynamic>> messages, int index) {

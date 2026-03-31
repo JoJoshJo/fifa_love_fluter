@@ -49,7 +49,9 @@ class SwipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    Widget card = _buildCard(context, size);
+    Widget card = RepaintBoundary(
+      child: _buildCard(context, size),
+    );
 
     // Apply stack position transforms for back cards
     if (stackPosition == 1) {
@@ -98,6 +100,10 @@ class SwipeCard extends StatelessWidget {
             CachedNetworkImage(
               imageUrl: avatarUrl,
               fit: BoxFit.cover,
+              memCacheWidth: 600,
+              memCacheHeight: 900,
+              maxWidthDiskCache: 800,
+              maxHeightDiskCache: 1200,
               placeholder: (_, __) => Container(
                 color: const Color(0xFF152B1E),
                 child: const Center(
@@ -390,14 +396,51 @@ class SwipeCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF135E4B), Color(0xFF0D1A13)],
+          colors: [
+            Color(0xFF135E4B),
+            Color(0xFF1E3D28),
+            Color(0xFF0D1A13),
+          ],
+          stops: [0.0, 0.5, 1.0],
         ),
       ),
-      child: Center(
-        child: Text(
-          _flagEmoji(nationality),
-          style: const TextStyle(fontSize: 80),
-        ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.05,
+              child: Image.asset(
+                'assets/images/grass_pattern.png', // Assuming this exists or using a generic placeholder if not
+                repeat: ImageRepeat.repeat,
+                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF4CB572).withValues(alpha: 0.2),
+                        blurRadius: 40,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    _flagEmoji(nationality),
+                    style: const TextStyle(fontSize: 100),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

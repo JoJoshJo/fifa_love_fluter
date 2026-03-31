@@ -7,6 +7,8 @@ import 'core/supabase/supabase_config.dart';
 import 'core/router/auth_gate.dart';
 import 'core/notifications/notification_service.dart';
 
+import 'core/theme/theme_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -21,15 +23,19 @@ void main() async {
   runApp(const ProviderScope(child: FifaLoveApp()));
 }
 
-class FifaLoveApp extends StatelessWidget {
+class FifaLoveApp extends ConsumerWidget {
   const FifaLoveApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+
     return MaterialApp(
       title: 'FIFA Love',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: themeMode,
       home: const AuthGate(),
     );
   }

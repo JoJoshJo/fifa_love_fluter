@@ -4,20 +4,22 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../../core/supabase/supabase_config.dart';
 import '../data/me_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/theme/theme_provider.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/completion_bar.dart';
 import 'widgets/section_header.dart';
 import 'widgets/field_tile.dart';
 import 'widgets/interest_chip_grid.dart';
 
-class MeScreen extends StatefulWidget {
+class MeScreen extends ConsumerStatefulWidget {
   const MeScreen({super.key});
 
   @override
-  State<MeScreen> createState() => _MeScreenState();
+  ConsumerState<MeScreen> createState() => _MeScreenState();
 }
 
-class _MeScreenState extends State<MeScreen> {
+class _MeScreenState extends ConsumerState<MeScreen> {
   final _repo = MeRepository();
   Map<String, dynamic> _profile = {};
   bool _loading = true;
@@ -298,6 +300,87 @@ class _MeScreenState extends State<MeScreen> {
         ],
       ),
     );
+  }
+
+  void _showLanguageSheet() {
+    final currentLang = _profile['app_language'] as String? ?? 'English';
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('SELECT LANGUAGE', 
+              style: GoogleFonts.spaceMono(
+                fontSize: 12, 
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF4CB572),
+                letterSpacing: 2
+              )
+            ),
+            const SizedBox(height: 16),
+            ...['English', 'Spanish', 'Portuguese', 'French', 'Arabic', 'Japanese'].map((lang) {
+              final isSelected = lang == currentLang;
+              return ListTile(
+                leading: Text(_getLangFlag(lang), style: const TextStyle(fontSize: 20)),
+                title: Text(lang, style: GoogleFonts.inter(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                )),
+                trailing: isSelected ? const Icon(Icons.check_circle, color: Color(0xFF4CB572)) : null,
+                onTap: () async {
+                  await _repo.updateProfile(_userId, {'app_language': lang});
+                  setState(() => _profile['app_language'] = lang);
+                  if (mounted) Navigator.pop(context);
+                },
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getLangFlag(String lang) {
+    switch (lang) {
+      case 'Spanish': return '🇪🇸';
+      case 'Portuguese': return '🇧🇷';
+      case 'French': return '🇫🇷';
+      case 'Arabic': return '🇸🇦';
+      case 'Japanese': return '🇯🇵';
+      default: return '🇺🇸';
+    }
+  }
+
+  Future<void> _resetPassword() async {
+    final email = SupabaseConfig.client.auth.currentUser?.email;
+    if (email == null) return;
+
+    try {
+      await SupabaseConfig.client.auth.resetPasswordForEmail(email);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Password reset email sent to $email'),
+            backgroundColor: const Color(0xFF135E4B),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to send reset email'),
+            backgroundColor: Color(0xFFE83535),
+          ),
+        );
+      }
+    }
   }
 
   static const _allLanguages = [
@@ -625,11 +708,13 @@ class _MeScreenState extends State<MeScreen> {
                           color: Color(0xFF4CB572)),
                       title: Text('Dark Mode',
                           style: GoogleFonts.inter(
-                              fontSize: 15, color: const Color(0xFFEBF2EE))),
-                      trailing: const Switch(
-                        value: true,
-                        activeThumbColor: Color(0xFF4CB572),
-                        onChanged: null,
+                              fontSize: 15, color: Theme.of(context).textTheme.bodyLarge?.color)),
+                      trailing: Switch(
+                        value: ref.watch(themeProvider) == ThemeMode.dark,
+                        activeColor: const Color(0xFF4CB572),
+                        onChanged: (v) {
+                          ref.read(themeProvider.notifier).toggleTheme();
+                        },
                       ),
                     ),
                     ListTile(
@@ -637,17 +722,14 @@ class _MeScreenState extends State<MeScreen> {
                           color: Color(0xFF4CB572)),
                       title: Text('Language',
                           style: GoogleFonts.inter(
-                              fontSize: 15, color: const Color(0xFFEBF2EE))),
-                      subtitle: Text('English',
+                              fontSize: 15, color: Theme.of(context).textTheme.bodyLarge?.color)),
+                      subtitle: Text(_profile['app_language'] as String? ?? 'English',
                           style: GoogleFonts.inter(
                               fontSize: 13,
-                              color: const Color(0xFFEBF2EE).withValues(alpha: 0.40))),
+                              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6))),
                       trailing: Icon(Icons.chevron_right,
-                          color: const Color(0xFFEBF2EE).withValues(alpha: 0.25)),
-                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Multiple languages coming soon!')),
-                      ),
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.3)),
+                      onTap: _showLanguageSheet,
                     ),
                   ],
                 ),
@@ -661,17 +743,13 @@ class _MeScreenState extends State<MeScreen> {
                   children: [
                     ListTile(
                       leading: Icon(Icons.lock_outline,
-                          color: const Color(0xFFEBF2EE).withValues(alpha: 0.40)),
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5)),
                       title: Text('Change Password',
                           style: GoogleFonts.inter(
-                              fontSize: 15, color: const Color(0xFFEBF2EE))),
+                              fontSize: 15, color: Theme.of(context).textTheme.bodyLarge?.color)),
                       trailing: Icon(Icons.chevron_right,
-                          color: const Color(0xFFEBF2EE).withValues(alpha: 0.20)),
-                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text(
-                                'Reset password via email coming soon!')),
-                      ),
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.3)),
+                      onTap: _resetPassword,
                     ),
                     Divider(color: const Color(0xFF4CB572).withValues(alpha: 0.08)),
                     ListTile(

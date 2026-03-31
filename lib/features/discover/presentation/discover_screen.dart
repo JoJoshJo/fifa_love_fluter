@@ -355,13 +355,15 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                               child: SizedBox(
                                 height: MediaQuery.of(context).size.height * 0.68,
                                 width: MediaQuery.of(context).size.width - 32,
-                                child: CardSwiper(
-                                  controller: _swiperController,
-                                  cardsCount: min(3, remaining),
-                                  numberOfCardsDisplayed: min(3, remaining),
-                                  backCardOffset: const Offset(0, -16),
-                                  scale: 0.95,
-                                  padding: EdgeInsets.zero,
+                                  child: CardSwiper(
+                                    controller: _swiperController,
+                                    cardsCount: min(3, remaining),
+                                    numberOfCardsDisplayed: 2,
+                                    backCardOffset: const Offset(0, -16),
+                                    scale: 0.95,
+                                    isLoop: false,
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: EdgeInsets.zero,
                                   onSwipe: (prevIndex, currentIndex, direction) {
                                     String action = 'nope';
                                     if (direction ==
