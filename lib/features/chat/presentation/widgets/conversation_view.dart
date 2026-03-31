@@ -70,15 +70,30 @@ class _ConversationViewState extends State<ConversationView> {
   }
 
   Future<void> _sendMessage() async {
-    final content = _messageController.text.trim();
-    if (content.isEmpty) return;
+    if (_messageController.text.trim().isEmpty) return;
 
+    // Guard against null match ID
+    final matchId = widget.match['id'] as String?;
+    if (matchId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Unable to send — match not found'),
+            backgroundColor: Color(0xFFE83535),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
+    final content = _messageController.text.trim();
     final originalText = _messageController.text;
     _messageController.clear();
 
     try {
       await _repo.sendMessage(
-        matchId: widget.match['id'] as String,
+        matchId: matchId,
         senderId: widget.currentUserId,
         content: content,
       );

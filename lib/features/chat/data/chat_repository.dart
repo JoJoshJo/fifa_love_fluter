@@ -90,6 +90,11 @@ class ChatRepository {
 
   // ─── Real-time message stream ───
   Stream<List<Map<String, dynamic>>> messagesStream(String matchId) {
+    // Return empty stream if matchId is empty
+    if (matchId.isEmpty) {
+      return Stream.value([]);
+    }
+
     try {
       return _client
           .from('messages')

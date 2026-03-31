@@ -279,6 +279,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                           currentUserId:
                                               _currentUserId ?? 'mock-user',
                                           onTap: () {
+                                            print('Opening conversation with match: ${_matches[index]}');
+                                            print('Match ID: ${_matches[index]['id']}');
                                             setState(() => _selectedMatch =
                                                 _matches[index]);
                                           },
