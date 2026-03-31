@@ -1,4 +1,5 @@
 import '../../../core/supabase/supabase_config.dart';
+import '../../../core/notifications/notification_service.dart';
 
 class DiscoverRepository {
   /// Fetches profiles to display in the swipe feed.
@@ -111,17 +112,31 @@ class DiscoverRepository {
       if (mutual.isNotEmpty) {
         // Create a match record
         final ids = [swiperId, swipedId]..sort();
+        String? matchId;
         try {
-          await SupabaseConfig.client.from('matches').insert({
+          final match = await SupabaseConfig.client.from('matches').insert({
             'user_a': ids[0],
             'user_b': ids[1],
             'match_score': matchScore,
             'status': 'active',
             'created_at': DateTime.now().toIso8601String(),
-          });
+          }).select().single();
+          matchId = match['id'] as String?;
         } catch (_) {
-          // Match might already exist — not critical
+          // Match might already exist
+          final existing = await SupabaseConfig.client.from('matches').select('id').eq('user_a', ids[0]).eq('user_b', ids[1]).maybeSingle();
+          matchId = existing?['id'] as String?;
         }
+        
+        try {
+          final matchedProfile = await SupabaseConfig.client.from('profiles').select('name').eq('id', swipedId).single();
+          await NotificationService()
+            .showMatchNotification(
+              matchName: matchedProfile['name'],
+              matchId: matchId ?? 'unknown',
+            );
+        } catch (_) {}
+        
         return {'matched': true};
       }
       return null;

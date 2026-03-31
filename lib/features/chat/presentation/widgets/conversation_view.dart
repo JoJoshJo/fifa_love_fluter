@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/chat_repository.dart';
 import '../../../../core/supabase/supabase_config.dart';
+import '../../../../core/notifications/notification_service.dart';
 import 'message_bubble.dart';
 import 'typing_indicator.dart';
 
@@ -29,6 +30,8 @@ class _ConversationViewState extends State<ConversationView> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ChatRepository _repo = ChatRepository(SupabaseConfig.client);
+
+  int _lastMessageCount = 0;
 
   // ignore: prefer_final_fields — mutated by typing presence callbacks
   bool _otherTyping = false;
@@ -340,6 +343,19 @@ class _ConversationViewState extends State<ConversationView> {
               }
 
               final messages = snapshot.data ?? [];
+
+              if (messages.isNotEmpty && messages.length > _lastMessageCount) {
+                 final newMsg = messages.last;
+                 if (newMsg['sender_id'] != widget.currentUserId) {
+                     final other = widget.match['other_user'] as Map<String, dynamic>;
+                     NotificationService().showMessageNotification(
+                         senderName: other['name'] ?? 'Match',
+                         message: newMsg['content'] as String,
+                         matchId: widget.match['id'] as String,
+                     );
+                 }
+                 _lastMessageCount = messages.length;
+              }
 
               if (messages.isEmpty) {
                 return Center(

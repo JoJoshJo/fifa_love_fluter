@@ -38,11 +38,6 @@ class _ScheduleTabState extends State<ScheduleTab> {
     return '${months[dt.month]} ${dt.day}';
   }
 
-  Color _stageColor(String stage) {
-    if (stage == 'Final') return const Color(0xFFF2C233);
-    return const Color(0xFF4CB572);
-  }
-
   void _showCityPicker() {
     showModalBottomSheet(
       context: context,

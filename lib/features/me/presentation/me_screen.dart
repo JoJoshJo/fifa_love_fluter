@@ -325,7 +325,6 @@ class _MeScreenState extends State<MeScreen> {
     }
 
     final completion = _repo.calculateCompletion(_profile);
-    final topPad = MediaQuery.of(context).padding.top;
     final bottomPad = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
@@ -338,9 +337,11 @@ class _MeScreenState extends State<MeScreen> {
               SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    SizedBox(height: topPad + 8),
                     ProfileHeader(
                         profile: _profile, onEditPhoto: _pickAvatar),
+                    const SizedBox(height: 16),
+                    _buildPremiumCard(context),
+                    const SizedBox(height: 16),
                     CompletionBar(
                       score: completion['score'] as int,
                       missing:
@@ -351,9 +352,83 @@ class _MeScreenState extends State<MeScreen> {
                 ),
               ),
 
+              // FOOTBALL IDENTITY
+              const SliverToBoxAdapter(
+                  child: SectionHeader("⚽ FOOTBALL IDENTITY", isEditable: true)),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    FieldTile(
+                      label: 'NATIONALITY', value: _nationality,
+                      icon: Icons.flag_outlined,
+                      onTap: () => _showEditSheet(
+                        label: 'NATIONALITY',
+                        currentValue: _nationality,
+                        onSave: (v) {
+                          setState(() => _nationality = v);
+                          _markChanged();
+                        },
+                      ),
+                    ),
+                    FieldTile(
+                      label: 'TEAM I SUPPORT',
+                      value: _teamSupported,
+                      icon: Icons.sports_soccer_outlined,
+                      onTap: () => _showEditSheet(
+                        label: 'TEAM I SUPPORT',
+                        currentValue: _teamSupported,
+                        onSave: (v) {
+                          setState(() => _teamSupported = v);
+                          _markChanged();
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('I AM A...',
+                              style: GoogleFonts.spaceMono(
+                                  fontSize: 9,
+                                  color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
+                                  letterSpacing: 1.5)),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              _toggleCard('🏠', 'Local', _isLocal, () {
+                                setState(() => _isLocal = true);
+                                _markChanged();
+                              }),
+                              const SizedBox(width: 8),
+                              _toggleCard('✈️', 'Visiting', !_isLocal, () {
+                                setState(() => _isLocal = false);
+                                _markChanged();
+                              }),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (_isLocal)
+                      FieldTile(
+                        label: 'MY CITY', value: _city,
+                        icon: Icons.location_city_outlined,
+                        onTap: () => _showEditSheet(
+                          label: 'MY CITY', currentValue: _city,
+                          onSave: (v) {
+                            setState(() => _city = v);
+                            _markChanged();
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
               // BASIC INFO
               const SliverToBoxAdapter(
-                  child: SectionHeader('BASIC INFO')),
+                  child: SectionHeader("👤 BASIC INFO", isEditable: true)),
               SliverToBoxAdapter(
                 child: Column(
                   children: [
@@ -398,86 +473,9 @@ class _MeScreenState extends State<MeScreen> {
                 ),
               ),
 
-              // FOOTBALL IDENTITY
-              const SliverToBoxAdapter(
-                  child: SectionHeader('FOOTBALL IDENTITY')),
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    FieldTile(
-                      label: 'NATIONALITY', value: _nationality,
-                      icon: Icons.flag_outlined,
-                      onTap: () => _showEditSheet(
-                        label: 'NATIONALITY',
-                        currentValue: _nationality,
-                        onSave: (v) {
-                          setState(() => _nationality = v);
-                          _markChanged();
-                        },
-                      ),
-                    ),
-                    FieldTile(
-                      label: 'TEAM I SUPPORT',
-                      value: _teamSupported,
-                      icon: Icons.sports_soccer_outlined,
-                      onTap: () => _showEditSheet(
-                        label: 'TEAM I SUPPORT',
-                        currentValue: _teamSupported,
-                        onSave: (v) {
-                          setState(() => _teamSupported = v);
-                          _markChanged();
-                        },
-                      ),
-                    ),
-
-                    // Local / Visiting toggle
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('I AM A...',
-                              style: GoogleFonts.spaceMono(
-                                  fontSize: 9,
-                                  color: Colors.white.withValues(alpha: 0.35),
-                                  letterSpacing: 1.5)),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              _toggleCard('🏠', 'Local', _isLocal, () {
-                                setState(() => _isLocal = true);
-                                _markChanged();
-                              }),
-                              const SizedBox(width: 8),
-                              _toggleCard('✈️', 'Visiting', !_isLocal, () {
-                                setState(() => _isLocal = false);
-                                _markChanged();
-                              }),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    if (_isLocal)
-                      FieldTile(
-                        label: 'MY CITY', value: _city,
-                        icon: Icons.location_city_outlined,
-                        onTap: () => _showEditSheet(
-                          label: 'MY CITY', currentValue: _city,
-                          onSave: (v) {
-                            setState(() => _city = v);
-                            _markChanged();
-                          },
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-
               // WHAT I'M LOOKING FOR
               const SliverToBoxAdapter(
-                  child: SectionHeader("WHAT I'M LOOKING FOR")),
+                  child: SectionHeader("❤️ WHAT I'M LOOKING FOR", isEditable: true)),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -487,7 +485,7 @@ class _MeScreenState extends State<MeScreen> {
                       Text('I WANT TO...',
                           style: GoogleFonts.spaceMono(
                               fontSize: 9,
-                              color: Colors.white.withValues(alpha: 0.35),
+                              color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
                               letterSpacing: 1.5)),
                       const SizedBox(height: 8),
                       ..._matchTypeOptions.map((opt) {
@@ -530,7 +528,7 @@ class _MeScreenState extends State<MeScreen> {
                                       style: GoogleFonts.inter(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.white)),
+                                          color: const Color(0xFFEBF2EE))),
                                 ),
                                 Icon(
                                   isSelected
@@ -539,7 +537,7 @@ class _MeScreenState extends State<MeScreen> {
                                   size: 18,
                                   color: isSelected
                                       ? const Color(0xFF4CB572)
-                                      : Colors.white.withValues(alpha: 0.20),
+                                      : const Color(0xFFEBF2EE).withValues(alpha: 0.20),
                                 ),
                               ],
                             ),
@@ -553,7 +551,7 @@ class _MeScreenState extends State<MeScreen> {
 
               // INTERESTS
               const SliverToBoxAdapter(
-                  child: SectionHeader('MY INTERESTS')),
+                  child: SectionHeader("🎯 MY INTERESTS", isEditable: true)),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -569,7 +567,7 @@ class _MeScreenState extends State<MeScreen> {
 
               // LANGUAGES
               const SliverToBoxAdapter(
-                  child: SectionHeader('LANGUAGES I SPEAK')),
+                  child: SectionHeader("🗣️ LANGUAGES", isEditable: true)),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -607,8 +605,8 @@ class _MeScreenState extends State<MeScreen> {
                               style: GoogleFonts.inter(
                                   fontSize: 13,
                                   color: isSelected
-                                      ? Colors.white
-                                      : Colors.white.withValues(alpha: 0.40))),
+                                      ? const Color(0xFFEBF2EE)
+                                      : const Color(0xFFEBF2EE).withValues(alpha: 0.4))),
                         ),
                       );
                     }).toList(),
@@ -618,7 +616,7 @@ class _MeScreenState extends State<MeScreen> {
 
               // SETTINGS
               const SliverToBoxAdapter(
-                  child: SectionHeader('SETTINGS')),
+                  child: SectionHeader("⚙️ SETTINGS")),
               SliverToBoxAdapter(
                 child: Column(
                   children: [
@@ -627,7 +625,7 @@ class _MeScreenState extends State<MeScreen> {
                           color: Color(0xFF4CB572)),
                       title: Text('Dark Mode',
                           style: GoogleFonts.inter(
-                              fontSize: 15, color: Colors.white)),
+                              fontSize: 15, color: const Color(0xFFEBF2EE))),
                       trailing: const Switch(
                         value: true,
                         activeThumbColor: Color(0xFF4CB572),
@@ -639,13 +637,13 @@ class _MeScreenState extends State<MeScreen> {
                           color: Color(0xFF4CB572)),
                       title: Text('Language',
                           style: GoogleFonts.inter(
-                              fontSize: 15, color: Colors.white)),
+                              fontSize: 15, color: const Color(0xFFEBF2EE))),
                       subtitle: Text('English',
                           style: GoogleFonts.inter(
                               fontSize: 13,
-                              color: Colors.white.withValues(alpha: 0.40))),
+                              color: const Color(0xFFEBF2EE).withValues(alpha: 0.40))),
                       trailing: Icon(Icons.chevron_right,
-                          color: Colors.white.withValues(alpha: 0.25)),
+                          color: const Color(0xFFEBF2EE).withValues(alpha: 0.25)),
                       onTap: () => ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text('Multiple languages coming soon!')),
@@ -657,109 +655,47 @@ class _MeScreenState extends State<MeScreen> {
 
               // ACCOUNT
               const SliverToBoxAdapter(
-                  child: SectionHeader('ACCOUNT')),
+                  child: SectionHeader("👑 ACCOUNT")),
               SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    // Premium card
-                    GestureDetector(
-                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Premium coming soon! ⭐')),
-                      ),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 12),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF1A3025), Color(0xFF0D2018)],
-                          ),
-                          border: Border.all(
-                              color: const Color(0xFFF2C233)
-                                  .withValues(alpha: 0.4)),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('⭐ GO PREMIUM',
-                                      style: GoogleFonts.spaceMono(
-                                          fontSize: 10,
-                                          color: const Color(0xFFF2C233),
-                                          letterSpacing: 1.5)),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                      'Unlimited swipes · See who liked you',
-                                      style: GoogleFonts.inter(
-                                          fontSize: 12,
-                                          color: Colors.white
-                                              .withValues(alpha: 0.60))),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF2C233)
-                                    .withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                    color: const Color(0xFFF2C233)),
-                              ),
-                              child: Text(r'$9.99/mo',
-                                  style: GoogleFonts.spaceMono(
-                                      fontSize: 11,
-                                      color: const Color(0xFFF2C233))),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
                     ListTile(
                       leading: Icon(Icons.lock_outline,
-                          color: Colors.white.withValues(alpha: 0.40)),
+                          color: const Color(0xFFEBF2EE).withValues(alpha: 0.40)),
                       title: Text('Change Password',
                           style: GoogleFonts.inter(
-                              fontSize: 15, color: Colors.white)),
+                              fontSize: 15, color: const Color(0xFFEBF2EE))),
                       trailing: Icon(Icons.chevron_right,
-                          color: Colors.white.withValues(alpha: 0.20)),
+                          color: const Color(0xFFEBF2EE).withValues(alpha: 0.20)),
                       onTap: () => ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text(
                                 'Reset password via email coming soon!')),
                       ),
                     ),
-
-                    Divider(color: Colors.white.withValues(alpha: 0.06)),
-
+                    Divider(color: const Color(0xFF4CB572).withValues(alpha: 0.08)),
                     ListTile(
                       leading: Icon(Icons.logout,
                           color:
-                              const Color(0xFFE83535).withValues(alpha: 0.8)),
-                      title: Text('Sign Out',
-                          style: GoogleFonts.inter(
-                              fontSize: 15,
+                              const Color(0xFFE83535).withValues(alpha: 0.7)),
+                      title: Text('SIGN OUT',
+                          style: GoogleFonts.spaceMono(
+                              fontSize: 11,
                               color: const Color(0xFFE83535)
-                                  .withValues(alpha: 0.8))),
+                                  .withValues(alpha: 0.7))),
+                      trailing: Icon(Icons.chevron_right,
+                          color: const Color(0xFFEBF2EE).withValues(alpha: 0.2)),
                       onTap: _confirmSignOut,
                     ),
-
                     ListTile(
                       leading: Icon(Icons.delete_outline,
                           color:
-                              const Color(0xFFE83535).withValues(alpha: 0.5)),
-                      title: Text('Delete Account',
-                          style: GoogleFonts.inter(
-                              fontSize: 15,
+                              const Color(0xFFE83535).withValues(alpha: 0.4)),
+                      title: Text('DELETE ACCOUNT',
+                          style: GoogleFonts.spaceMono(
+                              fontSize: 11,
                               color: const Color(0xFFE83535)
-                                  .withValues(alpha: 0.5))),
+                                  .withValues(alpha: 0.4))),
                       onTap: _confirmDelete,
                     ),
                   ],
@@ -779,29 +715,29 @@ class _MeScreenState extends State<MeScreen> {
                             onPressed: () {},
                             child: Text('Privacy Policy',
                                 style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    color: Colors.white
-                                        .withValues(alpha: 0.25))),
+                                    fontSize: 11,
+                                    color: const Color(0xFFEBF2EE)
+                                        .withValues(alpha: 0.2))),
                           ),
                           Text(' · ',
                               style: TextStyle(
-                                  color: Colors.white
-                                      .withValues(alpha: 0.15))),
+                                  color: const Color(0xFFEBF2EE)
+                                      .withValues(alpha: 0.12))),
                           TextButton(
                             onPressed: () {},
                             child: Text('Terms of Service',
                                 style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    color: Colors.white
-                                        .withValues(alpha: 0.25))),
+                                    fontSize: 11,
+                                    color: const Color(0xFFEBF2EE)
+                                        .withValues(alpha: 0.2))),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text('FIFA LOVE · World Cup 2026',
                           style: GoogleFonts.spaceMono(
-                              fontSize: 9,
-                              color: Colors.white.withValues(alpha: 0.15))),
+                              fontSize: 8,
+                              color: const Color(0xFFEBF2EE).withValues(alpha: 0.12))),
                       SizedBox(height: bottomPad + 80),
                     ],
                   ),
@@ -859,6 +795,79 @@ class _MeScreenState extends State<MeScreen> {
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumCard(BuildContext context) {
+    return GestureDetector(
+      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Premium coming soon! ⭐')),
+      ),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1A3025), Color(0xFF0D2018)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(
+              color: const Color(0xFFF2C233)
+                  .withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.star_rounded, size: 16, color: Color(0xFFF2C233)),
+                      const SizedBox(width: 6),
+                      Text('GO PREMIUM',
+                          style: GoogleFonts.spaceMono(
+                              fontSize: 10,
+                              color: const Color(0xFFF2C233),
+                              letterSpacing: 1.5)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text('Unlock Global Scouting',
+                      style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white)),
+                  const SizedBox(height: 2),
+                  Text(
+                      'Unlimited swipes · See who liked you',
+                      style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: const Color(0xFFEBF2EE)
+                              .withValues(alpha: 0.5))),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2C233)
+                    .withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: const Color(0xFFF2C233)),
+              ),
+              child: Text(r'$9.99/mo',
+                  style: GoogleFonts.spaceMono(
+                      fontSize: 11,
+                      color: const Color(0xFFF2C233))),
+            ),
+          ],
+        ),
       ),
     );
   }

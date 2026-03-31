@@ -45,7 +45,7 @@ class InterestChipGrid extends StatelessWidget {
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               color: isSelected
                   ? const Color(0xFF135E4B)
@@ -62,8 +62,8 @@ class InterestChipGrid extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 13,
                 color: isSelected
-                    ? Colors.white.withValues(alpha: 0.90)
-                    : Colors.white.withValues(alpha: 0.40),
+                    ? const Color(0xFFEBF2EE)
+                    : const Color(0xFFEBF2EE).withValues(alpha: 0.4),
               ),
             ),
           ),

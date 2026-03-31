@@ -27,7 +27,7 @@ class FieldTile extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: Colors.white.withValues(alpha: 0.06),
+              color: const Color(0xFF4CB572).withValues(alpha: 0.08),
               width: 1,
             ),
           ),
@@ -36,7 +36,7 @@ class FieldTile extends StatelessWidget {
           children: [
             if (icon != null) ...[
               Icon(icon, size: 18,
-                  color: const Color(0xFF4CB572).withValues(alpha: 0.7)),
+                  color: const Color(0xFF4CB572).withValues(alpha: 0.6)),
               const SizedBox(width: 12),
             ],
             Expanded(
@@ -47,18 +47,19 @@ class FieldTile extends StatelessWidget {
                     label,
                     style: GoogleFonts.spaceMono(
                       fontSize: 9,
-                      color: Colors.white.withValues(alpha: 0.35),
+                      color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
                       letterSpacing: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     value.isEmpty ? 'Tap to add' : value,
                     style: GoogleFonts.inter(
                       fontSize: 15,
+                      fontWeight: FontWeight.w400,
                       color: value.isEmpty
-                          ? Colors.white.withValues(alpha: 0.25)
-                          : Colors.white.withValues(alpha: 0.85),
+                          ? const Color(0xFFEBF2EE).withValues(alpha: 0.25)
+                          : const Color(0xFFEBF2EE).withValues(alpha: 0.85),
                     ),
                     maxLines: isMultiLine ? 3 : 1,
                     overflow: TextOverflow.ellipsis,
@@ -67,7 +68,7 @@ class FieldTile extends StatelessWidget {
               ),
             ),
             Icon(Icons.chevron_right,
-                size: 18, color: Colors.white.withValues(alpha: 0.20)),
+                size: 18, color: const Color(0xFFEBF2EE).withValues(alpha: 0.20)),
           ],
         ),
       ),

@@ -10,6 +10,7 @@ import '../data/discover_repository.dart';
 import 'widgets/swipe_card.dart';
 import 'widgets/match_overlay.dart';
 import 'widgets/country_filter_sheet.dart';
+import '../../../core/notifications/notification_service.dart';
 
 class DiscoverScreen extends ConsumerStatefulWidget {
   const DiscoverScreen({super.key});
@@ -465,7 +466,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
             MatchOverlay(
               matchedProfile: _matchedProfile!,
               myAvatarUrl: _myAvatarUrl,
-              onMessage: () {
+              onMessage: () async {
+                await NotificationService().requestPermissions();
                 // Pre-select the conversation and switch to Chat tab
                 ref.read(selectedMatchProvider.notifier).state = {
                   'id': 'new-match-${_matchedProfile!['id']}',

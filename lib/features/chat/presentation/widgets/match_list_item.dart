@@ -25,19 +25,6 @@ class MatchListItem extends StatelessWidget {
     return days[time.weekday - 1];
   }
 
-  String _flagEmoji(String? nationality) {
-    const flags = {
-      'Brazil': '🇧🇷', 'France': '🇫🇷', 'Argentina': '🇦🇷',
-      'USA': '🇺🇸', 'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'Germany': '🇩🇪',
-      'Spain': '🇪🇸', 'Portugal': '🇵🇹', 'Morocco': '🇲🇦',
-      'Japan': '🇯🇵', 'Nigeria': '🇳🇬', 'Mexico': '🇲🇽',
-      'Colombia': '🇨🇴', 'Senegal': '🇸🇳', 'Australia': '🇦🇺',
-      'South Korea': '🇰🇷', 'Netherlands': '🇳🇱', 'Italy': '🇮🇹',
-      'Belgium': '🇧🇪', 'Canada': '🇨🇦',
-    };
-    return flags[nationality] ?? '🌍';
-  }
-
   @override
   Widget build(BuildContext context) {
     final other = match['other_user'] as Map<String, dynamic>;
@@ -45,7 +32,6 @@ class MatchListItem extends StatelessWidget {
     final unread = (match['unread_count'] as int?) ?? 0;
     final avatarUrl = other['avatar_url'] as String?;
     final isVerified = (other['is_verified'] as bool?) ?? false;
-    final nationality = other['nationality'] as String?;
 
     final timeStr = lastMsg != null
         ? _timeAgo(lastMsg['created_at'] as String?)

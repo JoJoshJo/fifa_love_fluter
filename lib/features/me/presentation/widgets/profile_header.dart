@@ -33,35 +33,40 @@ class ProfileHeader extends StatelessWidget {
     final isVerified = profile['is_verified'] == true;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 24, 16, 0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar with edit button
+          // Avatar with camera button
           Stack(
             children: [
               Container(
-                width: 90, height: 90,
+                width: 80, height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                      color: const Color(0xFF4CB572), width: 2.5),
+                      color: const Color(0xFF4CB572), width: 2),
                 ),
                 child: ClipOval(
                   child: avatarUrl != null
                       ? CachedNetworkImage(
                           imageUrl: avatarUrl,
                           fit: BoxFit.cover,
-                          width: 90, height: 90,
+                          width: 80, height: 80,
                           errorWidget: (_, __, ___) => Container(
                             color: const Color(0xFF152B1E),
-                            child: const Icon(Icons.person,
-                                size: 40, color: Color(0xFF4CB572)),
+                            child: const Center(
+                              child: Icon(Icons.person_outline,
+                                  size: 36, color: Color(0xFF4CB572)),
+                            ),
                           ),
                         )
                       : Container(
                           color: const Color(0xFF152B1E),
-                          child: const Icon(Icons.person,
-                              size: 40, color: Color(0xFF4CB572)),
+                          child: const Center(
+                            child: Icon(Icons.person_outline,
+                                size: 36, color: Color(0xFF4CB572)),
+                          ),
                         ),
                 ),
               ),
@@ -70,13 +75,15 @@ class ProfileHeader extends StatelessWidget {
                 child: GestureDetector(
                   onTap: onEditPhoto,
                   child: Container(
-                    width: 28, height: 28,
+                    width: 26, height: 26,
                     decoration: const BoxDecoration(
                       color: Color(0xFF4CB572),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.camera_alt,
-                        size: 15, color: Color(0xFF080F0C)),
+                    child: const Center(
+                      child: Icon(Icons.camera_alt,
+                          size: 14, color: Color(0xFF080F0C)),
+                    ),
                   ),
                 ),
               ),
@@ -94,32 +101,38 @@ class ProfileHeader extends StatelessWidget {
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: const Color(0xFFEBF2EE),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if (nationality != null) ...[
+                    if (nationality != null && nationality.isNotEmpty) ...[
                       Text(
-                        '${_flagEmoji(nationality)} $nationality',
+                        _flagEmoji(nationality),
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        nationality,
                         style: GoogleFonts.inter(
                           fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.60),
+                          color: const Color(0xFF9BB3AF),
                         ),
                       ),
                     ],
-                    if (team != null) ...[
+                    if (team != null && team.isNotEmpty) ...[
                       Text(' · ',
                           style: GoogleFonts.inter(
                               fontSize: 13,
-                              color: Colors.white.withValues(alpha: 0.30))),
+                              color: const Color(0xFFEBF2EE).withValues(alpha: 0.3))),
                       Flexible(
                         child: Text(
                           team,
                           style: GoogleFonts.inter(
                             fontSize: 13,
-                            color: Colors.white.withValues(alpha: 0.45),
+                            color: const Color(0xFFEBF2EE).withValues(alpha: 0.45),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -127,15 +140,15 @@ class ProfileHeader extends StatelessWidget {
                     ],
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 4),
+                      horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: isVerified
-                        ? const Color(0xFF135E4B).withValues(alpha: 0.4)
+                        ? const Color(0xFF135E4B)
                         : const Color(0xFF152B1E),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isVerified
                           ? const Color(0xFF4CB572)
@@ -152,16 +165,17 @@ class ProfileHeader extends StatelessWidget {
                         size: 12,
                         color: isVerified
                             ? const Color(0xFF4CB572)
-                            : Colors.white.withValues(alpha: 0.25),
+                            : const Color(0xFFEBF2EE).withValues(alpha: 0.25),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        isVerified ? 'ID Verified' : 'Not Verified',
+                        isVerified ? 'ID VERIFIED' : 'NOT VERIFIED',
                         style: GoogleFonts.spaceMono(
                           fontSize: 9,
+                          letterSpacing: 1,
                           color: isVerified
                               ? const Color(0xFF4CB572)
-                              : Colors.white.withValues(alpha: 0.25),
+                              : const Color(0xFFEBF2EE).withValues(alpha: 0.25),
                         ),
                       ),
                     ],
