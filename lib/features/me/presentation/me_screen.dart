@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import '../../../core/supabase/supabase_config.dart';
 import '../data/me_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/theme_provider.dart';
-import 'widgets/profile_header.dart';
-import 'widgets/completion_bar.dart';
-import 'widgets/section_header.dart';
-import 'widgets/field_tile.dart';
-import 'widgets/interest_chip_grid.dart';
+import 'edit_profile_screen.dart';
 
 class MeScreen extends ConsumerStatefulWidget {
   const MeScreen({super.key});
@@ -23,21 +17,8 @@ class _MeScreenState extends ConsumerState<MeScreen> {
   final _repo = MeRepository();
   Map<String, dynamic> _profile = {};
   bool _loading = true;
-  bool _hasChanges = false;
-  bool _saving = false;
 
-  String _name = '';
-  String _bio = '';
-  String _nationality = '';
-  String _teamSupported = '';
-  String _city = '';
-  bool _isLocal = false;
-  List<String> _interests = [];
-  List<String> _languages = [];
-  List<String> _matchTypes = [];
-
-  String get _userId =>
-      SupabaseConfig.client.auth.currentUser?.id ?? '';
+  String get _userId => SupabaseConfig.client.auth.currentUser?.id ?? '';
 
   @override
   void initState() {
@@ -50,16 +31,6 @@ class _MeScreenState extends ConsumerState<MeScreen> {
       final profile = await _repo.fetchProfile(_userId);
       setState(() {
         _profile = profile;
-        _name = profile['name'] as String? ?? '';
-        _bio = profile['bio'] as String? ?? '';
-        _nationality = profile['nationality'] as String? ?? '';
-        _teamSupported = profile['team_supported'] as String? ?? '';
-        _city = profile['city'] as String? ?? '';
-        _isLocal = profile['is_local'] == true;
-        _interests = List<String>.from(profile['interests'] as List? ?? []);
-        _languages = List<String>.from(profile['languages'] as List? ?? []);
-        _matchTypes = List<String>.from(
-            profile['match_type_preference'] as List? ?? []);
         _loading = false;
       });
     } catch (_) {
@@ -67,236 +38,55 @@ class _MeScreenState extends ConsumerState<MeScreen> {
     }
   }
 
-  void _markChanged() => setState(() => _hasChanges = true);
-
-  Future<void> _saveProfile() async {
-    setState(() => _saving = true);
-    try {
-      await _repo.updateProfile(_userId, {
-        'name': _name,
-        'bio': _bio,
-        'nationality': _nationality,
-        'team_supported': _teamSupported,
-        'city': _city,
-        'is_local': _isLocal,
-        'interests': _interests,
-        'languages': _languages,
-        'match_type_preference': _matchTypes,
-      });
-      setState(() {
-        _saving = false;
-        _hasChanges = false;
-        _profile['name'] = _name;
-        _profile['bio'] = _bio;
-        _profile['nationality'] = _nationality;
-        _profile['team_supported'] = _teamSupported;
-        _profile['interests'] = _interests;
-        _profile['languages'] = _languages;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile saved ✅'),
-              backgroundColor: Color(0xFF135E4B)),
-        );
-      }
-    } catch (_) {
-      setState(() => _saving = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save'),
-              backgroundColor: Color(0xFFE83535)),
-        );
-      }
-    }
-  }
-
-  Future<void> _pickAvatar() async {
-    final picker = ImagePicker();
-    final file = await picker.pickImage(
-        source: ImageSource.gallery, maxWidth: 800, imageQuality: 85);
-    if (file == null) return;
-    try {
-      final url = await _repo.uploadAvatar(_userId, File(file.path));
-      if (url != null) {
-        await _repo.updateProfile(_userId, {'avatar_url': url});
-        setState(() => _profile['avatar_url'] = url);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Photo updated ✅'),
-                backgroundColor: Color(0xFF135E4B)),
-          );
-        }
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Upload failed'),
-              backgroundColor: Color(0xFFE83535)),
-        );
-      }
-    }
-  }
-
-  void _showEditSheet({
-    required String label,
-    required String currentValue,
-    required ValueChanged<String> onSave,
-    int maxLines = 1,
-  }) {
-    final controller = TextEditingController(text: currentValue);
-    final bottomPad = MediaQuery.of(context).viewInsets.bottom;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF0D1A13),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => Padding(
-        padding: EdgeInsets.fromLTRB(
-            24, 24, 24, 24 + bottomPad + MediaQuery.of(context).padding.bottom),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label,
-                style: GoogleFonts.spaceMono(
-                    fontSize: 10, color: const Color(0xFF4CB572),
-                    letterSpacing: 2)),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: controller,
-              autofocus: true,
-              maxLines: maxLines,
-              style: const TextStyle(color: Colors.white, fontSize: 15),
-              decoration: InputDecoration(
-                fillColor: const Color(0xFF152B1E),
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF4CB572)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.20)),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text('Cancel',
-                        style: GoogleFonts.inter(
-                            color: Colors.white.withValues(alpha: 0.60))),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      onSave(controller.text.trim());
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF135E4B),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text('Save',
-                        style: GoogleFonts.inter(color: Colors.white)),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _confirmSignOut() {
+  Future<void> _signOut() async {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF0D1A13),
-        title: Text('Sign out of FIFA LOVE?',
-            style: GoogleFonts.spaceGrotesk(color: Colors.white)),
+        title: Text('Sign Out', style: GoogleFonts.spaceGrotesk(color: Colors.white)),
+        content: Text('Are you sure you want to sign out?', style: GoogleFonts.inter(color: Colors.white70)),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel',
-                style: GoogleFonts.inter(
-                    color: Colors.white.withValues(alpha: 0.5))),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await _repo.signOut();
-            },
-            child: Text('Sign Out',
-                style: GoogleFonts.inter(color: const Color(0xFFE83535))),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel', style: GoogleFonts.inter(color: Colors.white30))),
+          TextButton(onPressed: () async {
+            Navigator.pop(context);
+            await _repo.signOut();
+          }, child: Text('Sign Out', style: GoogleFonts.inter(color: const Color(0xFFE83535)))),
         ],
       ),
     );
   }
 
-  void _confirmDelete() {
+  Future<void> _deleteAccount() async {
     final controller = TextEditingController();
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF0D1A13),
-        title: Text('Delete Account',
-            style: GoogleFonts.spaceGrotesk(color: Colors.white)),
+        title: Text('Delete Account', style: GoogleFonts.spaceGrotesk(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('This cannot be undone. Type DELETE to confirm.',
-                style: GoogleFonts.inter(
-                    color: Colors.white.withValues(alpha: 0.6))),
-            const SizedBox(height: 12),
+            Text('Type DELETE to confirm account deletion.', style: GoogleFonts.inter(color: Colors.white70)),
+            const SizedBox(height: 16),
             TextField(
               controller: controller,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 fillColor: const Color(0xFF152B1E),
                 filled: true,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
               ),
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel',
-                style: GoogleFonts.inter(
-                    color: Colors.white.withValues(alpha: 0.5))),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (controller.text.trim() == 'DELETE') {
-                Navigator.pop(context);
-                await _repo.deleteAccount(_userId);
-              }
-            },
-            child: Text('Delete',
-                style: GoogleFonts.inter(color: const Color(0xFFE83535))),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel', style: GoogleFonts.inter(color: Colors.white30))),
+          TextButton(onPressed: () async {
+            if (controller.text.trim() == 'DELETE') {
+              Navigator.pop(context);
+              await _repo.deleteAccount(_userId);
+            }
+          }, child: Text('Delete', style: GoogleFonts.inter(color: const Color(0xFFE83535)))),
         ],
       ),
     );
@@ -306,32 +96,19 @@ class _MeScreenState extends ConsumerState<MeScreen> {
     final currentLang = _profile['app_language'] as String? ?? 'English';
     showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: const Color(0xFF0D1A13),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (_) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('SELECT LANGUAGE', 
-              style: GoogleFonts.spaceMono(
-                fontSize: 12, 
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF4CB572),
-                letterSpacing: 2
-              )
-            ),
+            Text('SELECT LANGUAGE', style: GoogleFonts.spaceMono(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF4CB572), letterSpacing: 2)),
             const SizedBox(height: 16),
             ...['English', 'Spanish', 'Portuguese', 'French', 'Arabic', 'Japanese'].map((lang) {
               final isSelected = lang == currentLang;
               return ListTile(
-                leading: Text(_getLangFlag(lang), style: const TextStyle(fontSize: 20)),
-                title: Text(lang, style: GoogleFonts.inter(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                )),
+                title: Text(lang, style: GoogleFonts.inter(color: isSelected ? const Color(0xFF4CB572) : Colors.white, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                 trailing: isSelected ? const Icon(Icons.check_circle, color: Color(0xFF4CB572)) : null,
                 onTap: () async {
                   await _repo.updateProfile(_userId, {'app_language': lang});
@@ -346,641 +123,205 @@ class _MeScreenState extends ConsumerState<MeScreen> {
     );
   }
 
-  String _getLangFlag(String lang) {
-    switch (lang) {
-      case 'Spanish': return '🇪🇸';
-      case 'Portuguese': return '🇧🇷';
-      case 'French': return '🇫🇷';
-      case 'Arabic': return '🇸🇦';
-      case 'Japanese': return '🇯🇵';
-      default: return '🇺🇸';
-    }
-  }
-
-  Future<void> _resetPassword() async {
-    final email = SupabaseConfig.client.auth.currentUser?.email;
-    if (email == null) return;
-
-    try {
-      await SupabaseConfig.client.auth.resetPasswordForEmail(email);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Password reset email sent to $email'),
-            backgroundColor: const Color(0xFF135E4B),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to send reset email'),
-            backgroundColor: Color(0xFFE83535),
-          ),
-        );
-      }
-    }
-  }
-
-  static const _allLanguages = [
-    'English', 'Spanish', 'Portuguese', 'French', 'Arabic',
-    'Japanese', 'German', 'Korean', 'Italian', 'Dutch',
-    'Russian', 'Hindi', 'Mandarin', 'Turkish', 'Polish',
-  ];
-
-  static const _matchTypeOptions = [
-    '❤️ Dating & Romance',
-    '⚽ Fan Friends',
-    '🗺️ Local Guide',
-  ];
-
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF080F0C),
-        body: Center(
-          child: CircularProgressIndicator(
-              color: Color(0xFF4CB572), strokeWidth: 2),
-        ),
-      );
+      return const Scaffold(backgroundColor: Color(0xFF080F0C), body: Center(child: CircularProgressIndicator(color: Color(0xFF4CB572))));
     }
 
+    final safeArea = MediaQuery.of(context).padding;
     final completion = _repo.calculateCompletion(_profile);
-    final bottomPad = MediaQuery.of(context).padding.bottom;
+    final score = completion['score'] as int;
+    final isDark = ref.watch(themeProvider) == ThemeMode.dark;
 
     return Scaffold(
       backgroundColor: const Color(0xFF080F0C),
-      body: Stack(
-        children: [
-          CustomScrollView(
-            slivers: [
-              // Header
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    ProfileHeader(
-                        profile: _profile, onEditPhoto: _pickAvatar),
-                    const SizedBox(height: 16),
-                    _buildPremiumCard(context),
-                    const SizedBox(height: 16),
-                    CompletionBar(
-                      score: completion['score'] as int,
-                      missing:
-                          List<String>.from(completion['missing'] as List),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                ),
-              ),
-
-              // FOOTBALL IDENTITY
-              const SliverToBoxAdapter(
-                  child: SectionHeader("⚽ FOOTBALL IDENTITY", isEditable: true)),
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    FieldTile(
-                      label: 'NATIONALITY', value: _nationality,
-                      icon: Icons.flag_outlined,
-                      onTap: () => _showEditSheet(
-                        label: 'NATIONALITY',
-                        currentValue: _nationality,
-                        onSave: (v) {
-                          setState(() => _nationality = v);
-                          _markChanged();
-                        },
-                      ),
-                    ),
-                    FieldTile(
-                      label: 'TEAM I SUPPORT',
-                      value: _teamSupported,
-                      icon: Icons.sports_soccer_outlined,
-                      onTap: () => _showEditSheet(
-                        label: 'TEAM I SUPPORT',
-                        currentValue: _teamSupported,
-                        onSave: (v) {
-                          setState(() => _teamSupported = v);
-                          _markChanged();
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('I AM A...',
-                              style: GoogleFonts.spaceMono(
-                                  fontSize: 9,
-                                  color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
-                                  letterSpacing: 1.5)),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              _toggleCard('🏠', 'Local', _isLocal, () {
-                                setState(() => _isLocal = true);
-                                _markChanged();
-                              }),
-                              const SizedBox(width: 8),
-                              _toggleCard('✈️', 'Visiting', !_isLocal, () {
-                                setState(() => _isLocal = false);
-                                _markChanged();
-                              }),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (_isLocal)
-                      FieldTile(
-                        label: 'MY CITY', value: _city,
-                        icon: Icons.location_city_outlined,
-                        onTap: () => _showEditSheet(
-                          label: 'MY CITY', currentValue: _city,
-                          onSave: (v) {
-                            setState(() => _city = v);
-                            _markChanged();
-                          },
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-
-              // BASIC INFO
-              const SliverToBoxAdapter(
-                  child: SectionHeader("👤 BASIC INFO", isEditable: true)),
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    FieldTile(
-                      label: 'NAME', value: _name,
-                      icon: Icons.person_outline,
-                      onTap: () => _showEditSheet(
-                        label: 'NAME', currentValue: _name,
-                        onSave: (v) {
-                          setState(() => _name = v);
-                          _markChanged();
-                        },
-                      ),
-                    ),
-                    FieldTile(
-                      label: 'BIO', value: _bio,
-                      icon: Icons.edit_outlined, isMultiLine: true,
-                      onTap: () => _showEditSheet(
-                        label: 'BIO', currentValue: _bio,
-                        maxLines: 4,
-                        onSave: (v) {
-                          setState(() => _bio = v);
-                          _markChanged();
-                        },
-                      ),
-                    ),
-                    FieldTile(
-                      label: 'PHONE',
-                      value: _profile['phone_number'] as String? ?? '',
-                      icon: Icons.phone_outlined,
-                      onTap: () => _showEditSheet(
-                        label: 'PHONE',
-                        currentValue:
-                            _profile['phone_number'] as String? ?? '',
-                        onSave: (v) {
-                          setState(() => _profile['phone_number'] = v);
-                          _markChanged();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // WHAT I'M LOOKING FOR
-              const SliverToBoxAdapter(
-                  child: SectionHeader("❤️ WHAT I'M LOOKING FOR", isEditable: true)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('I WANT TO...',
-                          style: GoogleFonts.spaceMono(
-                              fontSize: 9,
-                              color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
-                              letterSpacing: 1.5)),
-                      const SizedBox(height: 8),
-                      ..._matchTypeOptions.map((opt) {
-                        final isSelected = _matchTypes.contains(opt);
-                        final emoji = opt.substring(0, 2);
-                        final label = opt.substring(2).trim();
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              if (isSelected) {
-                                _matchTypes.remove(opt);
-                              } else {
-                                _matchTypes.add(opt);
-                              }
-                            });
-                            _markChanged();
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFF135E4B)
-                                  : const Color(0xFF152B1E),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isSelected
-                                    ? const Color(0xFF4CB572)
-                                    : const Color(0xFF1E4A33),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Text(emoji,
-                                    style: const TextStyle(fontSize: 22)),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(label,
-                                      style: GoogleFonts.inter(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: const Color(0xFFEBF2EE))),
-                                ),
-                                Icon(
-                                  isSelected
-                                      ? Icons.check_circle
-                                      : Icons.circle_outlined,
-                                  size: 18,
-                                  color: isSelected
-                                      ? const Color(0xFF4CB572)
-                                      : const Color(0xFFEBF2EE).withValues(alpha: 0.20),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ),
-
-              // INTERESTS
-              const SliverToBoxAdapter(
-                  child: SectionHeader("🎯 MY INTERESTS", isEditable: true)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: InterestChipGrid(
-                    selected: _interests,
-                    onChanged: (updated) {
-                      setState(() => _interests = updated);
-                      _markChanged();
-                    },
-                  ),
-                ),
-              ),
-
-              // LANGUAGES
-              const SliverToBoxAdapter(
-                  child: SectionHeader("🗣️ LANGUAGES", isEditable: true)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Wrap(
-                    spacing: 8, runSpacing: 8,
-                    children: _allLanguages.map((lang) {
-                      final isSelected = _languages.contains(lang);
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (isSelected) {
-                              _languages.remove(lang);
-                            } else {
-                              _languages.add(lang);
-                            }
-                          });
-                          _markChanged();
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? const Color(0xFF135E4B)
-                                : const Color(0xFF152B1E),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isSelected
-                                  ? const Color(0xFF4CB572)
-                                  : const Color(0xFF1E4A33),
-                            ),
-                          ),
-                          child: Text(lang,
-                              style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  color: isSelected
-                                      ? const Color(0xFFEBF2EE)
-                                      : const Color(0xFFEBF2EE).withValues(alpha: 0.4))),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-
-              // SETTINGS
-              const SliverToBoxAdapter(
-                  child: SectionHeader("⚙️ SETTINGS")),
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.dark_mode_outlined,
-                          color: Color(0xFF4CB572)),
-                      title: Text('Dark Mode',
-                          style: GoogleFonts.inter(
-                              fontSize: 15, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                      trailing: Switch(
-                        value: ref.watch(themeProvider) == ThemeMode.dark,
-                        activeColor: const Color(0xFF4CB572),
-                        onChanged: (v) {
-                          ref.read(themeProvider.notifier).toggleTheme();
-                        },
-                      ),
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.language_outlined,
-                          color: Color(0xFF4CB572)),
-                      title: Text('Language',
-                          style: GoogleFonts.inter(
-                              fontSize: 15, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                      subtitle: Text(_profile['app_language'] as String? ?? 'English',
-                          style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6))),
-                      trailing: Icon(Icons.chevron_right,
-                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.3)),
-                      onTap: _showLanguageSheet,
-                    ),
-                  ],
-                ),
-              ),
-
-              // ACCOUNT
-              const SliverToBoxAdapter(
-                  child: SectionHeader("👑 ACCOUNT")),
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.lock_outline,
-                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5)),
-                      title: Text('Change Password',
-                          style: GoogleFonts.inter(
-                              fontSize: 15, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                      trailing: Icon(Icons.chevron_right,
-                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.3)),
-                      onTap: _resetPassword,
-                    ),
-                    Divider(color: const Color(0xFF4CB572).withValues(alpha: 0.08)),
-                    ListTile(
-                      leading: Icon(Icons.logout,
-                          color:
-                              const Color(0xFFE83535).withValues(alpha: 0.7)),
-                      title: Text('SIGN OUT',
-                          style: GoogleFonts.spaceMono(
-                              fontSize: 11,
-                              color: const Color(0xFFE83535)
-                                  .withValues(alpha: 0.7))),
-                      trailing: Icon(Icons.chevron_right,
-                          color: const Color(0xFFEBF2EE).withValues(alpha: 0.2)),
-                      onTap: _confirmSignOut,
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.delete_outline,
-                          color:
-                              const Color(0xFFE83535).withValues(alpha: 0.4)),
-                      title: Text('DELETE ACCOUNT',
-                          style: GoogleFonts.spaceMono(
-                              fontSize: 11,
-                              color: const Color(0xFFE83535)
-                                  .withValues(alpha: 0.4))),
-                      onTap: _confirmDelete,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Footer
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextButton(
-                            onPressed: () {},
-                            child: Text('Privacy Policy',
-                                style: GoogleFonts.inter(
-                                    fontSize: 11,
-                                    color: const Color(0xFFEBF2EE)
-                                        .withValues(alpha: 0.2))),
-                          ),
-                          Text(' · ',
-                              style: TextStyle(
-                                  color: const Color(0xFFEBF2EE)
-                                      .withValues(alpha: 0.12))),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text('Terms of Service',
-                                style: GoogleFonts.inter(
-                                    fontSize: 11,
-                                    color: const Color(0xFFEBF2EE)
-                                        .withValues(alpha: 0.2))),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text('FIFA LOVE · World Cup 2026',
-                          style: GoogleFonts.spaceMono(
-                              fontSize: 8,
-                              color: const Color(0xFFEBF2EE).withValues(alpha: 0.12))),
-                      SizedBox(height: bottomPad + 80),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          // Floating save button
-          if (_hasChanges)
-            Positioned(
-              bottom: bottomPad + 72,
-              left: 16, right: 16,
-              child: GestureDetector(
-                onTap: _saving ? null : _saveProfile,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  height: 52,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    gradient: const LinearGradient(
-                        colors: [Color(0xFF135E4B), Color(0xFF4CB572)]),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF4CB572).withValues(alpha: 0.3),
-                        blurRadius: 16, offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: _saving
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const SizedBox(
-                                width: 18, height: 18,
-                                child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2),
-                              ),
-                              const SizedBox(width: 8),
-                              Text('Saving...',
-                                  style: GoogleFonts.inter(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white)),
-                            ],
-                          )
-                        : Text('Save Changes',
-                            style: GoogleFonts.inter(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white)),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPremiumCard(BuildContext context) {
-    return GestureDetector(
-      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Premium coming soon! ⭐')),
-      ),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          gradient: const LinearGradient(
-            colors: [Color(0xFF1A3025), Color(0xFF0D2018)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          border: Border.all(
-              color: const Color(0xFFF2C233)
-                  .withValues(alpha: 0.35)),
-        ),
-        child: Row(
+      body: SingleChildScrollView(
+        child: Column(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            SizedBox(height: safeArea.top + 16),
+
+            // Profile Header Section
+            Center(
+              child: Stack(
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star_rounded, size: 16, color: Color(0xFFF2C233)),
-                      const SizedBox(width: 6),
-                      Text('GO PREMIUM',
-                          style: GoogleFonts.spaceMono(
-                              fontSize: 10,
-                              color: const Color(0xFFF2C233),
-                              letterSpacing: 1.5)),
-                    ],
+                   CircleAvatar(
+                    radius: 50,
+                    backgroundColor: const Color(0xFF152B1E),
+                    backgroundImage: _profile['avatar_url'] != null ? NetworkImage(_profile['avatar_url']) : null,
+                    child: _profile['avatar_url'] == null ? const Icon(Icons.person, size: 50, color: Colors.white24) : null,
                   ),
-                  const SizedBox(height: 4),
-                  Text('Unlock Global Scouting',
-                      style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white)),
-                  const SizedBox(height: 2),
-                  Text(
-                      'Unlimited swipes · See who liked you',
-                      style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: const Color(0xFFEBF2EE)
-                              .withValues(alpha: 0.5))),
+                  Positioned(
+                    bottom: 0, right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(color: Color(0xFF4CB572), shape: BoxShape.circle),
+                      child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                    ),
+                  ),
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            Text(_profile['name'] ?? 'User', style: GoogleFonts.spaceGrotesk(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text('🇧🇷 ${_profile['nationality'] ?? 'Nationality'} · ${_profile['team_supported'] ?? 'Team'}', 
+              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF9BB3AF))),
+            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF2C233)
-                    .withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                    color: const Color(0xFFF2C233)),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(color: const Color(0xFF4CB572).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.verified, size: 14, color: Color(0xFF4CB572)),
+                  const SizedBox(width: 4),
+                  Text('Level 1 Fans', style: GoogleFonts.spaceMono(fontSize: 10, color: const Color(0xFF4CB572), fontWeight: FontWeight.bold)),
+                ],
               ),
-              child: Text(r'$9.99/mo',
-                  style: GoogleFonts.spaceMono(
-                      fontSize: 11,
-                      color: const Color(0xFFF2C233))),
             ),
+
+            const SizedBox(height: 24),
+
+            // Profile Strength
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text('Profile $score%', style: GoogleFonts.spaceMono(fontSize: 10, color: const Color(0xFF4CB572))),
+                      const Spacer(),
+                      Text('${3 - (completion['missing'] as List).length} missing steps', style: GoogleFonts.spaceMono(fontSize: 10, color: Colors.white.withValues(alpha: 0.3))),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(2),
+                    child: LinearProgressIndicator(
+                      value: score / 100,
+                      minHeight: 3,
+                      backgroundColor: Colors.white.withValues(alpha: 0.08),
+                      color: score < 50 ? const Color(0xFFE83535) : const Color(0xFF4CB572),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Edit Profile Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: GestureDetector(
+                onTap: () async {
+                  final updated = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(initialProfile: _profile)));
+                  if (updated == true) _loadProfile();
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(26),
+                    gradient: const LinearGradient(colors: [Color(0xFF135E4B), Color(0xFF4CB572)]),
+                  ),
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.edit_outlined, size: 18, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Text('Edit Profile', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // Settings Section
+            _buildSectionHeader('SETTINGS'),
+            const SizedBox(height: 8),
+            _buildSettingItem(
+              icon: Icons.dark_mode,
+              title: 'Dark Mode',
+              trailing: Switch(
+                value: isDark,
+                activeTrackColor: const Color(0xFF4CB572),
+                onChanged: (v) => ref.read(themeProvider.notifier).toggleTheme(),
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildSettingItem(
+              icon: Icons.language,
+              title: 'Language',
+              subtitle: _profile['app_language'] ?? 'English',
+              onTap: _showLanguageSheet,
+            ),
+
+            const SizedBox(height: 32),
+
+            // Account Section
+            _buildSectionHeader('ACCOUNT'),
+            const SizedBox(height: 8),
+            _buildSettingItem(
+              icon: Icons.lock_outline,
+              title: 'Change Password',
+              onTap: () async {
+                final email = SupabaseConfig.client.auth.currentUser?.email;
+                if (email != null) {
+                  await SupabaseConfig.client.auth.resetPasswordForEmail(email);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reset email sent! ✅'), backgroundColor: Color(0xFF135E4B)));
+                  }
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildSettingItem(
+              icon: Icons.logout,
+              title: 'Sign Out',
+              titleColor: const Color(0xFFE83535).withValues(alpha: 0.7),
+              onTap: _signOut,
+            ),
+
+            const SizedBox(height: 24),
+            TextButton(
+              onPressed: _deleteAccount,
+              child: Text('Delete Account', style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFE83535).withValues(alpha: 0.35))),
+            ),
+
+            SizedBox(height: safeArea.bottom + 100),
           ],
         ),
       ),
     );
   }
 
-  Widget _toggleCard(
-      String emoji, String label, bool isActive, VoidCallback onTap) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          height: 52,
-          decoration: BoxDecoration(
-            color: isActive
-                ? const Color(0xFF135E4B)
-                : const Color(0xFF152B1E),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: isActive
-                  ? const Color(0xFF4CB572)
-                  : const Color(0xFF1E4A33),
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(emoji, style: const TextStyle(fontSize: 16)),
-              Text(label,
-                  style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: isActive
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.40))),
-            ],
-          ),
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(title, style: GoogleFonts.spaceMono(fontSize: 9, color: const Color(0xFF4CB572), letterSpacing: 2)),
+      ),
+    );
+  }
+
+  Widget _buildSettingItem({required IconData icon, required String title, String? subtitle, Widget? trailing, Color? titleColor, VoidCallback? onTap}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(color: const Color(0xFF0D1A13), borderRadius: BorderRadius.circular(12)),
+        child: ListTile(
+          onTap: onTap,
+          leading: Icon(icon, color: titleColor ?? const Color(0xFF4CB572), size: 20),
+          title: Text(title, style: GoogleFonts.inter(fontSize: 15, color: titleColor ?? Colors.white)),
+          subtitle: subtitle != null ? Text(subtitle, style: GoogleFonts.inter(fontSize: 12, color: Colors.white.withValues(alpha: 0.4))) : null,
+          trailing: trailing ?? (onTap != null ? const Icon(Icons.chevron_right, color: Colors.white12, size: 20) : null),
         ),
       ),
     );

@@ -279,10 +279,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                           currentUserId:
                                               _currentUserId ?? 'mock-user',
                                           onTap: () {
-                                            print('Opening conversation with match: ${_matches[index]}');
-                                            print('Match ID: ${_matches[index]['id']}');
-                                            setState(() => _selectedMatch =
-                                                _matches[index]);
+                                            final match = _matches[index];
+                                            if (match['id'] == null) {
+                                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                                content: Text('Match ID missing'),
+                                                backgroundColor: Color(0xFFE83535),
+                                              ));
+                                              return;
+                                            }
+                                            setState(() => _selectedMatch = match);
                                           },
                                         );
                                       },

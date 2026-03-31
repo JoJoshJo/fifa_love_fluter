@@ -14,9 +14,9 @@ class _FoodTabState extends State<FoodTab> {
 
   // Cities that have restaurant data
   static const _availableCities = [
-    'Dallas', 'Los Angeles', 'Miami',
-    'New York/New Jersey', 'Atlanta',
-    'Houston', 'Mexico City', 'Vancouver',
+    'Dallas', 'Los Angeles', 'Miami', 'New York/New Jersey', 'Atlanta',
+    'Houston', 'Philadelphia', 'Seattle', 'Boston', 'Kansas City',
+    'San Francisco', 'Vancouver', 'Toronto', 'Guadalajara', 'Mexico City', 'Monterrey'
   ];
 
   List<Map<String, dynamic>> get _filtered =>

@@ -224,83 +224,89 @@ class _ConversationViewState extends State<ConversationView> {
       children: [
         // ─── Header bar ───
         Container(
-          height: 60,
+          height: 64,
           decoration: BoxDecoration(
             color: const Color(0xFF0D1A13),
             border: Border(
               bottom: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.08), width: 1),
+                  color: const Color(0xFF4CB572).withValues(alpha: 0.1),
+                  width: 1),
             ),
           ),
-          child: Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.arrow_back_ios_new,
-                    size: 20,
-                    color: Colors.white.withValues(alpha: 0.70)),
-                onPressed: widget.onBack,
-              ),
-              // Avatar
-              Container(
-                width: 38,
-                height: 38,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.fromBorderSide(
-                    BorderSide(color: Color(0xFF4CB572), width: 1.5),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: SafeArea(
+            bottom: false,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.arrow_back_ios_new,
+                      size: 20,
+                      color: Colors.white.withValues(alpha: 0.60)),
+                  onPressed: widget.onBack,
+                ),
+                // Avatar
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFF4CB572), width: 1.5),
+                    color: const Color(0xFF1E3D28),
                   ),
-                  color: Color(0xFF1E3D28),
-                ),
-                child: ClipOval(
-                  child: avatarUrl != null
-                      ? CachedNetworkImage(
-                          imageUrl: avatarUrl,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) => const Icon(
-                              Icons.person,
-                              color: Color(0xFF4CB572)),
-                        )
-                      : Center(
-                          child: Text(
-                            (other['name'] as String? ?? '?')[0]
-                                .toUpperCase(),
-                            style: const TextStyle(
-                                color: Color(0xFF4CB572),
-                                fontWeight: FontWeight.bold),
+                  child: ClipOval(
+                    child: avatarUrl != null
+                        ? CachedNetworkImage(
+                            imageUrl: avatarUrl,
+                            fit: BoxFit.cover,
+                            errorWidget: (_, __, ___) => const Icon(
+                                Icons.person,
+                                color: Color(0xFF4CB572)),
+                          )
+                        : Center(
+                            child: Text(
+                              (other['name'] as String? ?? '?')[0].toUpperCase(),
+                              style: const TextStyle(
+                                  color: Color(0xFF4CB572),
+                                  fontWeight: FontWeight.bold),
+                            ),
                           ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        other['name'] as String? ?? 'Match',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      other['name'] as String? ?? 'Match',
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
                       ),
-                    ),
-                    Text(
-                      '${_flagEmoji(other['nationality'] as String?)} ${other['nationality'] ?? ''}',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.45),
+                      Row(
+                        children: [
+                          Text(
+                            '${_flagEmoji(other['nationality'] as String?)} ${other['nationality'] ?? ''}',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.white.withValues(alpha: 0.40),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: Icon(Icons.more_vert,
-                    color: Colors.white.withValues(alpha: 0.50)),
-                onPressed: _showOptionsSheet,
-              ),
-            ],
+                IconButton(
+                  icon: Icon(Icons.more_vert,
+                      color: Colors.white.withValues(alpha: 0.40)),
+                  onPressed: _showOptionsSheet,
+                ),
+              ],
+            ),
           ),
         ),
 
@@ -394,19 +400,98 @@ class _ConversationViewState extends State<ConversationView> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      const SizedBox(height: 60),
+                      // Matched profiles avatars
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            clipBehavior: Clip.none,
+                            children: [
+                              // My Avatar
+                              Container(
+                                width: 52,
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: const Color(0xFF4CB572), width: 1),
+                                  color: const Color(0xFF1E3D28),
+                                ),
+                                child: ClipOval(
+                                  child: widget.myProfile['avatar_url'] != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: widget.myProfile['avatar_url'],
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Center(
+                                          child: Text(
+                                            (widget.myProfile['name'] as String? ?? 'Me')[0].toUpperCase(),
+                                            style: const TextStyle(color: Color(0xFF4CB572)),
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              // Their Avatar
+                              Padding(
+                                padding: const EdgeInsets.only(left: 60),
+                                child: Container(
+                                  width: 52,
+                                  height: 52,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: const Color(0xFF4CB572), width: 1),
+                                    color: const Color(0xFF1E3D28),
+                                  ),
+                                  child: ClipOval(
+                                    child: avatarUrl != null
+                                        ? CachedNetworkImage(
+                                            imageUrl: avatarUrl,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Center(
+                                            child: Text(
+                                              (other['name'] as String? ?? '?')[0].toUpperCase(),
+                                              style: const TextStyle(color: Color(0xFF4CB572)),
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                              // Heart icon last (on top)
+                              Positioned(
+                                left: 40,
+                                child: Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF135E4B),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.favorite,
+                                      size: 16, color: Color(0xFFE8437A)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
                       Text(
-                        'Say hello! 👋',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          color: Colors.white.withValues(alpha: 0.40),
+                        'You matched! 🎉',
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
-                        'You matched with ${other['name'] ?? 'them'}',
+                        'Say something to start\nthe conversation',
+                        textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.25),
+                          fontSize: 14,
+                          color: Colors.white.withValues(alpha: 0.35),
                         ),
                       ),
                     ],
@@ -454,7 +539,7 @@ class _ConversationViewState extends State<ConversationView> {
             color: const Color(0xFF0D1A13),
             border: Border(
               top: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.08), width: 1),
+                  color: Colors.white.withValues(alpha: 0.06), width: 1),
             ),
           ),
           padding: EdgeInsets.fromLTRB(8, 8, 8, 8 + bottomPad),
@@ -462,31 +547,33 @@ class _ConversationViewState extends State<ConversationView> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: TextField(
-                  controller: _messageController,
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
-                  maxLines: 4,
-                  minLines: 1,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => _sendMessage(),
-                  decoration: InputDecoration(
-                    hintText: 'Message...',
-                    hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.30),
-                      fontSize: 14,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF152B1E),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: const Color(0xFF4CB572).withValues(alpha: 0.15),
+                      width: 1,
                     ),
-                    fillColor: const Color(0xFF152B1E),
-                    filled: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(22),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(22),
-                      borderSide: const BorderSide(
-                          color: Color(0xFF4CB572), width: 1),
+                  ),
+                  child: TextField(
+                    controller: _messageController,
+                    style: GoogleFonts.inter(
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontSize: 14),
+                    maxLines: 4,
+                    minLines: 1,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _sendMessage(),
+                    decoration: InputDecoration(
+                      hintText: 'Message...',
+                      hintStyle: GoogleFonts.inter(
+                        color: Colors.white.withValues(alpha: 0.25),
+                        fontSize: 14,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      border: InputBorder.none,
                     ),
                   ),
                 ),
@@ -499,17 +586,24 @@ class _ConversationViewState extends State<ConversationView> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
+                    shape: BoxShape.circle,
                     color: _inputHasText
                         ? const Color(0xFF135E4B)
                         : const Color(0xFF152B1E),
-                    shape: BoxShape.circle,
+                    gradient: _inputHasText
+                        ? const LinearGradient(
+                            colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : null,
                   ),
                   child: Icon(
                     Icons.send_rounded,
                     size: 20,
                     color: _inputHasText
                         ? Colors.white
-                        : Colors.white.withValues(alpha: 0.25),
+                        : Colors.white.withValues(alpha: 0.20),
                   ),
                 ),
               ),

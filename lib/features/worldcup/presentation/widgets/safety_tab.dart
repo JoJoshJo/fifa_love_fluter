@@ -11,7 +11,11 @@ class SafetyTab extends StatefulWidget {
 
 class _SafetyTabState extends State<SafetyTab> {
   String _selectedCity = 'Dallas';
-  static const _cities = ['Dallas', 'Los Angeles', 'Miami', 'Mexico City', 'Vancouver'];
+  static const _cities = [
+    'Dallas', 'Los Angeles', 'Miami', 'New York/New Jersey', 'Atlanta',
+    'Houston', 'Philadelphia', 'Seattle', 'Boston', 'Kansas City',
+    'San Francisco', 'Vancouver', 'Toronto', 'Guadalajara', 'Mexico City', 'Monterrey'
+  ];
 
   Color _scoreColor(double score) {
     if (score >= 8.0) return const Color(0xFF4CB572);

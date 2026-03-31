@@ -32,14 +32,14 @@ class MessageBubble extends StatelessWidget {
         ? const BorderRadius.only(
             topLeft: Radius.circular(18),
             topRight: Radius.circular(18),
-            bottomLeft: Radius.circular(18),
             bottomRight: Radius.circular(4),
+            bottomLeft: Radius.circular(18),
           )
         : const BorderRadius.only(
             topLeft: Radius.circular(4),
             topRight: Radius.circular(18),
-            bottomLeft: Radius.circular(18),
             bottomRight: Radius.circular(18),
+            bottomLeft: Radius.circular(18),
           );
 
     return Padding(
@@ -57,10 +57,10 @@ class MessageBubble extends StatelessWidget {
               Container(
                 constraints: BoxConstraints(maxWidth: screenWidth * 0.72),
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 10),
+                    horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
                   color:
-                      isMe ? const Color(0xFF135E4B) : const Color(0xFF1E3D28),
+                      isMe ? const Color(0xFF135E4B) : const Color(0xFF1A3025),
                   borderRadius: bubbleRadius,
                 ),
                 child: Text(
@@ -68,34 +68,36 @@ class MessageBubble extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: Colors.white.withValues(alpha: 0.90),
-                    height: 1.4,
+                    height: 1.45,
                   ),
                 ),
               ),
 
-              // Timestamp
-              if (showTime)
+              // Timestamp and Read Receipt
+              if (showTime || isMe)
                 Padding(
-                  padding: const EdgeInsets.only(top: 3),
-                  child: Text(
-                    _formatTime(message['created_at'] as String?),
-                    style: GoogleFonts.spaceMono(
-                      fontSize: 9,
-                      color: Colors.white.withValues(alpha: 0.25),
-                    ),
-                  ),
-                ),
-
-              // Read receipt (sent/read indicator)
-              if (isMe)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Icon(
-                    Icons.done_all,
-                    size: 12,
-                    color: readAt != null
-                        ? const Color(0xFF4CB572)
-                        : Colors.white.withValues(alpha: 0.30),
+                  padding: const EdgeInsets.only(top: 4, left: 4, right: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isMe) ...[
+                        Icon(
+                          Icons.done_all,
+                          size: 11,
+                          color: readAt != null
+                              ? const Color(0xFF4CB572)
+                              : Colors.white.withValues(alpha: 0.20),
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      Text(
+                        _formatTime(message['created_at'] as String?),
+                        style: GoogleFonts.spaceMono(
+                          fontSize: 9,
+                          color: Colors.white.withValues(alpha: 0.25),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
             ],
