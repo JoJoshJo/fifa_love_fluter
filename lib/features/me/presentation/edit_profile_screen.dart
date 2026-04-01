@@ -40,6 +40,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   String? _avatarUrl;
   File? _localImage;
 
+  final List<String> _cities = [
+    'Doha', 'Al Khor', 'Al Wakrah', 'Lusail', 'Rayyan', 'Dallas'
+  ];
+
+  String _normalizeGender(String? raw) {
+    if (raw == null) return 'Other';
+    final lower = raw.toLowerCase();
+    if (lower == 'male') return 'Male';
+    if (lower == 'female') return 'Female';
+    return 'Other';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -52,13 +64,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
       _ageController = TextEditingController(text: (_profile['age'] != null) ? _profile['age'].toString() : '');
       _teamController = TextEditingController(text: _profile['team_supported'] as String? ?? '');
 
-      _gender = _profile['gender'] as String? ?? 'Other';
+      _gender = _normalizeGender(_profile['gender'] as String?);
       _nationality = _profile['nationality'] as String? ?? '';
       _matchTypes = List<String>.from(_profile['match_type_preference'] ?? []);
       _isLocal = _profile['is_local'] as bool? ?? false;
       _city = _profile['city'] as String? ?? 'Dallas';
+      if (!_cities.contains(_city)) {
+        _city = 'Dallas';
+      }
       _countriesToMatch = List<String>.from(_profile['countries_to_match'] ?? []);
+      
+      final countries = [
+        'Argentina', 'Australia', 'Belgium', 'Brazil', 'Canada', 
+        'Colombia', 'Croatia', 'Ecuador', 'England', 'France', 
+        'Germany', 'Ghana', 'Italy', 'Japan', 'Mexico', 
+        'Morocco', 'Netherlands', 'Nigeria', 'Peru', 'Poland', 
+        'Portugal', 'Saudi Arabia', 'Senegal', 'South Korea', 'Spain', 'USA'
+      ];
       _teamSupported = _profile['team_supported'] as String? ?? '';
+      if (!countries.contains(_teamSupported)) {
+        _teamSupported = '';
+      }
+      
       _avatarUrl = _profile['avatar_url'] as String?;
     } catch (e) {
       _nameController = TextEditingController();
@@ -450,9 +477,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     );
   }
 
-  Widget _buildDropdownField(String label, List<String> options, String? current, Function(String?) onChanged, bool isLight, Color textColor, Color textMuted) {
+  Widget _buildDropdownField(String label, List<String> options, String value, ValueChanged<String?> onChanged, bool isLight, Color textColor, Color textMuted) {
     final inputColor = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
     final cardColor = isLight ? Colors.white : const Color(0xFF0D1A13);
+
+    // Ensure value exists in options
+    final safeValue = options.contains(value) ? value : options.first;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -467,7 +497,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
-              value: current,
+              value: safeValue,
               isExpanded: true,
               dropdownColor: cardColor,
               style: GoogleFonts.inter(color: textColor),
