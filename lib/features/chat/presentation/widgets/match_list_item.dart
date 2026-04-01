@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fifalove_mobile/core/constants/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -32,8 +31,6 @@ class MatchListItem extends StatelessWidget {
     final lastMsg = match['last_message'] as Map<String, dynamic>?;
     final unread = (match['unread_count'] as int?) ?? 0;
     final avatarUrl = other['avatar_url'] as String?;
-    final isVerified = (other['is_verified'] as bool?) ?? false;
-
     final timeStr = lastMsg != null
         ? _timeAgo(lastMsg['created_at'] as String?)
         : _timeAgo(match['created_at'] as String?);
@@ -69,35 +66,43 @@ class MatchListItem extends StatelessWidget {
       );
     }
 
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             child: Row(
               children: [
                 // Avatar
                 Stack(
                   children: [
                     Container(
-                      width: 52,
-                      height: 52,
+                      width: 54,
+                      height: 54,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Theme.of(context).cardColor,
+                        border: Border.all(
+                          color: const Color(0xFF4CB572).withValues(alpha: 0.2),
+                          width: 1.5,
+                        ),
                       ),
-                      child: ClipOval(
-                        child: avatarUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: avatarUrl,
-                                fit: BoxFit.cover,
-                                errorWidget: (_, __, ___) => _fallbackAvatar(
-                                    context, other['name'] as String? ?? '?'),
-                              )
-                            : _fallbackAvatar(
-                                context, other['name'] as String? ?? '?'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: ClipOval(
+                          child: avatarUrl != null
+                              ? CachedNetworkImage(
+                                  imageUrl: avatarUrl,
+                                  fit: BoxFit.cover,
+                                  errorWidget: (_, __, ___) => _fallbackAvatar(
+                                      context, other['name'] as String? ?? '?'),
+                                )
+                              : _fallbackAvatar(
+                                  context, other['name'] as String? ?? '?'),
+                        ),
                       ),
                     ),
                     if (isActive)
@@ -105,96 +110,87 @@ class MatchListItem extends StatelessWidget {
                         bottom: 2,
                         right: 2,
                         child: Container(
-                          width: 10,
-                          height: 10,
+                          width: 12,
+                          height: 12,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
+                            color: const Color(0xFF4CB572),
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: Theme.of(context).scaffoldBackgroundColor, width: 1.5),
+                                color: isLight
+                                    ? const Color(0xFFF5F0E8)
+                                    : const Color(0xFF080F0C),
+                                width: 2),
                           ),
                         ),
                       ),
                   ],
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
 
                 // Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             other['name'] as String? ?? 'Unknown',
                             style: GoogleFonts.inter(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                              fontSize: 16,
+                              fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w600,
+                              color: isLight ? const Color(0xFF0D2B1E) : Colors.white,
+                              letterSpacing: -0.2,
                             ),
                           ),
-                          if (isVerified) ...[
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.verified,
-                              size: 12,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ],
-                          const Spacer(),
                           Text(
-                            timeStr,
+                            timeStr.toUpperCase(),
                             style: GoogleFonts.spaceMono(
-                              fontSize: 10,
+                              fontSize: 9,
+                              fontWeight: unread > 0 ? FontWeight.bold : FontWeight.normal,
                               color: unread > 0
-                                  ? Theme.of(context).primaryColor
-                                  : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3),
+                                  ? const Color(0xFF4CB572)
+                                  : (isLight ? const Color(0xFF9BB3AF) : Colors.white24),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
                       Text(
-                            previewText,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: previewStyle,
+                        previewText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: previewStyle.copyWith(
+                          fontSize: 13,
+                          color: unread > 0
+                              ? (isLight ? const Color(0xFF0D2B1E).withValues(alpha: 0.8) : Colors.white70)
+                              : (isLight ? const Color(0xFF9BB3AF) : Colors.white38),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
 
-                // Unread badge
+                // Unread dot
                 if (unread > 0)
                   Container(
-                    width: 20,
-                    height: 20,
+                    margin: const EdgeInsets.only(left: 12),
+                    width: 7,
+                    height: 7,
                     decoration: const BoxDecoration(
-                      color: FifaColors.pink,
+                      color: Color(0xFF4CB572),
                       shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        unread > 9 ? '9+' : unread.toString(),
-                        style: GoogleFonts.spaceMono(
-                          fontSize: 9,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ),
                   ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 80),
+            padding: const EdgeInsets.only(left: 90),
             child: Divider(
               height: 1,
-              color: Theme.of(context).dividerColor,
+              color: isLight ? const Color(0xFFE5E0D8) : const Color(0xFF1A1A1A),
             ),
           ),
         ],
@@ -204,13 +200,14 @@ class MatchListItem extends StatelessWidget {
 
   Widget _fallbackAvatar(BuildContext context, String name) {
     final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    final isLight = Theme.of(context).brightness == Brightness.light;
     return Container(
-      color: Theme.of(context).cardColor,
+      color: isLight ? Colors.white : Colors.white10,
       child: Center(
         child: Text(
           initials,
-          style: GoogleFonts.spaceGrotesk(
-            color: Theme.of(context).primaryColor,
+          style: GoogleFonts.playfairDisplay(
+            color: const Color(0xFF4CB572),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),

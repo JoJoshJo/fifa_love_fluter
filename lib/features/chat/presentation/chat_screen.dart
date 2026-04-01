@@ -92,10 +92,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
     });
 
-    final topPad = MediaQuery.of(context).padding.top;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final backgroundColor = isLight
+        ? const Color(0xFFF5F0E8)
+        : const Color(0xFF080F0C);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: backgroundColor,
       body: Stack(
         children: [
           // ─── View 1: Match list ───
@@ -109,168 +112,184 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               curve: Curves.easeOutCubic,
               child: Column(
                 children: [
-                  // Header
+                  // HEADER — No AppBar. Custom header.
                   Container(
-                    padding: EdgeInsets.fromLTRB(16, topPad + 20, 16, 0),
-                    width: double.infinity,
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top + 16,
+                      left: 24,
+                      right: 24,
+                      bottom: 16,
+                    ),
+                    color: isLight
+                        ? const Color(0xFFF5F0E8)
+                        : const Color(0xFF080F0C),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'YOUR CONNECTIONS',
                           style: GoogleFonts.spaceMono(
-                            fontSize: 10,
+                            fontSize: 9,
+                            color: const Color(0xFF4CB572),
                             letterSpacing: 2,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                text: '${_matches.length} MATCHES',
-                                style: GoogleFonts.spaceGrotesk(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: ' .',
-                                    style: GoogleFonts.spaceGrotesk(
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Spacer(),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
                         Text(
-                          'Start a conversation',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
+                          '${_matches.length} Matches.',
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            fontStyle: FontStyle.italic,
+                            color: isLight ? Colors.black : Colors.white,
                           ),
                         ),
                       ],
                     ),
                   ),
-
                   // Content
                   Expanded(
                     child: _loading
-                        ? Center(
+                        ? const Center(
                             child: CircularProgressIndicator(
-                              color: Theme.of(context).primaryColor,
+                              color: Color(0xFF4CB572),
                               strokeWidth: 2,
                             ),
                           )
                         : _matches.isEmpty
                             ? _buildEmptyState(context)
                             : RefreshIndicator(
-                                color: Theme.of(context).primaryColor,
-                                backgroundColor: Theme.of(context).cardColor,
+                                color: const Color(0xFF135E4B),
+                                backgroundColor: isLight ? Colors.white : const Color(0xFF080F0C),
                                 onRefresh: _loadMatches,
                                 child: ListView(
                                   padding: EdgeInsets.zero,
-                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  physics: const BouncingScrollPhysics(
+                                    parent: AlwaysScrollableScrollPhysics()),
                                   children: [
-                                    const SizedBox(height: 20),
+                                    const SizedBox(height: 12),
+                                    
+                                    // PHOTO STRIP
                                     SizedBox(
-                                      height: 100,
-                                      child: ListView(
+                                      height: 125,
+                                      child: ListView.builder(
                                         scrollDirection: Axis.horizontal,
-                                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                                        children: [
-                                          ..._matches.take(3).map((match) {
-                                            final other = match['other_user'] as Map<String, dynamic>;
-                                            final avatarUrl = other['avatar_url'] as String?;
-                                            final name = other['name'] as String? ?? 'Unknown';
+                                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                                        itemCount: _matches.length + 1,
+                                        itemBuilder: (context, index) {
+                                          if (index == 0) {
+                                            // Add placeholder
                                             return Container(
-                                              margin: const EdgeInsets.only(right: 12),
-                                              width: 80,
-                                              height: 100,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(16),
-                                              ),
-                                              child: ClipRRect(
-                                                borderRadius: BorderRadius.circular(16),
-                                                child: Stack(
-                                                  fit: StackFit.expand,
-                                                  children: [
-                                                    if (avatarUrl != null)
-                                                      CachedNetworkImage(
-                                                        imageUrl: avatarUrl,
-                                                        fit: BoxFit.cover,
-                                                      )
-                                                    else
-                                                      Container(color: Theme.of(context).cardColor),
-                                                    Positioned(
-                                                      bottom: 0,
-                                                      left: 0,
-                                                      right: 0,
-                                                      child: Container(
-                                                        padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
-                                                        decoration: BoxDecoration(
-                                                          gradient: LinearGradient(
-                                                            begin: Alignment.bottomCenter,
-                                                            end: Alignment.topCenter,
-                                                            colors: [
-                                                              Theme.of(context).brightness == Brightness.light
-                                                                ? Colors.black.withValues(alpha: 0.2)
-                                                                : Colors.black.withValues(alpha: 0.8),
-                                                              Colors.transparent,
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        child: Text(
-                                                          name.split(' ').first,
-                                                          style: GoogleFonts.inter(
-                                                            fontSize: 11,
-                                                            fontWeight: FontWeight.w600,
-                                                            color: Colors.white,
-                                                          ),
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
+                                              width: 68,
+                                              margin: const EdgeInsets.only(right: 18),
+                                              child: Column(
+                                                children: [
+                                                  Container(
+                                                    width: 68, height: 84,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      border: Border.all(
+                                                        color: isLight 
+                                                          ? const Color(0xFFD4EBE0)
+                                                          : Colors.white10,
+                                                        width: 1,
                                                       ),
+                                                      color: isLight 
+                                                        ? Colors.white 
+                                                        : Colors.white.withValues(alpha: 0.05),
                                                     ),
-                                                  ],
-                                                ),
+                                                    child: Center(
+                                                      child: Icon(
+                                                        Icons.add_rounded,
+                                                        color: const Color(0xFF4CB572)
+                                                          .withValues(alpha: 0.6),
+                                                        size: 28)),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Text('NEW',
+                                                    style: GoogleFonts.spaceMono(
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: const Color(0xFF4CB572))),
+                                                ],
                                               ),
                                             );
-                                          }),
-                                          Container(
-                                            margin: const EdgeInsets.only(right: 12),
-                                            width: 80,
-                                            height: 100,
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
-                                              borderRadius: BorderRadius.circular(16),
-                                              border: Border.all(
-                                                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                                                width: 1,
+                                          }
+
+                                          final match = _matches[index - 1];
+                                          final other = match['other_user'] as Map<String, dynamic>;
+                                          final avatarUrl = other['avatar_url'] as String?;
+                                          final name = other['name'] as String? ?? 'Match';
+
+                                          return GestureDetector(
+                                            onTap: () => setState(() => _selectedMatch = match),
+                                            child: Container(
+                                              width: 68,
+                                              margin: const EdgeInsets.only(right: 18),
+                                              child: Column(
+                                                children: [
+                                                  Container(
+                                                    width: 68, height: 84,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                      border: Border.all(
+                                                        color: isLight 
+                                                          ? const Color(0xFFE5E0D8)
+                                                          : Colors.white10,
+                                                        width: 1,
+                                                      ),
+                                                      image: avatarUrl != null
+                                                          ? DecorationImage(
+                                                              image: CachedNetworkImageProvider(avatarUrl),
+                                                              fit: BoxFit.cover,
+                                                            )
+                                                          : null,
+                                                      color: isLight 
+                                                        ? Colors.white 
+                                                        : Colors.white12,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Text(
+                                                    name.split(' ').first.toUpperCase(),
+                                                    style: GoogleFonts.spaceMono(
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: isLight ? const Color(0xFF333333) : Colors.white70,
+                                                      letterSpacing: 0.5,
+                                                    ),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                            child: Center(
-                                              child: Icon(Icons.add, size: 24, color: Theme.of(context).primaryColor),
-                                            ),
-                                          ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 12),
+
+                                    // MESSAGES LABEL
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                      child: Row(
+                                        children: [
+                                          Text('MESSAGES',
+                                            style: GoogleFonts.spaceMono(
+                                              fontSize: 9,
+                                              color: const Color(0xFF9BB3AF),
+                                              letterSpacing: 1.5)),
+                                          const Spacer(),
+                                          Text('FILTER',
+                                            style: GoogleFonts.spaceMono(
+                                              fontSize: 9,
+                                              color: const Color(0xFF4CB572),
+                                              fontWeight: FontWeight.bold)),
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(height: 16),
-                                    Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                                      height: 1,
-                                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                                    ),
+
                                     ListView.builder(
                                       padding: EdgeInsets.zero,
                                       physics: const NeverScrollableScrollPhysics(),
@@ -295,6 +314,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                         );
                                       },
                                     ),
+                                    const SizedBox(height: 100),
                                   ],
                                 ),
                               ),
@@ -335,69 +355,64 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 60),
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(40),
-            ),
-            child: Center(
-              child: Icon(
-                Icons.chat_bubble_outline,
-                size: 36,
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 40),
           Text(
-            'No matches yet',
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 22,
+            'YOU HAVEN\'T CONNECTED YET',
+            style: GoogleFonts.spaceMono(
+              fontSize: 10,
+              color: const Color(0xFF4CB572),
+              letterSpacing: 1.5,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).textTheme.titleLarge?.color?.withValues(alpha: 0.5),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
           Text(
-            'Start swiping to find\nyour first match',
+            'Find your match\nthis World Cup.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 32,
+              fontWeight: FontWeight.w700,
+              color: isLight ? const Color(0xFF0D2B1E) : Colors.white,
+              height: 1.2,
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 32),
           GestureDetector(
             onTap: () {
-              ref.read(currentTabProvider.notifier).state = 0;
+              // Navigate to Discover or perform action
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  color: Theme.of(context).primaryColor,
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withValues(alpha: 0.8),
-                    ],
-                  ),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF135E4B),
+                    Color(0xFF4CB572),
+                  ],
                 ),
-                child: Text(
-                  'Go to Discover',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF135E4B).withValues(alpha: 0.2),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
                   ),
+                ],
+              ),
+              child: Text(
+                'Go to Discover',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
+              ),
             ),
           ),
         ],

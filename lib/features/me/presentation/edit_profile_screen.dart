@@ -25,15 +25,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   late TextEditingController _ageController;
   late TextEditingController _bioController;
   late TextEditingController _teamController;
-  String? _gender;
-  String? _nationality;
-  String? _avatarUrl;
-  File? _localImage;
-  late Map<String, dynamic> _profile;
+  
+  // Profile Data
+  late Map<String, dynamic> _profile = {};
+  late String _gender;
+  late String _nationality;
+  late String _teamSupported;
   late bool _isLocal;
   late String _city;
-  List<String> _matchTypes = [];
-  List<String> _countriesToMatch = [];
+  late List<String> _matchTypes;
+  late List<String> _countriesToMatch;
+  
+  // Media
+  String? _avatarUrl;
+  File? _localImage;
 
   @override
   void initState() {
@@ -49,10 +54,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
 
       _gender = _profile['gender'] as String? ?? 'Other';
       _nationality = _profile['nationality'] as String? ?? '';
+      _matchTypes = List<String>.from(_profile['match_type_preference'] ?? []);
       _isLocal = _profile['is_local'] as bool? ?? false;
       _city = _profile['city'] as String? ?? 'Dallas';
-      _matchTypes = List<String>.from(_profile['match_type_preference'] ?? []);
       _countriesToMatch = List<String>.from(_profile['countries_to_match'] ?? []);
+      _teamSupported = _profile['team_supported'] as String? ?? '';
       _avatarUrl = _profile['avatar_url'] as String?;
     } catch (e) {
       _nameController = TextEditingController();
@@ -61,10 +67,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
       _teamController = TextEditingController();
       _gender = 'Other';
       _nationality = '';
+      _matchTypes = [];
       _isLocal = false;
       _city = 'Dallas';
-      _matchTypes = [];
       _countriesToMatch = [];
+      _teamSupported = '';
     }
   }
 
@@ -161,9 +168,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = isLight ? const Color(0xFFEBF5F0) : const Color(0xFF080F0C);
+    final bgColor = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF080F0C);
     final textColor = isLight ? const Color(0xFF0D2B1E) : Colors.white;
-    final textMuted = isLight ? const Color(0xFF6B9E8A) : Colors.white38;
+    final textMuted = isLight ? const Color(0xFF9BB3AF) : Colors.white.withValues(alpha: 0.35);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -174,14 +181,50 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
           icon: Icon(Icons.close, color: textColor),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Edit Profile', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: textColor)),
+        title: Text('Edit Profile',
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: textColor,
+          )),
         actions: [
           if (_saving)
-            const Padding(padding: EdgeInsets.all(16), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: FifaColors.emeraldSpring)))
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: SizedBox(
+                width: 20, height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: FifaColors.emeraldSpring)))
           else
-            TextButton(
-              onPressed: _save,
-              child: Text('Save', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring)),
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Center(
+                child: GestureDetector(
+                  onTap: _save,
+                  child: Container(
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF135E4B),
+                          Color(0xFF4CB572),
+                        ]),
+                      borderRadius:
+                        BorderRadius.circular(18),
+                    ),
+                    child: Center(
+                      child: Text('Save',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
+                    ),
+                  ),
+                ),
+              ),
             ),
         ],
         bottom: TabBar(
@@ -243,7 +286,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
           children: [
             Expanded(child: _buildTextField('Age', _ageController, isLight, textColor, textMuted, hint: 'e.g. 24', keyboardType: TextInputType.number)),
             const SizedBox(width: 16),
-            Expanded(child: _buildDropdownField('Gender', ['Male', 'Female', 'Non-binary', 'Prefer not to say'], _gender, (v) => setState(() => _gender = v), isLight, textColor, textMuted)),
+            Expanded(child: _buildDropdownField('Gender', ['Male', 'Female', 'Non-binary', 'Prefer not to say'], _gender, (v) => setState(() => _gender = v ?? 'Other'), isLight, textColor, textMuted)),
           ],
         ),
         const SizedBox(height: 20),
@@ -256,7 +299,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        _buildPickerField('Nationality', _nationality ?? 'Select Country', _showNationalityPicker, isLight, textColor, textMuted, icon: Icons.flag_outlined),
+        _buildPickerField('Nationality', _nationality.isEmpty ? 'Select Country' : _nationality, _showNationalityPicker, isLight, textColor, textMuted, icon: Icons.flag_outlined),
         const SizedBox(height: 20),
         _buildTextField('Supported Team', _teamController, isLight, textColor, textMuted, hint: 'e.g. Real Madrid, Brazil, etc.'),
         const SizedBox(height: 32),
@@ -285,14 +328,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   }
 
   Widget _buildPreferencesTab(bool isLight, Color textColor, Color textMuted) {
-    final borderColor = isLight ? const Color(0xFFD4EBE0) : Colors.transparent;
-
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
         Text(
           "I'M LOOKING FOR...",
-          style: GoogleFonts.spaceMono(fontSize: 12, fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring, letterSpacing: 2),
+          style: GoogleFonts.spaceMono(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF4CB572),
+            letterSpacing: 2),
         ),
         const SizedBox(height: 8),
         Text(
@@ -304,27 +349,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
           '❤️', 'Dating & Romance', 
           _hasMatchType('Dating & Romance'),
           () => _toggleMatchType('Dating & Romance'),
-          isLight, textColor, borderColor
+          isLight, textColor
         ),
         const SizedBox(height: 12),
         _buildPreferenceCard(
           '⚽', 'Fan Friends', 
           _hasMatchType('Fan Friends'),
           () => _toggleMatchType('Fan Friends'),
-          isLight, textColor, borderColor
+          isLight, textColor
         ),
         const SizedBox(height: 12),
         _buildPreferenceCard(
           '🗺️', 'Local Guide', 
           _hasMatchType('Local Guide'),
           () => _toggleMatchType('Local Guide'),
-          isLight, textColor, borderColor
+          isLight, textColor
         ),
       ],
     );
   }
 
-  Widget _buildPreferenceCard(String emoji, String title, bool isSelected, VoidCallback onTap, bool isLight, Color textColor, Color borderColor) {
+  Widget _buildPreferenceCard(String emoji, String title, bool isSelected, VoidCallback onTap, bool isLight, Color textColor) {
     final cardColor = isLight ? Colors.white : const Color(0xFF0D1A13);
     
     return GestureDetector(
@@ -333,10 +378,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? FifaColors.emeraldSpring.withValues(alpha: 0.1) : cardColor,
+          color: isSelected 
+            ? const Color(0xFF135E4B) 
+            : cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? FifaColors.emeraldSpring : (isLight ? borderColor : Colors.white.withValues(alpha: 0.1)),
+            color: isSelected 
+              ? const Color(0xFF4CB572) 
+              : (isLight ? const Color(0xFFE8DDD0) : Colors.white.withValues(alpha: 0.1)),
             width: 1.5,
           ),
         ),
@@ -349,12 +398,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? FifaColors.emeraldSpring : (isLight ? textColor : Colors.white.withValues(alpha: 0.7)),
+                color: isSelected ? Colors.white : textColor,
               ),
             ),
             const Spacer(),
             if (isSelected)
-              const Icon(Icons.check_circle, color: FifaColors.emeraldSpring, size: 20),
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
           ],
         ),
       ),
@@ -362,12 +411,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   }
 
   Widget _buildTextField(String label, TextEditingController controller, bool isLight, Color textColor, Color textMuted, {String? hint, int maxLines = 1, TextInputType keyboardType = TextInputType.text}) {
-    final inputColor = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
+    final inputColor = isLight ? Colors.white : const Color(0xFF152B1E);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: GoogleFonts.spaceMono(fontSize: 10, fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring, letterSpacing: 1.5)),
+        Text(label.toUpperCase(),
+          style: GoogleFonts.spaceMono(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF4CB572),
+            letterSpacing: 1.5)),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
@@ -379,8 +433,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
             hintStyle: GoogleFonts.inter(color: textMuted.withValues(alpha: 0.5)),
             filled: true,
             fillColor: inputColor,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: isLight 
+                ? const BorderSide(color: Color(0xFFE8DDD0))
+                : BorderSide.none),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: isLight 
+                ? const BorderSide(color: Color(0xFFE8DDD0))
+                : BorderSide.none),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
@@ -463,10 +525,10 @@ class _CountryPickerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final bgColor = isLight ? Colors.white : const Color(0xFF0D1A13);
-    final inputColor = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
+    final bgColor = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF0D1A13);
+    final inputColor = isLight ? Colors.white : const Color(0xFF152B1E);
     final textColor = isLight ? const Color(0xFF0D2B1E) : Colors.white;
-    final textMuted = isLight ? const Color(0xFF6B9E8A) : Colors.white38;
+    final textMuted = isLight ? const Color(0xFF9BB3AF) : Colors.white38;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20),

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:fifalove_mobile/core/constants/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/me_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/theme_provider.dart';
 import 'edit_profile_screen.dart';
 import '../../../core/supabase/supabase_config.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:page_transition/page_transition.dart';
 
 class MeScreen extends ConsumerStatefulWidget {
   const MeScreen({super.key});
@@ -128,192 +129,640 @@ class _MeScreenState extends ConsumerState<MeScreen> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
+    final bg = isLight
+      ? const Color(0xFFF5F0E8)
+      : const Color(0xFF080F0C);
+    final card = isLight
+      ? Colors.white
+      : const Color(0xFF0D1A13);
+    final border = isLight
+      ? const Color(0xFFE8DDD0)
+      : const Color(0xFF1E4A33);
+    final text = isLight
+      ? const Color(0xFF0D2B1E)
+      : const Color(0xFFEBF2EE);
+    final muted = isLight
+      ? const Color(0xFF9BB3AF)
+      : const Color(0xFF9BB3AF);
+    const accent = Color(0xFF135E4B);
+    const accentGreen = Color(0xFF4CB572);
+
     if (_loading) {
       return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+        backgroundColor: bg,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: accentGreen,
+            strokeWidth: 2,
+          )),
       );
     }
 
     final safeArea = MediaQuery.of(context).padding;
-    final completion = _repo.calculateCompletion(_profile);
+    final completion =
+      _repo.calculateCompletion(_profile);
     final score = completion['score'] as int;
-    final isDark = ref.watch(themeProvider) == ThemeMode.dark;
+    final missing =
+      completion['missing'] as List;
+    final avatarUrl =
+      _profile['avatar_url'] as String?;
+    final name =
+      _profile['name'] as String? ?? 'Your Name';
+    String? _nationality;
+    String? _team;
+    final List<String> _interests = [];
+    final isVerified =
+      _profile['is_verified'] as bool? ?? false;
+    final currentLang =
+      _profile['app_language'] as String?
+        ?? 'English';
+    final themeMode = ref.watch(themeProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: bg,
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            SizedBox(height: safeArea.top + 32),
 
-            // SECTION 1: PROFILE
-            _buildProfileHeader(score),
+            // ── TOP HEADER BAR ─────────────────
+            Container(
+              padding: EdgeInsets.only(
+                top: safeArea.top + 16,
+                left: 24, right: 24,
+                bottom: 0),
+              color: bg,
+              child: Row(
+                children: [
+                  Text(
+                    'MY PROFILE',
+                    style: GoogleFonts.spaceMono(
+                      fontSize: 9,
+                      color: accentGreen,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () async {
+                      final updated =
+                        await Navigator.push(
+                          context,
+                          PageTransition(
+                            type: PageTransitionType
+                              .bottomToTop,
+                            duration: const Duration(
+                              milliseconds: 320),
+                            curve:
+                              Curves.easeOutCubic,
+                            child: EditProfileScreen(
+                              initialProfile:
+                                _profile),
+                          ),
+                        );
+                      if (updated == true) {
+                        _loadProfile();
+                      }
+                    },
+                    child: Container(
+                      padding:
+                        const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 7),
+                      decoration: BoxDecoration(
+                        borderRadius:
+                          BorderRadius.circular(20),
+                        border: Border.all(
+                          color: border),
+                        color: card,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.edit_outlined,
+                            size: 13,
+                            color: accent),
+                          const SizedBox(width: 5),
+                          Text('Edit',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight:
+                                FontWeight.w500,
+                              color: accent)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // ── PROFILE PHOTO ──────────────────
+            Center(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 110, height: 110,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isVerified
+                          ? accentGreen
+                          : border,
+                        width: 2.5),
+                      color: isLight
+                        ? const Color(0xFFE8F5EE)
+                        : const Color(0xFF152B1E),
+                    ),
+                    child: ClipOval(
+                      child: avatarUrl != null
+                        ? CachedNetworkImage(
+                            imageUrl: avatarUrl,
+                            fit: BoxFit.cover,
+                          )
+                        : Center(
+                            child: Text(
+                              name[0].toUpperCase(),
+                              style: GoogleFonts
+                                .playfairDisplay(
+                                  fontSize: 44,
+                                  fontWeight:
+                                    FontWeight.w700,
+                                  color: accentGreen,
+                                )),
+                          ),
+                    ),
+                  ),
+
+                  // Camera button
+                  Positioned(
+                    bottom: 2, right: 2,
+                    child: Container(
+                      width: 32, height: 32,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: accent,
+                        border: Border.all(
+                          color: bg, width: 2)),
+                      child: const Icon(
+                        Icons.camera_alt_rounded,
+                        size: 15,
+                        color: Colors.white),
+                    ),
+                  ),
+
+                  // Verified badge
+                  if (isVerified)
+                    Positioned(
+                      top: 2, right: -4,
+                      child: Container(
+                        width: 26, height: 26,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: accentGreen,
+                          border: Border.all(
+                            color: bg, width: 2)),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          size: 14,
+                          color: Colors.white),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // ── NAME ───────────────────────────
+            Text(name,
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: text,
+                height: 1.1,
+              )),
+
+            const SizedBox(height: 6),
+            
+            // ── NATIONALITY + TEAM ─────────────
+            Builder(
+              builder: (context) {
+                final nationality = _profile['nationality'] as String? ?? '';
+                final team = _profile['team_supported'] as String? ?? '';
+                if (nationality.isEmpty) return const SizedBox.shrink();
+                return Text(
+                  [
+                    '${_flag(nationality)} $nationality',
+                    if (team.isNotEmpty) team,
+                  ].join('  ·  '),
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    color: muted,
+                  ));
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            // ── PROFILE STRENGTH ───────────────
+            Padding(
+              padding: const EdgeInsets
+                .symmetric(horizontal: 24),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: card,
+                  borderRadius:
+                    BorderRadius.circular(16),
+                  border: Border.all(color: border),
+                  boxShadow: isLight ? [
+                    BoxShadow(
+                      color: Colors.black
+                        .withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    )
+                  ] : null,
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Text('PROFILE STRENGTH',
+                          style: GoogleFonts
+                            .spaceMono(
+                              fontSize: 9,
+                              color: accentGreen,
+                              letterSpacing: 1.5,
+                            )),
+                        const Spacer(),
+                        Text('$score%',
+                          style: GoogleFonts
+                            .playfairDisplay(
+                              fontSize: 20,
+                              fontWeight:
+                                FontWeight.w700,
+                              color: score < 50
+                                ? const Color(
+                                    0xFFE83535)
+                                : score < 80
+                                  ? const Color(
+                                      0xFFF2C233)
+                                  : accentGreen,
+                            )),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius:
+                        BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: score / 100,
+                        minHeight: 5,
+                        backgroundColor: isLight
+                          ? const Color(0xFFF0EBE3)
+                          : Colors.white
+                            .withValues(alpha: 0.08),
+                        valueColor:
+                          AlwaysStoppedAnimation(
+                            score < 50
+                              ? const Color(
+                                  0xFFE83535)
+                              : score < 80
+                                ? const Color(
+                                    0xFFF2C233)
+                                : accentGreen),
+                      ),
+                    ),
+                    if (missing.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      ...missing.take(2).map((tip) =>
+                        Padding(
+                          padding: const EdgeInsets
+                            .only(top: 5),
+                          child: Row(children: [
+                            Icon(
+                              Icons
+                                .add_circle_outline,
+                              size: 13,
+                              color: const Color(
+                                0xFFE83535)
+                                .withValues(
+                                  alpha: 0.6)),
+                            const SizedBox(width: 6),
+                            Text(tip as String,
+                              style: GoogleFonts
+                                .inter(
+                                  fontSize: 12,
+                                  color: muted)),
+                          ]),
+                        )),
+                    ],
+                  ],
+                ),
+              ),
+            ),
 
             const SizedBox(height: 32),
 
-            // SECTION 2: ACTION
-            _buildActionSection(),
+            // ── SETTINGS SECTION ───────────────
+            _sectionLabel('SETTINGS',
+              color: accentGreen),
+            const SizedBox(height: 10),
 
-            const SizedBox(height: 48),
-
-            // SECTION 3: SETTINGS & ACCOUNT
-            _buildSettingsSection(isDark),
-
-            const SizedBox(height: 40),
-            TextButton(
-              onPressed: _deleteAccount,
-              child: Text('Delete Account', style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFE83535).withValues(alpha: 0.4))),
+            _settingsGroup(
+              card: card,
+              border: border,
+              isLight: isLight,
+              children: [
+                _settingRow(
+                  icon: Icons.dark_mode_outlined,
+                  title: 'Dark Mode',
+                  text: text,
+                  iconColor: accent,
+                  border: border,
+                  trailing: Transform.scale(
+                    scale: 0.85,
+                    child: Switch(
+                      value: themeMode ==
+                        ThemeMode.dark,
+                      activeThumbColor: accentGreen,
+                      activeTrackColor: accentGreen
+                        .withValues(alpha: 0.3),
+                      inactiveThumbColor: isLight
+                        ? const Color(0xFF9BB3AF)
+                        : Colors.white38,
+                      inactiveTrackColor: isLight
+                        ? const Color(0xFFE8DDD0)
+                        : Colors.white12,
+                      onChanged: (_) => ref.read(
+                        themeProvider.notifier)
+                        .toggleTheme(),
+                    ),
+                  ),
+                ),
+                _divider(border),
+                _settingRow(
+                  icon: Icons.language_outlined,
+                  title: 'Language',
+                  subtitle: currentLang,
+                  text: text,
+                  iconColor: accent,
+                  border: border,
+                  onTap: _showLanguageSheet,
+                ),
+              ],
             ),
 
-            SizedBox(height: safeArea.bottom + 100),
-          ],
-        ),
-      ),
-    );
-  }
+            const SizedBox(height: 24),
 
-  Widget _buildProfileHeader(int score) {
-    return Column(
-      children: [
-        // Avatar
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-          backgroundImage: _profile['avatar_url'] != null ? NetworkImage(_profile['avatar_url']) : null,
-          child: _profile['avatar_url'] == null ? const Icon(Icons.person, size: 60, color: Colors.white24) : null,
-        ),
-        const SizedBox(height: 16),
+            // ── ACCOUNT SECTION ────────────────
+            _sectionLabel('ACCOUNT',
+              color: accentGreen),
+            const SizedBox(height: 10),
 
-        // Name & Verified Badge
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(_profile['name'] ?? 'User', 
-              style: GoogleFonts.spaceGrotesk(fontSize: 26, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color)),
-            const SizedBox(width: 8),
-            const Icon(Icons.verified, size: 18, color: FifaColors.emeraldSpring),
-          ],
-        ),
-        const SizedBox(height: 6),
-
-        // Nationality & Team
-        Text('${_profile['nationality'] ?? 'Nationality'} · ${_profile['team_supported'] ?? 'Team Member'}', 
-          style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).textTheme.bodySmall?.color)),
-
-        const SizedBox(height: 24),
-
-        // Profile Strength Bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 48),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Profile strength', style: GoogleFonts.inter(fontSize: 11, color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5))),
-                  Text('$score%', style: GoogleFonts.spaceMono(fontSize: 11, fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring)),
-                ],
-              ),
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: score / 100,
-                  minHeight: 4,
-                  backgroundColor: Theme.of(context).dividerColor.withValues(alpha: 0.05),
-                  color: FifaColors.emeraldSpring,
+            _settingsGroup(
+              card: card,
+              border: border,
+              isLight: isLight,
+              children: [
+                _settingRow(
+                  icon: Icons.lock_outline_rounded,
+                  title: 'Change Password',
+                  text: text,
+                  iconColor: muted,
+                  border: border,
+                  onTap: () async {
+                    final email = SupabaseConfig
+                      .client.auth.currentUser
+                      ?.email;
+                    if (email == null) return;
+                    try {
+                      await SupabaseConfig.client
+                        .auth.resetPasswordForEmail(
+                          email);
+                      if (!mounted) return;
+                      if (mounted) {
+                        ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(
+                            content: Text(
+                              'Reset email sent ✅'),
+                            backgroundColor: accent,
+                            behavior: SnackBarBehavior
+                              .floating,
+                            shape:
+                              RoundedRectangleBorder(
+                                borderRadius:
+                                  BorderRadius
+                                    .circular(12)),
+                          ));
+                      }
+                    } catch (e) {
+                      if (!mounted) return;
+                      if (mounted) {
+                        ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(
+                            content: Text(
+                              'Could not send email'),
+                            backgroundColor:
+                              const Color(0xFFE83535),
+                            behavior: SnackBarBehavior
+                              .floating,
+                          ));
+                      }
+                    }
+                  },
                 ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+                _divider(border),
+                _settingRow(
+                  icon: Icons.logout_rounded,
+                  title: 'Sign Out',
+                  text: const Color(0xFFE83535)
+                    .withValues(alpha: 0.8),
+                  iconColor: const Color(0xFFE83535)
+                    .withValues(alpha: 0.8),
+                  border: border,
+                  onTap: _signOut,
+                ),
+              ],
+            ),
 
-  Widget _buildActionSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 48),
-      child: GestureDetector(
-        onTap: () async {
-          final updated = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(initialProfile: _profile)));
-          if (updated == true) _loadProfile();
-        },
-        child: Container(
-          height: 52,
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
-            borderRadius: BorderRadius.circular(26),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text('Edit Profile', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white)),
-          ),
+            const SizedBox(height: 16),
+
+            // Delete account
+            TextButton(
+              onPressed: _deleteAccount,
+              child: Text(
+                'Delete Account',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: const Color(0xFFE83535)
+                    .withValues(alpha: 0.35),
+                )),
+            ),
+
+            // Footer
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment:
+                MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    minimumSize: Size.zero,
+                    padding:
+                      const EdgeInsets.symmetric(
+                        horizontal: 8)),
+                  child: Text('Privacy',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: muted))),
+                Text('·',
+                  style: TextStyle(
+                    color: muted
+                      .withValues(alpha: 0.4))),
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    minimumSize: Size.zero,
+                    padding:
+                      const EdgeInsets.symmetric(
+                        horizontal: 8)),
+                  child: Text('Terms',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: muted))),
+              ],
+            ),
+            Text(
+              'FIFA LOVE · World Cup 2026',
+              style: GoogleFonts.spaceMono(
+                fontSize: 9,
+                color: muted
+                  .withValues(alpha: 0.4))),
+
+            SizedBox(
+              height: safeArea.bottom + 100),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSettingsSection(bool isDark) {
-    return Column(
-      children: [
-        _buildSettingTile(
-          icon: Icons.language_outlined,
-          title: 'Language',
-          trailing: Text(_profile['app_language'] ?? 'English', style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).primaryColor)),
-          onTap: _showLanguageSheet,
-        ),
-        _buildSettingTile(
-          icon: isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-          title: isDark ? 'Light Mode' : 'Dark Mode',
-          trailing: Switch(
-            value: isDark,
-            activeThumbColor: FifaColors.emeraldSpring,
-            onChanged: (v) => ref.read(themeProvider.notifier).toggleTheme(),
-          ),
-        ),
-        _buildSettingTile(
-          icon: Icons.lock_outline_rounded,
-          title: 'Change Password',
-          onTap: () {
-            // Password reset logic already exists
-            final email = SupabaseConfig.client.auth.currentUser?.email;
-            if (email != null) {
-              SupabaseConfig.client.auth.resetPasswordForEmail(email);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reset email sent! ✅'), backgroundColor: FifaColors.emeraldForest));
-            }
-          },
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          child: Divider(color: Theme.of(context).dividerColor.withValues(alpha: 0.05)),
-        ),
-        _buildSettingTile(
-          icon: Icons.logout_rounded,
-          title: 'Sign Out',
-          titleColor: const Color(0xFFE83535),
-          onTap: _signOut,
-        ),
-      ],
+  // ── HELPER WIDGETS ─────────────────────
+
+  Widget _sectionLabel(String label,
+    {required Color color}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 24),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(label,
+          style: GoogleFonts.spaceMono(
+            fontSize: 9,
+            color: color,
+            letterSpacing: 2,
+          )),
+      ),
     );
   }
 
-  Widget _buildSettingTile({required IconData icon, required String title, Widget? trailing, Color? titleColor, VoidCallback? onTap}) {
+  Widget _settingsGroup({
+    required Color card,
+    required Color border,
+    required bool isLight,
+    required List<Widget> children,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: border),
+          boxShadow: isLight ? [
+            BoxShadow(
+              color: Colors.black
+                .withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            )
+          ] : null,
+        ),
+        child: Column(children: children),
+      ),
+    );
+  }
+
+  Widget _settingRow({
+    required IconData icon,
+    required String title,
+    required Color text,
+    required Color iconColor,
+    required Color border,
+    String? subtitle,
+    Widget? trailing,
+    VoidCallback? onTap,
+  }) {
     return ListTile(
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 32),
-      leading: Icon(icon, size: 22, color: titleColor ?? Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5)),
-      title: Text(title, style: GoogleFonts.inter(fontSize: 15, color: titleColor ?? Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.w500)),
-      trailing: trailing ?? (onTap != null ? Icon(Icons.arrow_forward_ios, size: 14, color: Theme.of(context).dividerColor) : null),
+      contentPadding:
+        const EdgeInsets.symmetric(
+          horizontal: 16, vertical: 2),
+      leading: Icon(icon,
+        color: iconColor, size: 20),
+      title: Text(title,
+        style: GoogleFonts.inter(
+          fontSize: 15,
+          color: text,
+          fontWeight: FontWeight.w500)),
+      subtitle: subtitle != null
+        ? Text(subtitle,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: text
+                .withValues(alpha: 0.4)))
+        : null,
+      trailing: trailing ?? (onTap != null
+        ? Icon(
+            Icons.chevron_right_rounded,
+            size: 18,
+            color: text
+              .withValues(alpha: 0.25))
+        : null),
     );
+  }
+
+  Widget _divider(Color border) {
+    return Divider(
+      height: 1, thickness: 1,
+      color: border,
+      indent: 52);
+  }
+
+  String _flag(String? n) {
+    const m = {
+      'Brazil': '🇧🇷', 'France': '🇫🇷',
+      'Argentina': '🇦🇷',
+      'United States': '🇺🇸',
+      'England': '🏴',
+      'Germany': '🇩🇪', 'Spain': '🇪🇸',
+      'Portugal': '🇵🇹', 'Morocco': '🇲🇦',
+      'Japan': '🇯🇵', 'Nigeria': '🇳🇬',
+      'Benin': '🇧🇯', 'Ghana': '🇬🇦',
+    };
+    return m[n] ?? '🌍';
   }
 }
