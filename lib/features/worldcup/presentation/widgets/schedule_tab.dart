@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../data/worldcup_data.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
+import 'package:fifalove_mobile/features/worldcup/data/worldcup_data.dart';
 
 class ScheduleTab extends StatefulWidget {
   const ScheduleTab({super.key});
@@ -41,7 +42,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
   void _showCityPicker() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF0D1A13),
+      backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -57,14 +58,14 @@ class _ScheduleTabState extends State<ScheduleTab> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: Theme.of(context).dividerColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               ListTile(
                 title: Text(
                   'All Cities',
-                  style: GoogleFonts.inter(color: Colors.white),
+                  style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyLarge?.color),
                 ),
                 trailing: _cityFilter.isEmpty
                     ? const Icon(Icons.check, color: Color(0xFF4CB572))
@@ -75,7 +76,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                 },
               ),
               ...cities.map((c) => ListTile(
-                    title: Text(c, style: GoogleFonts.inter(color: Colors.white)),
+                    title: Text(c, style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyLarge?.color)),
                     trailing: _cityFilter == c
                         ? const Icon(Icons.check, color: Color(0xFF4CB572))
                         : null,
@@ -103,7 +104,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
               'EXPLORE MORE',
               style: GoogleFonts.spaceMono(
                 fontSize: 9,
-                color: const Color(0xFF4CB572),
+                color: Theme.of(context).primaryColor,
                 letterSpacing: 2,
               ),
             ),
@@ -115,15 +116,15 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   height: 80,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0D1A13),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF4CB572).withValues(alpha: 0.15),
+                      color: Theme.of(context).dividerColor,
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.confirmation_number, size: 24, color: Color(0xFF4CB572)),
+                      Icon(Icons.confirmation_number, size: 24, color: Theme.of(context).primaryColor),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -142,7 +143,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: Theme.of(context).textTheme.titleLarge?.color,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -159,15 +160,15 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   height: 80,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0D1A13),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF4CB572).withValues(alpha: 0.15),
+                      color: Theme.of(context).dividerColor,
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.restaurant, size: 24, color: Color(0xFF4CB572)),
+                      Icon(Icons.restaurant, size: 24, color: Theme.of(context).primaryColor),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -186,7 +187,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: Theme.of(context).textTheme.titleLarge?.color,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -223,27 +224,27 @@ class _ScheduleTabState extends State<ScheduleTab> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF152B1E),
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF1E4A33)),
+                      border: Border.all(color: Theme.of(context).dividerColor),
                     ),
                     child: Row(
                       children: [
                         const Icon(Icons.location_on_outlined,
-                            size: 14, color: Color(0xFF4CB572)),
+                            size: 14, color: FifaColors.emeraldSpring),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             _cityFilter.isEmpty ? 'All Cities' : _cityFilter,
                             style: GoogleFonts.inter(
                               fontSize: 13,
-                              color: Colors.white,
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
                             ),
                           ),
                         ),
                         Icon(Icons.expand_more,
                             size: 16,
-                            color: Colors.white.withValues(alpha: 0.40)),
+                            color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.40)),
                       ],
                     ),
                   ),
@@ -270,7 +271,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
             'UPCOMING FIXTURES',
             style: GoogleFonts.spaceMono(
               fontSize: 9,
-              color: const Color(0xFF4CB572),
+              color: Theme.of(context).primaryColor,
               letterSpacing: 2,
             ),
           ),
@@ -283,7 +284,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   child: Text(
                     'No matches found',
                     style: GoogleFonts.inter(
-                      color: Colors.white.withValues(alpha: 0.40),
+                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.40),
                     ),
                   ),
                 )
@@ -301,10 +302,10 @@ class _ScheduleTabState extends State<ScheduleTab> {
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0D1A13),
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFF4CB572).withValues(alpha: 0.12),
+                          color: Theme.of(context).dividerColor,
                         ),
                       ),
                       child: Column(
@@ -317,14 +318,14 @@ class _ScheduleTabState extends State<ScheduleTab> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF4CB572).withValues(alpha: 0.1),
+                                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   m['stage'] as String,
                                   style: GoogleFonts.spaceMono(
                                     fontSize: 9,
-                                    color: const Color(0xFF4CB572),
+                                    color: Theme.of(context).primaryColor,
                                   ),
                                 ),
                               ),
@@ -332,7 +333,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                 m['time'] as String,
                                 style: GoogleFonts.spaceMono(
                                   fontSize: 12,
-                                  color: const Color(0xFFF2C233),
+                                  color: FifaColors.gold,
                                 ),
                               ),
                             ],
@@ -355,7 +356,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                     style: GoogleFonts.inter(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.white,
+                                      color: Theme.of(context).textTheme.titleLarge?.color,
                                     ),
                                   ),
                                 ],
@@ -367,7 +368,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                 style: GoogleFonts.spaceGrotesk(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color(0xFFEBF2EE).withValues(alpha: 0.2),
+                                  color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.2),
                                 ),
                               ),
 
@@ -383,7 +384,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                     style: GoogleFonts.inter(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.white,
+                                      color: Theme.of(context).textTheme.titleLarge?.color,
                                     ),
                                   ),
                                 ],
@@ -394,7 +395,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                           const SizedBox(height: 12),
                           // Thin divider
                           Divider(
-                            color: const Color(0xFF4CB572).withValues(alpha: 0.1),
+                            color: Theme.of(context).dividerColor,
                             height: 1,
                           ),
                           const SizedBox(height: 8),
@@ -406,13 +407,13 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                 children: [
                                   Icon(Icons.location_on_outlined,
                                       size: 12,
-                                      color: const Color(0xFFEBF2EE).withValues(alpha: 0.3)),
+                                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3)),
                                   const SizedBox(width: 4),
                                   Text(
                                     '${m['city']} · ${m['stadium']}',
                                     style: GoogleFonts.inter(
                                       fontSize: 12,
-                                      color: const Color(0xFFEBF2EE).withValues(alpha: 0.4),
+                                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
                                     ),
                                   ),
                                 ],
@@ -422,13 +423,13 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                 children: [
                                   Icon(Icons.calendar_today_outlined,
                                       size: 11,
-                                      color: const Color(0xFFEBF2EE).withValues(alpha: 0.3)),
+                                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3)),
                                   const SizedBox(width: 4),
                                   Text(
                                     _formatDate(m['date'] as String),
                                     style: GoogleFonts.spaceMono(
                                       fontSize: 10,
-                                      color: const Color(0xFFEBF2EE).withValues(alpha: 0.3),
+                                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3),
                                     ),
                                   ),
                                 ],
@@ -438,13 +439,13 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                 width: 28,
                                 height: 28,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF152B1E),
+                                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.notifications_outlined,
                                   size: 14,
-                                  color: Color(0xFF4CB572),
+                                  color: Theme.of(context).primaryColor,
                                 ),
                               ),
                             ],

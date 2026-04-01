@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase/supabase_config.dart';
+import '../../../core/constants/colors.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -25,7 +26,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email address')),
+        const SnackBar(
+          content: Text('Please enter your email address'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -38,16 +42,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(e.message),
-              backgroundColor: const Color(0xFFE83535)),
+            content: Text(e.message),
+            backgroundColor: const Color(0xFFE83535),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('Something went wrong. Please try again.'),
-              backgroundColor: Color(0xFFE83535)),
+            content: Text('Something went wrong. Please try again.'),
+            backgroundColor: Color(0xFFE83535),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {
@@ -57,16 +65,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF080F0C),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
         decoration: BoxDecoration(
           gradient: RadialGradient(
             center: Alignment.bottomCenter,
             radius: 1.5,
             colors: [
-              const Color(0xFF135E4B).withValues(alpha: 0.4),
-              const Color(0xFF080F0C),
+              FifaColors.emeraldForest.withValues(alpha: isLight ? 0.08 : 0.4),
+              theme.scaffoldBackgroundColor,
             ],
           ),
         ),
@@ -76,37 +87,41 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // A) Back button
+                // Back button
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.arrow_back_ios_new,
-                          size: 20,
-                          color: Colors.white.withValues(alpha: 0.6)),
+                      icon: Icon(
+                        Icons.arrow_back_ios_new,
+                        size: 20,
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const Spacer(),
                   ],
                 ),
 
-                // B) Top spacing
                 const SizedBox(height: 40),
 
-                // C) Icon
+                // Icon
                 Center(
                   child: Container(
                     width: 80,
                     height: 80,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF135E4B),
+                    decoration: BoxDecoration(
+                      color: FifaColors.emeraldForest.withValues(alpha: isLight ? 0.1 : 1.0),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.lock_reset_outlined,
-                        size: 36, color: Color(0xFF4CB572)),
+                    child: Icon(
+                      Icons.lock_reset_outlined,
+                      size: 36, 
+                      color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                    ),
                   ),
                 ),
 
-                // D) Heading + subtext
+                // Heading + subtext
                 const SizedBox(height: 24),
                 Text(
                   'Forgot Password?',
@@ -114,7 +129,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: theme.textTheme.displayLarge?.color,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -126,129 +141,118 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     maxLines: 2,
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: Colors.white.withValues(alpha: 0.45),
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 40),
 
-                // E) Email field
+                // Email field
                 Text(
                   'EMAIL ADDRESS',
                   style: GoogleFonts.spaceMono(
                     fontSize: 9,
-                    color: const Color(0xFF4CB572),
+                    color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
                     letterSpacing: 2,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: 'your@email.com',
-                    hintStyle:
-                        TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-                    fillColor: const Color(0xFF152B1E),
-                    filled: true,
-                    prefixIcon: const Icon(Icons.mail_outline,
-                        color: Color(0xFF4CB572)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                          color: Color(0xFF4CB572), width: 1.5),
-                    ),
+                  style: theme.textTheme.bodyLarge,
+                  decoration: const InputDecoration(
+                    hintText: "your@email.com",
+                    prefixIcon: Icon(Icons.mail_outline),
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // F) Send button / success state
+                // Send button / success state
                 if (_emailSent)
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF135E4B).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(14),
+                      color: FifaColors.emeraldForest.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: const Color(0xFF4CB572).withValues(alpha: 0.4),
+                        color: FifaColors.emeraldForest.withValues(alpha: 0.2),
                       ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.check_circle_outline,
-                            size: 20, color: Color(0xFF4CB572)),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Reset link sent!',
+                        const Icon(
+                          Icons.check_circle_outline,
+                          size: 24, 
+                          color: FifaColors.emeraldSpring,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Reset link sent!',
                                 style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white)),
-                            Text('Check your inbox',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: theme.textTheme.titleLarge?.color,
+                                ),
+                              ),
+                              Text(
+                                'Check your inbox for instructions.',
                                 style: GoogleFonts.inter(
-                                    fontSize: 12,
-                                    color: Colors.white
-                                        .withValues(alpha: 0.50))),
-                          ],
+                                  fontSize: 13,
+                                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   )
                 else
-                  InkWell(
-                    onTap: _loading ? null : _sendReset,
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      height: 56,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                      ),
-                      child: _loading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2),
-                            )
-                          : Text('Send Reset Link',
-                              style: GoogleFonts.inter(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white)),
-                    ),
+                  ElevatedButton(
+                    onPressed: _loading ? null : _sendReset,
+                    child: _loading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white, 
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text('Send Reset Link'),
                   ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 28),
 
-                // G) Back to sign in
+                // Back to sign in
                 Center(
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.arrow_back,
-                            size: 14, color: Color(0xFF4CB572)),
+                        const Icon(
+                          Icons.arrow_back,
+                          size: 14, 
+                          color: FifaColors.emeraldSpring,
+                        ),
                         const SizedBox(width: 6),
-                        Text('Back to Sign In',
-                            style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: const Color(0xFF4CB572))),
+                        Text(
+                          'Back to Sign In',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: FifaColors.emeraldSpring,
+                          ),
+                        ),
                       ],
                     ),
                   ),

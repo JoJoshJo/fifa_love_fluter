@@ -39,7 +39,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080F0C),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: IndexedStack(
         index: _currentIndex,
         children: const [

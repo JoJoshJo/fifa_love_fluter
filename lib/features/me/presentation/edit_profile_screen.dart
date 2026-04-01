@@ -1,540 +1,509 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import '../../../core/supabase/supabase_config.dart';
+import '../../../core/constants/colors.dart';
 import '../data/me_repository.dart';
-
+import '../../../core/supabase/supabase_config.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final Map<String, dynamic> initialProfile;
+
   const EditProfileScreen({super.key, required this.initialProfile});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final _repo = MeRepository();
-  late Map<String, dynamic> _profile;
   bool _saving = false;
 
-  // Form Controllers
+  // Controllers
   late TextEditingController _nameController;
-  late TextEditingController _bioController;
   late TextEditingController _ageController;
-  late String _gender;
-  late String _nationality;
-  late String _teamSupported;
+  late TextEditingController _bioController;
+  late TextEditingController _teamController;
+  String? _gender;
+  String? _nationality;
+  String? _avatarUrl;
+  File? _localImage;
+  late Map<String, dynamic> _profile;
   late bool _isLocal;
   late String _city;
-  late List<String> _matchTypes;
-  late List<String> _countriesToMatch;
-
-  final List<Map<String, String>> _countries = [
-    {'name': 'Brazil', 'flag': '🇧🇷'},
-    {'name': 'France', 'flag': '🇫🇷'},
-    {'name': 'Argentina', 'flag': '🇦🇷'},
-    {'name': 'United States', 'flag': '🇺🇸'},
-    {'name': 'England', 'flag': '🏴󠁧󠁢󠁥󠁮󠁧󠁿'},
-    {'name': 'Germany', 'flag': '🇩🇪'},
-    {'name': 'Spain', 'flag': '🇪🇸'},
-    {'name': 'Portugal', 'flag': '🇵🇹'},
-    {'name': 'Morocco', 'flag': '🇲🇦'},
-    {'name': 'Japan', 'flag': '🇯🇵'},
-    {'name': 'Nigeria', 'flag': '🇳🇬'},
-    {'name': 'Mexico', 'flag': '🇲🇽'},
-    {'name': 'Colombia', 'flag': '🇨🇴'},
-    {'name': 'Senegal', 'flag': '🇸🇳'},
-    {'name': 'Australia', 'flag': '🇦🇺'},
-    {'name': 'South Korea', 'flag': '🇰🇷'},
-    {'name': 'Netherlands', 'flag': '🇳🇱'},
-    {'name': 'Italy', 'flag': '🇮🇹'},
-    {'name': 'Belgium', 'flag': '🇧🇪'},
-    {'name': 'Canada', 'flag': '🇨🇦'},
-    {'name': 'Benin', 'flag': '🇧🇯'},
-    {'name': 'Ghana', 'flag': '🇬🇭'},
-    {'name': 'Cameroon', 'flag': '🇨🇲'},
-    {'name': 'Uruguay', 'flag': '🇺🇾'},
-    {'name': 'South Africa', 'flag': '🇿🇦'},
-    {'name': 'Iran', 'flag': '🇮🇷'},
-    {'name': 'Saudi Arabia', 'flag': '🇸🇦'},
-    {'name': 'Togo', 'flag': '🇹🇬'},
-    {'name': 'Ivory Coast', 'flag': '🇨🇮'},
-    {'name': 'Tunisia', 'flag': '🇹🇳'},
-    {'name': 'Poland', 'flag': '🇵🇱'},
-    {'name': 'Croatia', 'flag': '🇭🇷'},
-    {'name': 'Switzerland', 'flag': '🇨🇭'},
-    {'name': 'Denmark', 'flag': '🇩🇪'},
-    {'name': 'Sweden', 'flag': '🇸🇪'},
-    {'name': 'Norway', 'flag': '🇳🇴'},
-  ];
-
-  final List<String> _cities = [
-    'New York', 'Los Angeles', 'Miami', 'Chicago', 'Atlanta', 'Dallas', 
-    'Houston', 'San Francisco', 'Seattle', 'Toronto', 'London', 'Paris', 
-    'Berlin', 'Madrid', 'Rome', 'Dubai'
-  ];
+  List<String> _matchTypes = [];
+  List<String> _countriesToMatch = [];
 
   @override
   void initState() {
     super.initState();
-    _profile = Map<String, dynamic>.from(widget.initialProfile);
-    _nameController = TextEditingController(text: _profile['name'] ?? '');
-    _bioController = TextEditingController(text: _profile['bio'] ?? '');
-    _ageController = TextEditingController(text: (_profile['age'] ?? '').toString());
-    _gender = _profile['gender'] ?? 'Other';
-    _nationality = _profile['nationality'] ?? '';
-    _teamSupported = _profile['team_supported'] ?? '';
-    _isLocal = _profile['is_local'] == true;
-    _city = _profile['city'] ?? 'Miami';
-    _matchTypes = List<String>.from(_profile['match_type_preference'] ?? []);
-    _countriesToMatch = List<String>.from(_profile['countries_to_match'] ?? []);
-  }
-
-  Future<void> _saveTab(Map<String, dynamic> data) async {
-    setState(() => _saving = true);
+    _tabController = TabController(length: 3, vsync: this);
     try {
-      final userId = SupabaseConfig.client.auth.currentUser!.id;
-      await _repo.updateProfile(userId, data);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Changes saved ✅'), backgroundColor: Color(0xFF135E4B)),
-        );
-      }
+      _profile = Map<String, dynamic>.from(widget.initialProfile);
+
+      _nameController = TextEditingController(text: _profile['name'] as String? ?? '');
+      _bioController = TextEditingController(text: _profile['bio'] as String? ?? '');
+      _ageController = TextEditingController(text: (_profile['age'] != null) ? _profile['age'].toString() : '');
+      _teamController = TextEditingController(text: _profile['team_supported'] as String? ?? '');
+
+      _gender = _profile['gender'] as String? ?? 'Other';
+      _nationality = _profile['nationality'] as String? ?? '';
+      _isLocal = _profile['is_local'] as bool? ?? false;
+      _city = _profile['city'] as String? ?? 'Dallas';
+      _matchTypes = List<String>.from(_profile['match_type_preference'] ?? []);
+      _countriesToMatch = List<String>.from(_profile['countries_to_match'] ?? []);
+      _avatarUrl = _profile['avatar_url'] as String?;
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to save ❌'), backgroundColor: Color(0xFFE83535)),
-        );
-      }
-    } finally {
-      setState(() => _saving = false);
+      _nameController = TextEditingController();
+      _bioController = TextEditingController();
+      _ageController = TextEditingController();
+      _teamController = TextEditingController();
+      _gender = 'Other';
+      _nationality = '';
+      _isLocal = false;
+      _city = 'Dallas';
+      _matchTypes = [];
+      _countriesToMatch = [];
     }
   }
 
-  void _showCountryPicker(String label, Function(String) onSelect) {
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _nameController.dispose();
+    _ageController.dispose();
+    _bioController.dispose();
+    _teamController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    if (picked != null) {
+      setState(() => _localImage = File(picked.path));
+    }
+  }
+
+  bool _hasMatchType(String type) {
+    return _matchTypes.contains(type);
+  }
+
+  void _toggleMatchType(String type) {
+    setState(() {
+      if (_matchTypes.contains(type)) {
+        _matchTypes.remove(type);
+      } else {
+        _matchTypes.add(type);
+      }
+    });
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      final userId = SupabaseConfig.client.auth.currentUser!.id;
+      
+      String? finalAvatarUrl = _avatarUrl;
+      if (_localImage != null) {
+        finalAvatarUrl = await _repo.uploadAvatar(userId, _localImage!);
+      }
+
+      final updates = {
+        'name': _nameController.text.trim(),
+        'age': int.tryParse(_ageController.text) ?? (_profile['age'] as int? ?? 18),
+        'bio': _bioController.text.trim(),
+        'gender': _gender,
+        'nationality': _nationality,
+        'team_supported': _teamController.text.trim(),
+        'avatar_url': finalAvatarUrl,
+        'interests': _matchTypes,
+      };
+
+      await _repo.updateProfile(userId, updates);
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving profile: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  void _showNationalityPicker() {
+    final countries = [
+      'Argentina', 'Australia', 'Belgium', 'Brazil', 'Canada', 
+      'Colombia', 'Croatia', 'Ecuador', 'England', 'France', 
+      'Germany', 'Ghana', 'Italy', 'Japan', 'Mexico', 
+      'Morocco', 'Netherlands', 'Nigeria', 'Peru', 'Poland', 
+      'Portugal', 'Saudi Arabia', 'Senegal', 'South Korea', 'Spain', 'USA'
+    ];
+
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
+    if (!mounted) return;
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF0D1A13),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      backgroundColor: isLight ? Colors.white : const Color(0xFF0D1A13),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => _CountryPickerSheet(
-        countries: _countries,
-        label: label,
-        onSelect: onSelect,
+        title: 'SELECT NATIONALITY',
+        countries: countries,
+        onSelect: (c) => setState(() => _nationality = c),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        backgroundColor: const Color(0xFF080F0C),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF080F0C),
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context, true),
-          ),
-          title: Text('Edit Profile', style: GoogleFonts.spaceGrotesk(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
-          bottom: TabBar(
-            indicatorColor: const Color(0xFF4CB572),
-            labelColor: const Color(0xFF4CB572),
-            unselectedLabelColor: Colors.white.withValues(alpha: 0.4),
-            labelStyle: GoogleFonts.spaceMono(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
-            tabs: const [
-              Tab(text: 'ABOUT ME'),
-              Tab(text: 'FOOTBALL'),
-              Tab(text: 'PREFERENCES'),
-            ],
-          ),
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = isLight ? const Color(0xFFEBF5F0) : const Color(0xFF080F0C);
+    final textColor = isLight ? const Color(0xFF0D2B1E) : Colors.white;
+    final textMuted = isLight ? const Color(0xFF6B9E8A) : Colors.white38;
+
+    return Scaffold(
+      backgroundColor: bgColor,
+      appBar: AppBar(
+        backgroundColor: bgColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.close, color: textColor),
+          onPressed: () => Navigator.pop(context),
         ),
-        body: TabBarView(
-          children: [
-            _buildAboutMeTab(),
-            _buildFootballTab(),
-            _buildPreferencesTab(),
+        title: Text('Edit Profile', style: GoogleFonts.spaceGrotesk(fontWeight: FontWeight.bold, color: textColor)),
+        actions: [
+          if (_saving)
+            const Padding(padding: EdgeInsets.all(16), child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: FifaColors.emeraldSpring)))
+          else
+            TextButton(
+              onPressed: _save,
+              child: Text('Save', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring)),
+            ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: FifaColors.emeraldSpring,
+          labelColor: FifaColors.emeraldSpring,
+          unselectedLabelColor: textMuted,
+          indicatorSize: TabBarIndicatorSize.label,
+          labelStyle: GoogleFonts.spaceMono(fontSize: 11, fontWeight: FontWeight.bold),
+          tabs: const [
+            Tab(text: 'ABOUT'),
+            Tab(text: 'FOOTBALL'),
+            Tab(text: 'MATCHING'),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildAboutMeTab(isLight, textColor, textMuted),
+          _buildFootballIdentityTab(isLight, textColor, textMuted),
+          _buildPreferencesTab(isLight, textColor, textMuted),
+        ],
       ),
     );
   }
 
-  Widget _buildAboutMeTab() {
-    return SingleChildScrollView(
+  Widget _buildAboutMeTab(bool isLight, Color textColor, Color textMuted) {
+    return ListView(
       padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
+      children: [
+        Center(
+          child: GestureDetector(
+            onTap: _pickImage,
             child: Stack(
               children: [
                 CircleAvatar(
                   radius: 50,
-                  backgroundColor: const Color(0xFF152B1E),
-                   backgroundImage: _profile['avatar_url'] != null 
-                    ? NetworkImage(_profile['avatar_url']) 
-                    : null,
-                  child: _profile['avatar_url'] == null 
-                    ? const Icon(Icons.person, size: 50, color: Colors.white24) 
-                    : null,
+                  backgroundColor: textColor.withValues(alpha: 0.1),
+                  backgroundImage: _localImage != null ? FileImage(_localImage!) : (_avatarUrl != null ? NetworkImage(_avatarUrl!) : null) as ImageProvider?,
+                  child: (_localImage == null && _avatarUrl == null) ? Icon(Icons.person, size: 50, color: textMuted) : null,
                 ),
                 Positioned(
                   bottom: 0, right: 0,
-                  child: GestureDetector(
-                    onTap: () async {
-                      final picker = ImagePicker();
-                      final file = await picker.pickImage(source: ImageSource.gallery, maxWidth: 800);
-                      if (file != null) {
-                        final userId = SupabaseConfig.client.auth.currentUser!.id;
-                        final url = await _repo.uploadAvatar(userId, File(file.path));
-                        if (url != null) {
-                          await _repo.updateProfile(userId, {'avatar_url': url});
-                          setState(() => _profile['avatar_url'] = url);
-                        }
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(color: Color(0xFF4CB572), shape: BoxShape.circle),
-                      child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
-                    ),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(color: FifaColors.emeraldSpring, shape: BoxShape.circle),
+                    child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 32),
-          _buildTextField('FULL NAME', _nameController),
-          const SizedBox(height: 20),
-          _buildTextField('AGE', _ageController, keyboardType: TextInputType.number),
-          const SizedBox(height: 20),
-          _buildDropdownField('GENDER', _gender, ['Male', 'Female', 'Other'], (val) => setState(() => _gender = val!)),
-          const SizedBox(height: 20),
-          _buildTextField('BIO', _bioController, maxLines: 4),
-          const SizedBox(height: 32),
-          _buildSaveButton(() {
-            _saveTab({
-              'name': _nameController.text.trim(),
-              'age': int.tryParse(_ageController.text) ?? _profile['age'],
-              'gender': _gender,
-              'bio': _bioController.text.trim(),
-            });
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFootballTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildPickerField('NATIONALITY', _nationality, () => _showCountryPicker('NATIONALITY', (c) => setState(() => _nationality = c))),
-          const SizedBox(height: 20),
-          _buildPickerField('TEAM I SUPPORT', _teamSupported, () => _showCountryPicker('TEAM I SUPPORT', (c) => setState(() => _teamSupported = c))),
-          const SizedBox(height: 32),
-          Text('IDENTITY', style: GoogleFonts.spaceMono(fontSize: 10, color: const Color(0xFF4CB572), letterSpacing: 2)),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildIdentityToggle('🏠', 'Local', _isLocal, () => setState(() => _isLocal = true)),
-              const SizedBox(width: 12),
-              _buildIdentityToggle('✈️', 'Visiting', !_isLocal, () => setState(() => _isLocal = false)),
-            ],
-          ),
-          if (_isLocal) ...[
-            const SizedBox(height: 24),
-            _buildDropdownField('CITY', _city, _cities, (val) => setState(() => _city = val!)),
+        ),
+        const SizedBox(height: 32),
+        _buildTextField('Full Name', _nameController, isLight, textColor, textMuted, hint: 'How others see you'),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(child: _buildTextField('Age', _ageController, isLight, textColor, textMuted, hint: 'e.g. 24', keyboardType: TextInputType.number)),
+            const SizedBox(width: 16),
+            Expanded(child: _buildDropdownField('Gender', ['Male', 'Female', 'Non-binary', 'Prefer not to say'], _gender, (v) => setState(() => _gender = v), isLight, textColor, textMuted)),
           ],
-          const SizedBox(height: 32),
-          _buildSaveButton(() {
-            _saveTab({
-              'nationality': _nationality,
-              'team_supported': _teamSupported,
-              'is_local': _isLocal,
-              'city': _isLocal ? _city : null,
-            });
-          }),
-        ],
-      ),
+        ),
+        const SizedBox(height: 20),
+        _buildTextField('Bio', _bioController, isLight, textColor, textMuted, hint: 'Tell fans about your football journey...', maxLines: 4),
+      ],
     );
   }
 
-  Widget _buildPreferencesTab() {
-    return SingleChildScrollView(
+  Widget _buildFootballIdentityTab(bool isLight, Color textColor, Color textMuted) {
+    return ListView(
       padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('WHAT I\'M LOOKING FOR', style: GoogleFonts.spaceMono(fontSize: 10, color: const Color(0xFF4CB572), letterSpacing: 2)),
-          const SizedBox(height: 12),
-          _buildPreferenceCard('❤️', 'Dating & Romance', _matchTypes.contains('❤️ Dating & Romance'), () {
-             setState(() => _matchTypes.contains('❤️ Dating & Romance') ? _matchTypes.remove('❤️ Dating & Romance') : _matchTypes.add('❤️ Dating & Romance'));
-          }),
-          const SizedBox(height: 8),
-          _buildPreferenceCard('⚽', 'Fan Friends', _matchTypes.contains('⚽ Fan Friends'), () {
-             setState(() => _matchTypes.contains('⚽ Fan Friends') ? _matchTypes.remove('⚽ Fan Friends') : _matchTypes.add('⚽ Fan Friends'));
-          }),
-          const SizedBox(height: 8),
-          _buildPreferenceCard('🗺️', 'Local Guide', _matchTypes.contains('🗺️ Local Guide'), () {
-             setState(() => _matchTypes.contains('🗺️ Local Guide') ? _matchTypes.remove('🗺️ Local Guide') : _matchTypes.add('🗺️ Local Guide'));
-          }),
-          const SizedBox(height: 32),
-          Row(
+      children: [
+        _buildPickerField('Nationality', _nationality ?? 'Select Country', _showNationalityPicker, isLight, textColor, textMuted, icon: Icons.flag_outlined),
+        const SizedBox(height: 20),
+        _buildTextField('Supported Team', _teamController, isLight, textColor, textMuted, hint: 'e.g. Real Madrid, Brazil, etc.'),
+        const SizedBox(height: 32),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: FifaColors.emeraldSpring.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.1)),
+          ),
+          child: Row(
             children: [
-              Text('COUNTRIES TO MATCH', style: GoogleFonts.spaceMono(fontSize: 10, color: const Color(0xFF4CB572), letterSpacing: 2)),
-              const Spacer(),
-              GestureDetector(
-                onTap: () => setState(() => _countriesToMatch = _countries.map((e) => e['name']!).toList()),
-                child: Text('SELECT ALL', style: GoogleFonts.spaceMono(fontSize: 10, color: Colors.white38)),
+              const Icon(Icons.info_outline, size: 20, color: FifaColors.emeraldSpring),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Your football identity helps us match you with compatible fans.',
+                  style: GoogleFonts.inter(fontSize: 13, color: textMuted),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          _buildCountriesGrid(),
-          const SizedBox(height: 32),
-          _buildSaveButton(() {
-            _saveTab({
-              'match_type_preference': _matchTypes,
-              'countries_to_match': _countriesToMatch,
-            });
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTextField(String label, TextEditingController controller, {int maxLines = 1, TextInputType? keyboardType}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: GoogleFonts.spaceMono(fontSize: 9, color: Colors.white38, letterSpacing: 1.5)),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          style: GoogleFonts.inter(color: Colors.white, fontSize: 15),
-          decoration: InputDecoration(
-            fillColor: const Color(0xFF0D1A13),
-            filled: true,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          ),
         ),
       ],
     );
   }
 
-  Widget _buildDropdownField(String label, String value, List<String> options, ValueChanged<String?> onChanged) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildPreferencesTab(bool isLight, Color textColor, Color textMuted) {
+    final borderColor = isLight ? const Color(0xFFD4EBE0) : Colors.transparent;
+
+    return ListView(
+      padding: const EdgeInsets.all(24),
       children: [
-        Text(label, style: GoogleFonts.spaceMono(fontSize: 9, color: Colors.white38, letterSpacing: 1.5)),
+        Text(
+          "I'M LOOKING FOR...",
+          style: GoogleFonts.spaceMono(fontSize: 12, fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring, letterSpacing: 2),
+        ),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(color: const Color(0xFF0D1A13), borderRadius: BorderRadius.circular(12)),
-          child: DropdownButton<String>(
-            value: value,
-            isExpanded: true,
-            underline: const SizedBox(),
-            dropdownColor: const Color(0xFF0D1A13),
-            icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white38),
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 15),
-            items: options.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-            onChanged: onChanged,
-          ),
+        Text(
+          "Select the types of connections you want to make during the World Cup.",
+          style: GoogleFonts.inter(fontSize: 14, color: textMuted),
+        ),
+        const SizedBox(height: 24),
+        _buildPreferenceCard(
+          '❤️', 'Dating & Romance', 
+          _hasMatchType('Dating & Romance'),
+          () => _toggleMatchType('Dating & Romance'),
+          isLight, textColor, borderColor
+        ),
+        const SizedBox(height: 12),
+        _buildPreferenceCard(
+          '⚽', 'Fan Friends', 
+          _hasMatchType('Fan Friends'),
+          () => _toggleMatchType('Fan Friends'),
+          isLight, textColor, borderColor
+        ),
+        const SizedBox(height: 12),
+        _buildPreferenceCard(
+          '🗺️', 'Local Guide', 
+          _hasMatchType('Local Guide'),
+          () => _toggleMatchType('Local Guide'),
+          isLight, textColor, borderColor
         ),
       ],
     );
   }
 
-  Widget _buildPickerField(String label, String value, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: GoogleFonts.spaceMono(fontSize: 9, color: Colors.white38, letterSpacing: 1.5)),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(color: const Color(0xFF0D1A13), borderRadius: BorderRadius.circular(12)),
-            child: Row(
-              children: [
-                Text(value.isEmpty ? 'Select...' : value, style: GoogleFonts.inter(color: value.isEmpty ? Colors.white24 : Colors.white, fontSize: 15)),
-                const Spacer(),
-                const Icon(Icons.search, size: 18, color: Colors.white38),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIdentityToggle(String emoji, String label, bool isSelected, VoidCallback onTap) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF135E4B) : const Color(0xFF0D1A13),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: isSelected ? const Color(0xFF4CB572) : Colors.transparent),
-          ),
-          child: Column(
-            children: [
-              Text(emoji, style: const TextStyle(fontSize: 24)),
-              const SizedBox(height: 4),
-              Text(label, style: GoogleFonts.inter(color: isSelected ? Colors.white : Colors.white38, fontSize: 13, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPreferenceCard(String emoji, String label, bool isSelected, VoidCallback onTap) {
+  Widget _buildPreferenceCard(String emoji, String title, bool isSelected, VoidCallback onTap, bool isLight, Color textColor, Color borderColor) {
+    final cardColor = isLight ? Colors.white : const Color(0xFF0D1A13);
+    
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF4CB572) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? const Color(0xFF4CB572) : Colors.white.withValues(alpha: 0.1)),
+          color: isSelected ? FifaColors.emeraldSpring.withValues(alpha: 0.1) : cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? FifaColors.emeraldSpring : (isLight ? borderColor : Colors.white.withValues(alpha: 0.1)),
+            width: 1.5,
+          ),
         ),
         child: Row(
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 20)),
-            const SizedBox(width: 12),
-            Text(label, style: GoogleFonts.inter(color: isSelected ? Colors.white : Colors.white70, fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(emoji, style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 16),
+            Text(
+              title,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected ? FifaColors.emeraldSpring : (isLight ? textColor : Colors.white.withValues(alpha: 0.7)),
+              ),
+            ),
             const Spacer(),
-            if (isSelected) const Icon(Icons.check, color: Colors.white, size: 18),
+            if (isSelected)
+              const Icon(Icons.check_circle, color: FifaColors.emeraldSpring, size: 20),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCountriesGrid() {
-    return Wrap(
-      spacing: 8, runSpacing: 8,
-      children: _countries.map((c) {
-        final isSelected = _countriesToMatch.contains(c['name']);
-        return GestureDetector(
-          onTap: () => setState(() => isSelected ? _countriesToMatch.remove(c['name']) : _countriesToMatch.add(c['name']!)),
+  Widget _buildTextField(String label, TextEditingController controller, bool isLight, Color textColor, Color textMuted, {String? hint, int maxLines = 1, TextInputType keyboardType = TextInputType.text}) {
+    final inputColor = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(), style: GoogleFonts.spaceMono(fontSize: 10, fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring, letterSpacing: 1.5)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          style: GoogleFonts.inter(color: textColor),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: GoogleFonts.inter(color: textMuted.withValues(alpha: 0.5)),
+            filled: true,
+            fillColor: inputColor,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField(String label, List<String> options, String? current, Function(String?) onChanged, bool isLight, Color textColor, Color textMuted) {
+    final inputColor = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
+    final cardColor = isLight ? Colors.white : const Color(0xFF0D1A13);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(), style: GoogleFonts.spaceMono(fontSize: 10, fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring, letterSpacing: 1.5)),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: inputColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: current,
+              isExpanded: true,
+              dropdownColor: cardColor,
+              style: GoogleFonts.inter(color: textColor),
+              items: options.map((o) => DropdownMenuItem(value: o, child: Text(o, style: GoogleFonts.inter(color: textColor)))).toList(),
+              onChanged: onChanged,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPickerField(String label, String value, VoidCallback onTap, bool isLight, Color textColor, Color textMuted, {IconData? icon}) {
+    final inputColor = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(), style: GoogleFonts.spaceMono(fontSize: 10, fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring, letterSpacing: 1.5)),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF135E4B) : const Color(0xFF0D1A13),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: isSelected ? const Color(0xFF4CB572) : Colors.transparent),
+              color: inputColor,
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(c['flag']!, style: const TextStyle(fontSize: 14)),
-                const SizedBox(width: 6),
-                Text(c['name']!, style: GoogleFonts.inter(color: isSelected ? Colors.white : Colors.white38, fontSize: 12)),
+                if (icon != null) ...[Icon(icon, size: 20, color: FifaColors.emeraldSpring), const SizedBox(width: 12)],
+                Text(value, style: GoogleFonts.inter(fontSize: 15, color: textColor)),
+                const Spacer(),
+                Icon(Icons.chevron_right, size: 20, color: textMuted.withValues(alpha: 0.5)),
               ],
             ),
           ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildSaveButton(VoidCallback onPressed) {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton(
-        onPressed: _saving ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF135E4B),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
         ),
-        child: _saving 
-          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-          : Text('SAVE CHANGES', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
-      ),
+      ],
     );
   }
 }
 
-class _CountryPickerSheet extends StatefulWidget {
-  final List<Map<String, String>> countries;
-  final String label;
+class _CountryPickerSheet extends StatelessWidget {
+  final String title;
+  final List<String> countries;
   final Function(String) onSelect;
 
-  const _CountryPickerSheet({required this.countries, required this.label, required this.onSelect});
-
-  @override
-  State<_CountryPickerSheet> createState() => _CountryPickerSheetState();
-}
-
-class _CountryPickerSheetState extends State<_CountryPickerSheet> {
-  String _query = '';
+  const _CountryPickerSheet({
+    required this.title,
+    required this.countries,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final filtered = widget.countries.where((c) => c['name']!.toLowerCase().contains(_query.toLowerCase())).toList();
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = isLight ? Colors.white : const Color(0xFF0D1A13);
+    final inputColor = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
+    final textColor = isLight ? const Color(0xFF0D2B1E) : Colors.white;
+    final textMuted = isLight ? const Color(0xFF6B9E8A) : Colors.white38;
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Text(widget.label, style: GoogleFonts.spaceGrotesk(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
-              const Spacer(),
-              IconButton(icon: const Icon(Icons.close, color: Colors.white30), onPressed: () => Navigator.pop(context)),
-            ],
-          ),
+          Text(title, style: GoogleFonts.spaceMono(fontSize: 12, color: FifaColors.emeraldSpring, fontWeight: FontWeight.bold, letterSpacing: 2)),
           const SizedBox(height: 16),
-          TextField(
-            autofocus: true,
-            style: const TextStyle(color: Colors.white),
-            onChanged: (val) => setState(() => _query = val),
-            decoration: InputDecoration(
-              hintText: 'Search country...',
-              hintStyle: const TextStyle(color: Colors.white24),
-              prefixIcon: const Icon(Icons.search, color: Colors.white30),
-              fillColor: const Color(0xFF152B1E),
-              filled: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextField(
+              style: GoogleFonts.inter(color: textColor),
+              decoration: InputDecoration(
+                hintText: 'Search country...',
+                hintStyle: GoogleFonts.inter(color: textMuted.withValues(alpha: 0.5)),
+                prefixIcon: Icon(Icons.search, color: textMuted),
+                filled: true,
+                fillColor: inputColor,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           Expanded(
             child: ListView.builder(
-              itemCount: filtered.length,
-              itemBuilder: (context, index) {
-                final c = filtered[index];
-                return ListTile(
-                  leading: Text(c['flag']!, style: const TextStyle(fontSize: 24)),
-                  title: Text(c['name']!, style: GoogleFonts.inter(color: Colors.white)),
-                  onTap: () {
-                    widget.onSelect(c['name']!);
-                    Navigator.pop(context);
-                  },
-                );
-              },
+              itemCount: countries.length,
+              itemBuilder: (context, i) => ListTile(
+                title: Text(countries[i], style: GoogleFonts.inter(color: textColor)),
+                onTap: () {
+                  onSelect(countries[i]);
+                  Navigator.pop(context);
+                },
+              ),
             ),
           ),
         ],

@@ -83,8 +83,7 @@ class ChatRepository {
 
       return enriched;
     } catch (e) {
-      // Return mock data if Supabase isn't configured
-      return _mockMatches(userId);
+      return [];
     }
   }
 
@@ -180,90 +179,4 @@ class ChatRepository {
     return reasons.take(3).toList();
   }
 
-  // ─── Mock data when DB not set up ───
-  List<Map<String, dynamic>> _mockMatches(String userId) {
-    final now = DateTime.now();
-    return [
-      {
-        'id': 'mock-match-1',
-        'user_a': userId,
-        'user_b': 'mock-user-jordan',
-        'match_score': 87,
-        'created_at': now
-            .subtract(const Duration(hours: 2))
-            .toIso8601String(),
-        'status': 'active',
-        'other_user': {
-          'id': 'mock-user-jordan',
-          'name': 'Jordan Smith',
-          'avatar_url': null,
-          'nationality': 'USA',
-          'is_verified': true,
-          'interests': ['Football', 'Hiking', 'Music'],
-          'languages': ['English', 'Spanish'],
-          'countries_to_match': ['Brazil', 'England'],
-        },
-        'last_message': {
-          'content': 'Hey! Saw you\'re also going to the Brazil game! 🇧🇷⚽',
-          'created_at': now
-              .subtract(const Duration(minutes: 45))
-              .toIso8601String(),
-          'sender_id': 'mock-user-jordan',
-          'read_at': null,
-        },
-        'unread_count': 1,
-      },
-      {
-        'id': 'mock-match-2',
-        'user_a': 'mock-user-sofia',
-        'user_b': userId,
-        'match_score': 92,
-        'created_at': now
-            .subtract(const Duration(hours: 18))
-            .toIso8601String(),
-        'status': 'active',
-        'other_user': {
-          'id': 'mock-user-sofia',
-          'name': 'Sofia Andrade',
-          'avatar_url': null,
-          'nationality': 'Brazil',
-          'is_verified': true,
-          'interests': ['Football', 'Samba', 'Beach'],
-          'languages': ['Portuguese', 'English'],
-          'countries_to_match': ['USA', 'Argentina'],
-        },
-        'last_message': {
-          'content': 'Can\'t wait for the final! 🏆',
-          'created_at': now
-              .subtract(const Duration(hours: 3))
-              .toIso8601String(),
-          'sender_id': userId,
-          'read_at': now.toIso8601String(),
-        },
-        'unread_count': 0,
-      },
-      {
-        'id': 'mock-match-3',
-        'user_a': userId,
-        'user_b': 'mock-user-amara',
-        'match_score': 78,
-        'created_at': now
-            .subtract(const Duration(hours: 36))
-            .toIso8601String(),
-        'status': 'active',
-        'other_user': {
-          'id': 'mock-user-amara',
-          'name': 'Amara Diallo',
-          'avatar_url': null,
-          'nationality': 'Nigeria',
-          'is_verified': false,
-          'interests': ['Football', 'Music', 'Art'],
-          'languages': ['English', 'French'],
-          'countries_to_match': ['Brazil', 'USA'],
-        },
-        'last_message': null,
-        'unread_count': 0,
-      },
-    ];
-  }
 }

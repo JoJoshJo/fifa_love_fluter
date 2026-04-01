@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'email_confirm_screen.dart';
+import '../../../core/constants/colors.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -20,7 +21,6 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isLoading = false;
 
   // STEP 1 STATE
-
   Uint8List? _profileImageBytes;
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
@@ -72,16 +72,19 @@ class _SignupScreenState extends State<SignupScreen> {
     if (image != null) {
       final bytes = await image.readAsBytes();
       setState(() {
-
         _profileImageBytes = bytes;
       });
     }
   }
   
   void _submitProfile() async {
-    // Basic final validations
     if (_emailController.text.isEmpty || _passwordController.text.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please provide a valid email and password (min 6 chars)')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please provide a valid email and password (min 6 chars)'),
+          behavior: SnackBarBehavior.floating,
+        )
+      );
       return;
     }
     
@@ -117,13 +120,23 @@ class _SignupScreenState extends State<SignupScreen> {
             )
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign up failed. Please try again.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Sign up failed. Please try again.'),
+              behavior: SnackBarBehavior.floating,
+            )
+          );
         }
       }
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            behavior: SnackBarBehavior.floating,
+          )
+        );
       }
     }
   }
@@ -132,7 +145,6 @@ class _SignupScreenState extends State<SignupScreen> {
     int s = 0;
     if (password.length >= 8) s++;
     if (password.contains(RegExp(r'[A-Z]'))) s++;
-    // ignore: valid_regexps
     if (password.contains(RegExp(r'[0-9]'))) s++;
     if (password.contains(RegExp(r'[!@#\$&*~]'))) s++;
     return s == 0 && password.isNotEmpty ? 1 : s;
@@ -140,21 +152,23 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF080F0C),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopBar(),
-            _buildProgressBar(),
+            _buildTopBar(context),
+            _buildProgressBar(context),
             Expanded(
               child: PageView(
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                   _buildStep1(),
-                   _buildStep2(),
-                   _buildStep3(),
+                   _buildStep1(context),
+                   _buildStep2(context),
+                   _buildStep3(context),
                 ],
               ),
             ),
@@ -164,7 +178,8 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -172,7 +187,7 @@ class _SignupScreenState extends State<SignupScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back, color: theme.textTheme.bodyLarge?.color),
             onPressed: _prevStep,
           ),
           Row(
@@ -185,7 +200,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 height: 8,
                 width: active ? 24 : 8,
                 decoration: BoxDecoration(
-                  color: active ? const Color(0xFF4CB572) : Colors.white.withValues(alpha: 0.2),
+                  color: active ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(4),
                 ),
               );
@@ -196,27 +211,31 @@ class _SignupScreenState extends State<SignupScreen> {
               onPressed: _nextStep,
               child: Text(
                 'Skip',
-                style: GoogleFonts.spaceMono(fontSize: 11, color: const Color(0xFF4CB572)),
+                style: GoogleFonts.spaceMono(
+                  fontSize: 11, 
+                  color: FifaColors.emeraldSpring,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             )
           else
-            const SizedBox(width: 48), // Balance alignment
+            const SizedBox(width: 48), 
         ],
       ),
     );
   }
 
-  Widget _buildProgressBar() {
+  Widget _buildProgressBar(BuildContext context) {
     return LinearProgressIndicator(
       value: (_currentPage + 1) / 3,
-      backgroundColor: Colors.white.withValues(alpha: 0.08),
-      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF4CB572)),
+      backgroundColor: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+      valueColor: const AlwaysStoppedAnimation<Color>(FifaColors.emeraldSpring),
       minHeight: 2,
     );
   }
   
-  // --- STEP 1 ---
-  Widget _buildStep1() {
+  Widget _buildStep1(BuildContext context) {
+    final theme = Theme.of(context);
     bool canContinue = _nameController.text.isNotEmpty && 
                        (int.tryParse(_ageController.text) ?? 0) >= 18 && 
                        _selectedGender != null;
@@ -226,12 +245,25 @@ class _SignupScreenState extends State<SignupScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text("Tell us about you", style: GoogleFonts.spaceGrotesk(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(
+            "Tell us about you", 
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 28, 
+              fontWeight: FontWeight.bold, 
+              color: theme.textTheme.displayLarge?.color,
+            ),
+          ),
           const SizedBox(height: 8),
-          Text("You can always change this later", style: GoogleFonts.inter(fontSize: 14, color: Colors.white.withValues(alpha: 0.4))),
+          Text(
+            "You can always change this later", 
+            style: GoogleFonts.inter(
+              fontSize: 14, 
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+            ),
+          ),
           const SizedBox(height: 32),
 
-          // A) Photo
+          // Photo
           Center(
             child: Column(
               children: [
@@ -240,47 +272,63 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: Container(
                     width: 120, height: 120,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E3D28),
+                      color: FifaColors.emeraldForest.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFF4CB572).withValues(alpha: 0.5), width: 2, style: BorderStyle.solid), // dashed isn't native easily, fallback solid
+                      border: Border.all(
+                        color: FifaColors.emeraldSpring.withValues(alpha: 0.3), 
+                        width: 2,
+                      ),
                       image: _profileImageBytes != null 
                         ? DecorationImage(image: MemoryImage(_profileImageBytes!), fit: BoxFit.cover) 
                         : null,
                     ),
-                    child: _profileImageBytes == null ? const Icon(Icons.camera_alt, color: Color(0xFF4CB572), size: 32) : null,
+                    child: _profileImageBytes == null 
+                      ? const Icon(Icons.camera_alt, color: FifaColors.emeraldSpring, size: 32) 
+                      : null,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text("Add Photo (optional)", style: GoogleFonts.spaceMono(fontSize: 10, color: const Color(0xFF9BB3AF))),
+                const SizedBox(height: 12),
+                Text(
+                  "Add Photo (optional)", 
+                  style: GoogleFonts.spaceMono(
+                    fontSize: 10, 
+                    color: theme.textTheme.bodySmall?.color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Name
+          _buildLabel(context, "YOUR NAME"),
+          TextFormField(
+            controller: _nameController,
+            style: theme.textTheme.bodyLarge,
+            onChanged: (v) => setState((){}),
+            decoration: const InputDecoration(
+              hintText: "What do people call you?",
             ),
           ),
           const SizedBox(height: 24),
 
-          // B) Name
-          _buildLabel("YOUR NAME"),
-          TextFormField(
-            controller: _nameController,
-            style: const TextStyle(color: Colors.white),
-            onChanged: (v) => setState((){}),
-            decoration: _inputDecoration("What do people call you?"),
-          ),
-          const SizedBox(height: 24),
-
-          // C) Age
-          _buildLabel("YOUR AGE"),
+          // Age
+          _buildLabel(context, "YOUR AGE"),
           TextFormField(
             controller: _ageController,
             keyboardType: TextInputType.number,
-            style: const TextStyle(color: Colors.white),
+            style: theme.textTheme.bodyLarge,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             onChanged: (v) => setState((){}),
-            decoration: _inputDecoration("Must be 18+"),
+            decoration: const InputDecoration(
+              hintText: "Must be 18+",
+            ),
           ),
           const SizedBox(height: 24),
 
-          // D) Gender
-          _buildLabel("GENDER"),
+          // Gender
+          _buildLabel(context, "GENDER"),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -288,14 +336,31 @@ class _SignupScreenState extends State<SignupScreen> {
               final isSelected = _selectedGender == g;
               return GestureDetector(
                 onTap: () => setState(() => _selectedGender = g),
-                child: Container(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF135E4B) : const Color(0xFF152B1E),
+                    color: isSelected ? FifaColors.emeraldForest : theme.cardColor,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: isSelected ? const Color(0xFF4CB572) : const Color(0xFF1E4A33)),
+                    border: Border.all(
+                      color: isSelected ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.2),
+                    ),
+                    boxShadow: isSelected ? [
+                      BoxShadow(
+                        color: FifaColors.emeraldSpring.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ] : null,
                   ),
-                  child: Text(g, style: GoogleFonts.inter(fontSize: 14, color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.5))),
+                  child: Text(
+                    g, 
+                    style: GoogleFonts.inter(
+                      fontSize: 14, 
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
                 ),
               );
             }).toList(),
@@ -308,8 +373,8 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // --- STEP 2 ---
-  Widget _buildStep2() {
+  Widget _buildStep2(BuildContext context) {
+    final theme = Theme.of(context);
     bool canContinue = _nationality != null && _teamSupported != null && (!_isLocal || _city != null);
 
     return SingleChildScrollView(
@@ -317,29 +382,78 @@ class _SignupScreenState extends State<SignupScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text("Your football identity", style: GoogleFonts.spaceGrotesk(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(
+            "Your football identity", 
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 28, 
+              fontWeight: FontWeight.bold, 
+              color: theme.textTheme.displayLarge?.color,
+            ),
+          ),
           const SizedBox(height: 8),
-          Text("This is how fans find you", style: GoogleFonts.inter(fontSize: 14, color: Colors.white.withValues(alpha: 0.4))),
+          Text(
+            "This is how fans find you", 
+            style: GoogleFonts.inter(
+              fontSize: 14, 
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+            ),
+          ),
           const SizedBox(height: 32),
 
-          _buildLabel("YOUR NATIONALITY"),
+          _buildLabel(context, "YOUR NATIONALITY"),
           GestureDetector(
             onTap: () => _showCountryPicker((val) => setState(() => _nationality = val)),
             child: Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: const Color(0xFF152B1E), borderRadius: BorderRadius.circular(12)),
-              child: Text(_nationality ?? "Select Nationality", style: GoogleFonts.inter(color: _nationality != null ? Colors.white : Colors.white.withValues(alpha: 0.5))),
+              decoration: BoxDecoration(
+                color: theme.inputDecorationTheme.fillColor, 
+                borderRadius: BorderRadius.circular(12),
+                border: _nationality != null 
+                  ? Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.5))
+                  : null,
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    _nationality ?? "Select Nationality", 
+                    style: GoogleFonts.inter(
+                      color: _nationality != null ? theme.textTheme.bodyLarge?.color : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                      fontWeight: _nationality != null ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.expand_more, color: theme.textTheme.bodySmall?.color),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 24),
 
-          _buildLabel("TEAM YOU SUPPORT"),
+          _buildLabel(context, "TEAM YOU SUPPORT"),
           GestureDetector(
             onTap: () => _showCountryPicker((val) => setState(() => _teamSupported = val)),
             child: Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: const Color(0xFF152B1E), borderRadius: BorderRadius.circular(12)),
-              child: Text(_teamSupported ?? "Select Team", style: GoogleFonts.inter(color: _teamSupported != null ? Colors.white : Colors.white.withValues(alpha: 0.5))),
+              decoration: BoxDecoration(
+                color: theme.inputDecorationTheme.fillColor, 
+                borderRadius: BorderRadius.circular(12),
+                border: _teamSupported != null 
+                  ? Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.5))
+                  : null,
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    _teamSupported ?? "Select Team", 
+                    style: GoogleFonts.inter(
+                      color: _teamSupported != null ? theme.textTheme.bodyLarge?.color : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                      fontWeight: _teamSupported != null ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.expand_more, color: theme.textTheme.bodySmall?.color),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 32),
@@ -354,13 +468,31 @@ class _SignupScreenState extends State<SignupScreen> {
           
           if (_isLocal) ...[
             const SizedBox(height: 32),
-            _buildLabel("YOUR CITY"),
+            _buildLabel(context, "YOUR CITY"),
             GestureDetector(
               onTap: () => _showCityPicker(),
               child: Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: const Color(0xFF152B1E), borderRadius: BorderRadius.circular(12)),
-                child: Text(_city ?? "Select Host City", style: GoogleFonts.inter(color: _city != null ? Colors.white : Colors.white.withValues(alpha: 0.5))),
+                decoration: BoxDecoration(
+                  color: theme.inputDecorationTheme.fillColor, 
+                  borderRadius: BorderRadius.circular(12),
+                  border: _city != null 
+                    ? Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.5))
+                    : null,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      _city ?? "Select Host City", 
+                      style: GoogleFonts.inter(
+                        color: _city != null ? theme.textTheme.bodyLarge?.color : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                        fontWeight: _city != null ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(Icons.expand_more, color: theme.textTheme.bodySmall?.color),
+                  ],
+                ),
               ),
             ),
           ],
@@ -373,32 +505,53 @@ class _SignupScreenState extends State<SignupScreen> {
   }
   
   Widget _buildToggleCard(bool isLocalValue, String icon, String title, String sub) {
+    final theme = Theme.of(context);
     bool isSelected = _isLocal == isLocalValue;
     return GestureDetector(
       onTap: () => setState(() {
         _isLocal = isLocalValue;
         if (!_isLocal) _city = null; 
       }),
-      child: Container(
-        height: 80,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 100,
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF135E4B) : const Color(0xFF152B1E),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? const Color(0xFF4CB572) : const Color(0xFF1E4A33), width: isSelected ? 1.5 : 1),
+          color: isSelected ? FifaColors.emeraldForest : theme.cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.1), 
+            width: isSelected ? 1.5 : 1,
+          ),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: FifaColors.emeraldSpring.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ] : null,
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(icon, style: const TextStyle(fontSize: 16)),
-                const SizedBox(width: 8),
-                Text(title, style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 13)),
-              ],
+            Text(icon, style: const TextStyle(fontSize: 24)),
+            const SizedBox(height: 8),
+            Text(
+              title, 
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold, 
+                color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color, 
+                fontSize: 14,
+              ),
             ),
             const SizedBox(height: 4),
-            Text(sub, style: GoogleFonts.inter(fontSize: 11, color: Colors.white.withValues(alpha: 0.6))),
+            Text(
+              sub, 
+              style: GoogleFonts.inter(
+                fontSize: 12, 
+                color: isSelected ? Colors.white.withValues(alpha: 0.7) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+              ),
+            ),
           ],
         ),
       ),
@@ -406,49 +559,76 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _showCountryPicker(Function(String) onSelect) {
-    showModalBottomSheet(context: context, backgroundColor: const Color(0xFF080F0C), builder: (ctx) {
-      return ListView.builder(
-        itemCount: _topCountries.length,
-        itemBuilder: (ctx, i) {
-          return ListTile(
-            title: Text(_topCountries[i], style: const TextStyle(color: Colors.white)),
-            onTap: () {
-              onSelect(_topCountries[i]);
-              Navigator.pop(ctx);
-            },
-          );
-        },
-      );
-    });
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context, 
+      backgroundColor: theme.scaffoldBackgroundColor, 
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: _topCountries.length,
+          itemBuilder: (ctx, i) {
+            return ListTile(
+              title: Text(_topCountries[i], style: theme.textTheme.bodyLarge),
+              onTap: () {
+                onSelect(_topCountries[i]);
+                Navigator.pop(ctx);
+              },
+            );
+          },
+        );
+      }
+    );
   }
 
   void _showCityPicker() {
-    showModalBottomSheet(context: context, backgroundColor: const Color(0xFF080F0C), builder: (ctx) {
-      return ListView.builder(
-        itemCount: _hostCities.length,
-        itemBuilder: (ctx, i) {
-          return ListTile(
-            title: Text(_hostCities[i], style: const TextStyle(color: Colors.white)),
-            onTap: () {
-              setState(() => _city = _hostCities[i]);
-              Navigator.pop(ctx);
-            },
-          );
-        },
-      );
-    });
+    final theme = Theme.of(context);
+    showModalBottomSheet(
+      context: context, 
+      backgroundColor: theme.scaffoldBackgroundColor, 
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: _hostCities.length,
+          itemBuilder: (ctx, i) {
+            return ListTile(
+              title: Text(_hostCities[i], style: theme.textTheme.bodyLarge),
+              onTap: () {
+                setState(() => _city = _hostCities[i]);
+                Navigator.pop(ctx);
+              },
+            );
+          },
+        );
+      }
+    );
   }
 
-  // --- STEP 3 ---
-  Widget _buildStep3() {
+  Widget _buildStep3(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text("Who do you want to meet?", style: GoogleFonts.spaceGrotesk(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(
+            "Who do you want to meet?", 
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 28, 
+              fontWeight: FontWeight.bold, 
+              color: theme.textTheme.displayLarge?.color,
+            ),
+          ),
           const SizedBox(height: 8),
-          Text("Select all that apply", style: GoogleFonts.inter(fontSize: 14, color: Colors.white.withValues(alpha: 0.4))),
+          Text(
+            "Select all that apply", 
+            style: GoogleFonts.inter(
+              fontSize: 14, 
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+            ),
+          ),
           const SizedBox(height: 32),
 
           _buildMultiSelectCard("Dating & Romance", "Find a connection that lasts", "❤️"),
@@ -458,8 +638,14 @@ class _SignupScreenState extends State<SignupScreen> {
           _buildMultiSelectCard("Local Guide", "Show me your city", "🗺️"),
           
           const SizedBox(height: 32),
-          _buildLabel("FANS FROM WHICH COUNTRIES?"),
-          Text("Leave empty to meet everyone", style: GoogleFonts.inter(fontSize: 13, color: Colors.white.withValues(alpha: 0.4))),
+          _buildLabel(context, "FANS FROM WHICH COUNTRIES?"),
+          Text(
+            "Leave empty to meet everyone", 
+            style: GoogleFonts.inter(
+              fontSize: 13, 
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+            ),
+          ),
           const SizedBox(height: 16),
           
           Wrap(
@@ -476,45 +662,54 @@ class _SignupScreenState extends State<SignupScreen> {
                      }
                    });
                  },
-                 child: Container(
+                 child: AnimatedContainer(
+                   duration: const Duration(milliseconds: 200),
                    height: 36,
                    padding: const EdgeInsets.symmetric(horizontal: 16),
                    decoration: BoxDecoration(
-                     color: isSelected ? const Color(0xFF4CB572) : const Color(0xFF152B1E),
+                     color: isSelected ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.05),
                      borderRadius: BorderRadius.circular(18),
+                     border: Border.all(
+                       color: isSelected ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.1),
+                     ),
                    ),
                    alignment: Alignment.center,
-                   child: Text(c, style: GoogleFonts.inter(fontSize: 12, color: Colors.white)),
+                   child: Text(
+                    c, 
+                    style: GoogleFonts.inter(
+                      fontSize: 12, 
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
+                    ),
+                  ),
                  )
                );
             }).toList(),
           ),
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: () {}, // For 195 list expansion
-              child: const Text("+ Add more countries", style: TextStyle(color: Color(0xFF4CB572))),
-            )
-          ),
-          
           const SizedBox(height: 32),
-          _buildLabel("YOUR EMAIL"),
+
+          _buildLabel(context, "YOUR EMAIL"),
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            style: const TextStyle(color: Colors.white),
-            decoration: _inputDecoration("email@domain.com"),
+            style: theme.textTheme.bodyLarge,
+            decoration: const InputDecoration(
+              hintText: 'email@domain.com',
+              prefixIcon: Icon(Icons.email_outlined),
+            ),
           ),
           const SizedBox(height: 24),
           
-          _buildLabel("CREATE PASSWORD"),
+          _buildLabel(context, "CREATE PASSWORD"),
           TextFormField(
             controller: _passwordController,
             obscureText: true,
             onChanged: (v) => setState((){}),
-            style: const TextStyle(color: Colors.white),
-            decoration: _inputDecoration("Minimum 6 characters"),
+            style: theme.textTheme.bodyLarge,
+            decoration: const InputDecoration(
+              hintText: '••••••••',
+              prefixIcon: Icon(Icons.lock_outline),
+            ),
           ),
           const SizedBox(height: 12),
           _buildPasswordStrengthBar(),
@@ -527,6 +722,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildMultiSelectCard(String title, String subtitle, String icon) {
+    final theme = Theme.of(context);
     bool isSelected = _selectedIntentions.contains(title);
     return GestureDetector(
       onTap: () {
@@ -538,16 +734,20 @@ class _SignupScreenState extends State<SignupScreen> {
           }
         });
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         height: 80,
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF135E4B) : const Color(0xFF152B1E),
+          color: isSelected ? FifaColors.emeraldForest : theme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? const Color(0xFF4CB572) : const Color(0xFF1E4A33), width: isSelected ? 1.5 : 1),
+          border: Border.all(
+            color: isSelected ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.1), 
+            width: isSelected ? 1.5 : 1,
+          ),
         ),
         child: Row(
           children: [
-            Container(width: 3, height: 80, color: isSelected ? const Color(0xFF4CB572) : Colors.transparent),
+            Container(width: 4, height: 80, decoration: BoxDecoration(color: isSelected ? FifaColors.emeraldSpring : Colors.transparent, borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)))),
             const SizedBox(width: 16),
             Text(icon, style: const TextStyle(fontSize: 28)),
             const SizedBox(width: 16),
@@ -555,8 +755,21 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                Text(subtitle, style: GoogleFonts.inter(fontSize: 13, color: Colors.white.withValues(alpha: 0.6))),
+                Text(
+                  title, 
+                  style: GoogleFonts.inter(
+                    fontSize: 16, 
+                    fontWeight: FontWeight.bold, 
+                    color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
+                  ),
+                ),
+                Text(
+                  subtitle, 
+                  style: GoogleFonts.inter(
+                    fontSize: 13, 
+                    color: isSelected ? Colors.white.withValues(alpha: 0.7) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                  ),
+                ),
               ],
             )
           ],
@@ -569,7 +782,7 @@ class _SignupScreenState extends State<SignupScreen> {
     int str = _getPasswordStrength(_passwordController.text);
     return Row(
       children: List.generate(4, (index) {
-        Color c = Colors.white.withValues(alpha: 0.08);
+        Color c = Theme.of(context).dividerColor.withValues(alpha: 0.1);
         if (str > index) {
           if (str == 1) {
             c = Colors.red;
@@ -592,57 +805,49 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // --- HELPERS ---
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(BuildContext context, String text) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
-      child: Text(text, style: GoogleFonts.spaceMono(fontSize: 10, color: const Color(0xFF4CB572), letterSpacing: 2)),
-    );
-  }
-
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-      fillColor: const Color(0xFF152B1E),
-      filled: true,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF4CB572))),
+      child: Text(
+        text, 
+        style: GoogleFonts.spaceMono(
+          fontSize: 10, 
+          color: FifaColors.emeraldSpring, 
+          letterSpacing: 2,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
   
   Widget _buildContinueBtn(bool enabled, VoidCallback onTap) {
-    return InkWell(
-      onTap: enabled ? onTap : null,
-      borderRadius: BorderRadius.circular(16),
-      child: Opacity(
-        opacity: enabled ? 1.0 : 0.5,
-        child: Container(
-          height: 56, alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: const LinearGradient(colors: [Color(0xFF135E4B), Color(0xFF4CB572)]),
-          ),
-          child: Text("Continue →", style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
-        ),
+    return ElevatedButton(
+      onPressed: enabled ? onTap : null,
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 60),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: FifaColors.emeraldForest,
+        disabledBackgroundColor: FifaColors.emeraldForest.withValues(alpha: 0.1),
+      ),
+      child: Text(
+        "Continue →", 
+        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
   }
 
   Widget _buildSignUpBtn() {
-    return InkWell(
-      onTap: _isLoading ? null : _submitProfile,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        height: 56, alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(colors: [Color(0xFF135E4B), Color(0xFF4CB572)]),
-        ),
-        child: _isLoading 
-          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-          : Text("Create My Profile 🎉", style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+    return ElevatedButton(
+      onPressed: _isLoading ? null : _submitProfile,
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 60),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: FifaColors.emeraldForest,
       ),
+      child: _isLoading 
+        ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+        : const Text("Create My Profile 🎉"),
     );
   }
 }

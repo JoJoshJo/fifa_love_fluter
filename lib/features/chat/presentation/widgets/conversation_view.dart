@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../data/chat_repository.dart';
 import '../../../../core/supabase/supabase_config.dart';
@@ -136,7 +137,7 @@ class _ConversationViewState extends State<ConversationView> {
   void _showOptionsSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF0D1A13),
+      backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -150,7 +151,7 @@ class _ConversationViewState extends State<ConversationView> {
               height: 4,
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Theme.of(context).dividerColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -184,18 +185,18 @@ class _ConversationViewState extends State<ConversationView> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF0D1A13),
+        backgroundColor: Theme.of(context).cardColor,
         title: Text('Unmatch?',
-            style: GoogleFonts.spaceGrotesk(color: Colors.white)),
+            style: GoogleFonts.spaceGrotesk(color: Theme.of(context).textTheme.titleLarge?.color)),
         content: Text('This will remove the match and all messages.',
             style: GoogleFonts.inter(
-                color: Colors.white.withValues(alpha: 0.6))),
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text('Cancel',
                 style: GoogleFonts.inter(
-                    color: Colors.white.withValues(alpha: 0.5))),
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5))),
           ),
           TextButton(
             onPressed: () async {
@@ -226,10 +227,10 @@ class _ConversationViewState extends State<ConversationView> {
         Container(
           height: 64,
           decoration: BoxDecoration(
-            color: const Color(0xFF0D1A13),
+            color: Theme.of(context).cardColor,
             border: Border(
               bottom: BorderSide(
-                  color: const Color(0xFF4CB572).withValues(alpha: 0.1),
+                  color: Theme.of(context).dividerColor,
                   width: 1),
             ),
           ),
@@ -239,9 +240,9 @@ class _ConversationViewState extends State<ConversationView> {
             child: Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.arrow_back_ios_new,
-                      size: 20,
-                      color: Colors.white.withValues(alpha: 0.60)),
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        size: 20,
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.60)),
                   onPressed: widget.onBack,
                 ),
                 // Avatar
@@ -250,23 +251,23 @@ class _ConversationViewState extends State<ConversationView> {
                   height: 40,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF4CB572), width: 1.5),
-                    color: const Color(0xFF1E3D28),
+                    border: Border.all(color: Theme.of(context).primaryColor, width: 1.5),
+                    color: Theme.of(context).cardColor,
                   ),
                   child: ClipOval(
                     child: avatarUrl != null
                         ? CachedNetworkImage(
                             imageUrl: avatarUrl,
                             fit: BoxFit.cover,
-                            errorWidget: (_, __, ___) => const Icon(
+                            errorWidget: (_, __, ___) => Icon(
                                 Icons.person,
-                                color: Color(0xFF4CB572)),
+                                color: Theme.of(context).primaryColor),
                           )
                         : Center(
                             child: Text(
                               (other['name'] as String? ?? '?')[0].toUpperCase(),
-                              style: const TextStyle(
-                                  color: Color(0xFF4CB572),
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -283,7 +284,7 @@ class _ConversationViewState extends State<ConversationView> {
                         style: GoogleFonts.inter(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
                         ),
                       ),
                       Row(
@@ -292,7 +293,7 @@ class _ConversationViewState extends State<ConversationView> {
                             '${_flagEmoji(other['nationality'] as String?)} ${other['nationality'] ?? ''}',
                             style: GoogleFonts.inter(
                               fontSize: 12,
-                              color: Colors.white.withValues(alpha: 0.40),
+                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.40),
                             ),
                           ),
                         ],
@@ -302,7 +303,7 @@ class _ConversationViewState extends State<ConversationView> {
                 ),
                 IconButton(
                   icon: Icon(Icons.more_vert,
-                      color: Colors.white.withValues(alpha: 0.40)),
+                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.40)),
                   onPressed: _showOptionsSheet,
                 ),
               ],
@@ -318,10 +319,10 @@ class _ConversationViewState extends State<ConversationView> {
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF135E4B).withValues(alpha: 0.15),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: const Color(0xFF4CB572).withValues(alpha: 0.25),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.25),
               ),
             ),
             child: Row(
@@ -335,7 +336,7 @@ class _ConversationViewState extends State<ConversationView> {
                         '⚡ WHY YOU MATCHED',
                         style: GoogleFonts.spaceMono(
                           fontSize: 9,
-                          color: const Color(0xFF4CB572),
+                          color: Theme.of(context).primaryColor,
                           letterSpacing: 1.5,
                         ),
                       ),
@@ -346,7 +347,7 @@ class _ConversationViewState extends State<ConversationView> {
                               '· $r',
                               style: GoogleFonts.inter(
                                 fontSize: 12,
-                                color: Colors.white.withValues(alpha: 0.65),
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.65),
                               ),
                             ),
                           )),
@@ -356,7 +357,7 @@ class _ConversationViewState extends State<ConversationView> {
                 IconButton(
                   icon: Icon(Icons.close,
                       size: 16,
-                      color: Colors.white.withValues(alpha: 0.30)),
+                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.30)),
                   constraints: const BoxConstraints(),
                   padding: EdgeInsets.zero,
                   onPressed: () =>
@@ -372,9 +373,9 @@ class _ConversationViewState extends State<ConversationView> {
             stream: _repo.messagesStream(widget.match['id'] as String),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
+                return Center(
                   child: CircularProgressIndicator(
-                    color: Color(0xFF4CB572),
+                    color: Theme.of(context).primaryColor,
                     strokeWidth: 2,
                   ),
                 );
@@ -415,8 +416,8 @@ class _ConversationViewState extends State<ConversationView> {
                                 height: 52,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: const Color(0xFF4CB572), width: 1),
-                                  color: const Color(0xFF1E3D28),
+                                  border: Border.all(color: Theme.of(context).primaryColor, width: 1),
+                                  color: Theme.of(context).cardColor,
                                 ),
                                 child: ClipOval(
                                   child: widget.myProfile['avatar_url'] != null
@@ -426,10 +427,10 @@ class _ConversationViewState extends State<ConversationView> {
                                         )
                                       : Center(
                                           child: Text(
-                                            (widget.myProfile['name'] as String? ?? 'Me')[0].toUpperCase(),
-                                            style: const TextStyle(color: Color(0xFF4CB572)),
+                                              (widget.myProfile['name'] as String? ?? 'Me')[0].toUpperCase(),
+                                              style: TextStyle(color: Theme.of(context).primaryColor),
+                                            ),
                                           ),
-                                        ),
                                 ),
                               ),
                               // Their Avatar
@@ -440,8 +441,8 @@ class _ConversationViewState extends State<ConversationView> {
                                   height: 52,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: const Color(0xFF4CB572), width: 1),
-                                    color: const Color(0xFF1E3D28),
+                                    border: Border.all(color: Theme.of(context).primaryColor, width: 1),
+                                    color: Theme.of(context).cardColor,
                                   ),
                                   child: ClipOval(
                                     child: avatarUrl != null
@@ -452,7 +453,7 @@ class _ConversationViewState extends State<ConversationView> {
                                         : Center(
                                             child: Text(
                                               (other['name'] as String? ?? '?')[0].toUpperCase(),
-                                              style: const TextStyle(color: Color(0xFF4CB572)),
+                                              style: TextStyle(color: Theme.of(context).primaryColor),
                                             ),
                                           ),
                                   ),
@@ -464,12 +465,12 @@ class _ConversationViewState extends State<ConversationView> {
                                 child: Container(
                                   width: 32,
                                   height: 32,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF135E4B),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(Icons.favorite,
-                                      size: 16, color: Color(0xFFE8437A)),
+                                      size: 16, color: FifaColors.pink),
                                 ),
                               ),
                             ],
@@ -482,7 +483,7 @@ class _ConversationViewState extends State<ConversationView> {
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -491,7 +492,7 @@ class _ConversationViewState extends State<ConversationView> {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: Colors.white.withValues(alpha: 0.35),
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
                         ),
                       ),
                     ],
@@ -536,10 +537,10 @@ class _ConversationViewState extends State<ConversationView> {
         // ─── Input bar ───
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF0D1A13),
+            color: Theme.of(context).cardColor,
             border: Border(
               top: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.06), width: 1),
+                  color: Theme.of(context).dividerColor, width: 1),
             ),
           ),
           padding: EdgeInsets.fromLTRB(8, 8, 8, 8 + bottomPad),
@@ -549,17 +550,17 @@ class _ConversationViewState extends State<ConversationView> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF152B1E),
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(
-                      color: const Color(0xFF4CB572).withValues(alpha: 0.15),
+                      color: Theme.of(context).dividerColor,
                       width: 1,
                     ),
                   ),
                   child: TextField(
                     controller: _messageController,
                     style: GoogleFonts.inter(
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.85),
                         fontSize: 14),
                     maxLines: 4,
                     minLines: 1,
@@ -568,7 +569,7 @@ class _ConversationViewState extends State<ConversationView> {
                     decoration: InputDecoration(
                       hintText: 'Message...',
                       hintStyle: GoogleFonts.inter(
-                        color: Colors.white.withValues(alpha: 0.25),
+                        color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.25),
                         fontSize: 14,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
@@ -588,11 +589,14 @@ class _ConversationViewState extends State<ConversationView> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: _inputHasText
-                        ? const Color(0xFF135E4B)
-                        : const Color(0xFF152B1E),
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).dividerColor.withValues(alpha: 0.05),
                     gradient: _inputHasText
-                        ? const LinearGradient(
-                            colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
+                        ? LinearGradient(
+                            colors: [
+                              Theme.of(context).primaryColor,
+                              Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           )
@@ -603,7 +607,7 @@ class _ConversationViewState extends State<ConversationView> {
                     size: 20,
                     color: _inputHasText
                         ? Colors.white
-                        : Colors.white.withValues(alpha: 0.20),
+                        : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.20),
                   ),
                 ),
               ),

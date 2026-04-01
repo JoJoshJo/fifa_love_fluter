@@ -20,7 +20,7 @@ class _RidesTabState extends State<RidesTab> {
             Icon(
               Icons.directions_car,
               size: 64,
-              color: const Color(0xFF4CB572).withValues(alpha: 0.3),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 24),
             Text(
@@ -28,7 +28,7 @@ class _RidesTabState extends State<RidesTab> {
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: Theme.of(context).textTheme.titleLarge?.color?.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 8),
@@ -36,7 +36,7 @@ class _RidesTabState extends State<RidesTab> {
               'COMING SOON',
               style: GoogleFonts.spaceMono(
                 fontSize: 11,
-                color: const Color(0xFF4CB572),
+                color: Theme.of(context).primaryColor,
                 letterSpacing: 2,
               ),
             ),
@@ -46,7 +46,7 @@ class _RidesTabState extends State<RidesTab> {
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.35),
+                color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.35),
                 height: 1.5,
               ),
             ),

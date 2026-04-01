@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:page_transition/page_transition.dart';
 
+import '../../../core/widgets/particle_background.dart';
+import '../../../core/constants/colors.dart';
 import 'signup_screen.dart';
 import 'signin_screen.dart';
 
@@ -9,18 +12,19 @@ class LandingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           // LAYER 1 — Background
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/hero_couple.jpg',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
+          _heroBackground(context),
+          
+          // LAYER 1.5 — Particles
+          const Positioned.fill(
+            child: ParticleBackground(),
           ),
           
           // LAYER 2 — Content
@@ -41,8 +45,9 @@ class LandingScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.spaceMono(
                         fontSize: 10,
-                        color: const Color(0xFFA1D8B5),
+                        color: isLight ? FifaColors.emeraldForest : const Color(0xFFA1D8B5),
                         letterSpacing: 4.0,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -54,7 +59,7 @@ class LandingScreen extends StatelessWidget {
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 52,
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFFF2C233),
+                        color: isLight ? FifaColors.emeraldForest : const Color(0xFFF2C233),
                         letterSpacing: 2.0,
                       ),
                     ),
@@ -66,7 +71,7 @@ class LandingScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 16,
-                        color: Colors.white.withValues(alpha: 0.55),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.55),
                       ),
                     ),
 
@@ -74,74 +79,44 @@ class LandingScreen extends StatelessWidget {
                     const SizedBox(height: 40),
 
                     // E) Create Account button
-                    InkWell(
-                      onTap: () {
+                    ElevatedButton(
+                      onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignupScreen(),
+                          PageTransition(
+                            type: PageTransitionType.fade,
+                            child: const SignupScreen(),
                           ),
                         );
                       },
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        height: 56,
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                        ),
-                        child: Text(
-                          'Create Account',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                      child: const Text('Create Account'),
                     ),
 
                     // F) Gap 12px
                     const SizedBox(height: 12),
 
                     // G) Sign In button
-                    InkWell(
-                      onTap: () {
+                    OutlinedButton(
+                      onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignInScreen(),
+                          PageTransition(
+                            type: PageTransitionType.fade,
+                            child: const SignInScreen(),
                           ),
                         );
                       },
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        height: 56,
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.18),
-                            width: 1,
-                          ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: isLight ? FifaColors.emeraldForest.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.2),
                         ),
-                        child: Text(
-                          'Sign In',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white.withValues(alpha: 0.85),
-                          ),
+                        foregroundColor: theme.textTheme.bodyLarge?.color,
+                        minimumSize: const Size(double.infinity, 56),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
+                      child: const Text('Sign In'),
                     ),
 
                     // H) Gap 32px
@@ -155,7 +130,7 @@ class LandingScreen extends StatelessWidget {
                           '🔒 18+ · ID Verified · Safe',
                           style: GoogleFonts.spaceMono(
                             fontSize: 10,
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.3),
                           ),
                         ),
                       ],
@@ -166,6 +141,26 @@ class LandingScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _heroBackground(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+    
+    return Positioned.fill(
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.topCenter,
+            radius: 1.2,
+            colors: [
+              FifaColors.emeraldSpring.withValues(alpha: isLight ? 0.1 : 0.3),
+              theme.scaffoldBackgroundColor,
+            ],
+          ),
+        ),
       ),
     );
   }

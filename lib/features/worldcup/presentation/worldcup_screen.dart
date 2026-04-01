@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
 import 'widgets/schedule_tab.dart';
 import 'widgets/food_tab.dart';
 import 'widgets/safety_tab.dart';
@@ -35,7 +36,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
     final topPad = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080F0C),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // ─── Header ───
@@ -53,7 +54,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                           style: GoogleFonts.spaceGrotesk(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFFEBF2EE),
+                            color: Theme.of(context).textTheme.titleLarge?.color,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -61,7 +62,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                           '2026',
                           style: GoogleFonts.spaceMono(
                             fontSize: 13,
-                            color: const Color(0xFF4CB572),
+                            color: Theme.of(context).primaryColor,
                             letterSpacing: 2,
                           ),
                         ),
@@ -72,7 +73,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                       'THE ROAD TO THE FINALS',
                       style: GoogleFonts.spaceMono(
                         fontSize: 9,
-                        color: const Color(0xFF9BB3AF),
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
                         letterSpacing: 2,
                       ),
                     ),
@@ -84,10 +85,10 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF135E4B).withValues(alpha: 0.3),
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                        color: const Color(0xFF4CB572).withValues(alpha: 0.4)),
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.2)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -97,14 +98,14 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFFF2C233),
+                          color: FifaColors.gold,
                         ),
                       ),
                       Text(
                         'DAYS LEFT',
                         style: GoogleFonts.spaceMono(
                           fontSize: 7,
-                          color: const Color(0xFF4CB572),
+                          color: Theme.of(context).primaryColor,
                           letterSpacing: 1,
                         ),
                       ),
@@ -129,13 +130,13 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                   Container(
                     width: double.infinity,
                     height: double.infinity,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Color(0xFF135E4B),
-                          Color(0xFF080F0C),
+                          Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                          Theme.of(context).scaffoldBackgroundColor,
                         ],
                       ),
                     ),
@@ -144,7 +145,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                     child: Icon(
                       Icons.stadium_outlined,
                       size: 64,
-                      color: const Color(0xFF4CB572).withValues(alpha: 0.3),
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
                     ),
                   ),
                   Positioned(
@@ -159,7 +160,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            const Color(0xFF080F0C).withValues(alpha: 0.9),
+                            Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.9),
                           ],
                         ),
                       ),
@@ -169,17 +170,17 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF2C233).withValues(alpha: 0.15),
+                              color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: const Color(0xFFF2C233).withValues(alpha: 0.4),
+                                color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
                               ),
                             ),
                             child: Text(
                               'LIVE VENUE',
                               style: GoogleFonts.spaceMono(
                                 fontSize: 8,
-                                color: const Color(0xFFF2C233),
+                                color: Theme.of(context).primaryColor,
                               ),
                             ),
                           ),
@@ -189,7 +190,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                             style: GoogleFonts.spaceGrotesk(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Theme.of(context).textTheme.titleLarge?.color,
                             ),
                           ),
                         ],
@@ -220,12 +221,12 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
                       color: isActive
-                          ? const Color(0xFF4CB572)
-                          : const Color(0xFF152B1E),
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(20),
                       border: isActive
                           ? null
-                          : Border.all(color: const Color(0xFF1E4A33)),
+                          : Border.all(color: Theme.of(context).dividerColor),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -234,8 +235,8 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                           tab['icon'] as IconData,
                           size: 14,
                           color: isActive
-                              ? const Color(0xFF080F0C)
-                              : const Color(0xFFEBF2EE).withValues(alpha: 0.4),
+                              ? Colors.white
+                              : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -244,8 +245,8 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                             fontSize: 10,
                             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                             color: isActive
-                                ? const Color(0xFF080F0C)
-                                : const Color(0xFFEBF2EE).withValues(alpha: 0.4),
+                                ? Colors.white
+                                : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
                           ),
                         ),
                       ],
@@ -259,7 +260,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
           const SizedBox(height: 8),
 
           // Divider
-          Divider(height: 1, color: const Color(0xFF4CB572).withValues(alpha: 0.1)),
+          Divider(height: 1, color: Theme.of(context).dividerColor),
 
           // ─── Tab content ───
           Expanded(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../data/worldcup_data.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
+import 'package:fifalove_mobile/features/worldcup/data/worldcup_data.dart';
 
 class SafetyTab extends StatefulWidget {
   const SafetyTab({super.key});
@@ -18,8 +19,8 @@ class _SafetyTabState extends State<SafetyTab> {
   ];
 
   Color _scoreColor(double score) {
-    if (score >= 8.0) return const Color(0xFF4CB572);
-    if (score >= 7.0) return const Color(0xFFF2C233);
+    if (score >= 8.0) return FifaColors.emeraldSpring;
+    if (score >= 7.0) return FifaColors.gold;
     return const Color(0xFFE83535);
   }
 
@@ -28,9 +29,9 @@ class _SafetyTabState extends State<SafetyTab> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0D1A13),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor ?? const Color(0xFF1E4A33)),
+        border: Border.all(color: borderColor ?? Theme.of(context).dividerColor),
       ),
       child: child,
     );
@@ -77,15 +78,15 @@ class _SafetyTabState extends State<SafetyTab> {
                   margin: const EdgeInsets.only(right: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isActive ? const Color(0xFF135E4B) : const Color(0xFF152B1E),
+                    color: isActive ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: isActive ? cs : const Color(0xFF1E4A33)),
+                    border: Border.all(color: isActive ? cs : Theme.of(context).dividerColor),
                   ),
                   child: Text(
                     city,
                     style: GoogleFonts.inter(
                       fontSize: 12,
-                      color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.45),
+                      color: isActive ? Colors.white : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.45),
                       fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
@@ -108,7 +109,7 @@ class _SafetyTabState extends State<SafetyTab> {
                       children: [
                         Text('SAFETY SCORE',
                             style: GoogleFonts.spaceMono(
-                                fontSize: 9, color: const Color(0xFF4CB572), letterSpacing: 1.5)),
+                                fontSize: 9, color: Theme.of(context).primaryColor, letterSpacing: 1.5)),
                         const SizedBox(height: 6),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -121,7 +122,7 @@ class _SafetyTabState extends State<SafetyTab> {
                               child: Text(' /10',
                                   style: GoogleFonts.inter(
                                       fontSize: 16,
-                                      color: Colors.white.withValues(alpha: 0.40))),
+                                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.40))),
                             ),
                           ],
                         ),
@@ -149,15 +150,15 @@ class _SafetyTabState extends State<SafetyTab> {
                   children: [
                     Text('✅ SAFE AREAS',
                         style: GoogleFonts.spaceMono(
-                            fontSize: 9, color: const Color(0xFF4CB572), letterSpacing: 1.5)),
+                            fontSize: 9, color: Theme.of(context).primaryColor, letterSpacing: 1.5)),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 8, runSpacing: 6,
                       children: (data['best_areas'] as List)
                           .map((area) => _chip(
                                 label: area as String,
-                                bg: const Color(0xFF135E4B).withValues(alpha: 0.3),
-                                textColor: Colors.white.withValues(alpha: 0.80),
+                                bg: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                textColor: Theme.of(context).primaryColor,
                               ))
                           .toList(),
                     ),
@@ -168,13 +169,20 @@ class _SafetyTabState extends State<SafetyTab> {
 
               // Avoid areas
               _card(
-                borderColor: const Color(0xFFE83535).withValues(alpha: 0.2),
+                borderColor: const Color(0xFFE83535).withValues(alpha: 0.1),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('⚠️ CAUTION AT NIGHT',
-                        style: GoogleFonts.spaceMono(
-                            fontSize: 9, color: const Color(0xFFE83535), letterSpacing: 1.5)),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined,
+                            size: 14, color: FifaColors.emeraldSpring),
+                        const SizedBox(width: 4),
+                        Text('⚠️ CAUTION AT NIGHT',
+                            style: GoogleFonts.spaceMono(
+                                fontSize: 9, color: const Color(0xFFE83535), letterSpacing: 1.5)),
+                      ],
+                    ),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 8, runSpacing: 6,
@@ -195,18 +203,18 @@ class _SafetyTabState extends State<SafetyTab> {
               _card(
                 child: Row(
                   children: [
-                    const Icon(Icons.local_hospital_outlined, size: 18, color: Color(0xFF4CB572)),
+                    Icon(Icons.local_hospital_outlined, size: 18, color: Theme.of(context).primaryColor),
                     const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('EMERGENCY NUMBER',
                             style: GoogleFonts.spaceMono(
-                                fontSize: 9, color: const Color(0xFF4CB572), letterSpacing: 1.5)),
+                                fontSize: 9, color: Theme.of(context).primaryColor, letterSpacing: 1.5)),
                         const SizedBox(height: 2),
                         Text(data['emergency'] as String,
                             style: GoogleFonts.spaceGrotesk(
-                                fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                                fontSize: 22, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color)),
                       ],
                     ),
                   ],
@@ -218,22 +226,22 @@ class _SafetyTabState extends State<SafetyTab> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF2C233).withValues(alpha: 0.08),
+                  color: FifaColors.gold.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
                   border:
-                      Border.all(color: const Color(0xFFF2C233).withValues(alpha: 0.25)),
+                      Border.all(color: FifaColors.gold.withValues(alpha: 0.25)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.lightbulb_outline, size: 18, color: Color(0xFFF2C233)),
+                    const Icon(Icons.lightbulb_outline, size: 18, color: FifaColors.gold),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         data['tip'] as String,
                         style: GoogleFonts.inter(
                             fontSize: 13,
-                            color: Colors.white.withValues(alpha: 0.70),
+                            color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.70),
                             height: 1.5),
                       ),
                     ),

@@ -27,7 +27,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _currentUserId = SupabaseConfig.client.auth.currentUser?.id ?? 'mock-user';
+    _currentUserId = SupabaseConfig.client.auth.currentUser?.id;
+    if (_currentUserId == null) return;
     _loadMatches();
     _fetchMyProfile();
   }
@@ -68,7 +69,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _loadMatches() async {
     setState(() => _loading = true);
     try {
-      final userId = _currentUserId ?? 'mock-user';
+      final userId = _currentUserId ?? '';
       final matches = await _repo.fetchMatches(userId);
       if (mounted) {
         setState(() {
@@ -94,7 +95,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final topPad = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080F0C),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // ─── View 1: Match list ───
@@ -120,7 +121,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           style: GoogleFonts.spaceMono(
                             fontSize: 10,
                             letterSpacing: 2,
-                            color: const Color(0xFF9BB3AF),
+                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -132,7 +133,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                 style: GoogleFonts.spaceGrotesk(
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color(0xFFEBF2EE),
+                                  color: Theme.of(context).textTheme.bodyLarge?.color,
                                 ),
                                 children: [
                                   TextSpan(
@@ -140,7 +141,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                     style: GoogleFonts.spaceGrotesk(
                                       fontSize: 32,
                                       fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF4CB572),
+                                      color: Theme.of(context).primaryColor,
                                     ),
                                   ),
                                 ],
@@ -154,7 +155,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           'Start a conversation',
                           style: GoogleFonts.inter(
                             fontSize: 14,
-                            color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
+                            color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
                           ),
                         ),
                       ],
@@ -164,17 +165,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   // Content
                   Expanded(
                     child: _loading
-                        ? const Center(
+                        ? Center(
                             child: CircularProgressIndicator(
-                              color: Color(0xFF4CB572),
+                              color: Theme.of(context).primaryColor,
                               strokeWidth: 2,
                             ),
                           )
                         : _matches.isEmpty
-                            ? _buildEmptyState()
+                            ? _buildEmptyState(context)
                             : RefreshIndicator(
-                                color: const Color(0xFF4CB572),
-                                backgroundColor: const Color(0xFF0D1A13),
+                                color: Theme.of(context).primaryColor,
+                                backgroundColor: Theme.of(context).cardColor,
                                 onRefresh: _loadMatches,
                                 child: ListView(
                                   padding: EdgeInsets.zero,
@@ -209,7 +210,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                                         fit: BoxFit.cover,
                                                       )
                                                     else
-                                                      Container(color: const Color(0xFF1E3D28)),
+                                                      Container(color: Theme.of(context).cardColor),
                                                     Positioned(
                                                       bottom: 0,
                                                       left: 0,
@@ -221,7 +222,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                                             begin: Alignment.bottomCenter,
                                                             end: Alignment.topCenter,
                                                             colors: [
-                                                              const Color(0xFF080F0C).withValues(alpha: 0.7),
+                                                              Theme.of(context).brightness == Brightness.light
+                                                                ? Colors.black.withValues(alpha: 0.2)
+                                                                : Colors.black.withValues(alpha: 0.8),
                                                               Colors.transparent,
                                                             ],
                                                           ),
@@ -248,15 +251,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                             width: 80,
                                             height: 100,
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFF152B1E),
+                                              color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
                                               borderRadius: BorderRadius.circular(16),
                                               border: Border.all(
-                                                color: const Color(0xFF4CB572).withValues(alpha: 0.3),
+                                                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
                                                 width: 1,
                                               ),
                                             ),
-                                            child: const Center(
-                                              child: Icon(Icons.add, size: 24, color: Color(0xFF4CB572)),
+                                            child: Center(
+                                              child: Icon(Icons.add, size: 24, color: Theme.of(context).primaryColor),
                                             ),
                                           ),
                                         ],
@@ -266,7 +269,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                     Container(
                                       margin: const EdgeInsets.symmetric(horizontal: 16),
                                       height: 1,
-                                      color: const Color(0xFF4CB572).withValues(alpha: 0.1),
+                                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                                     ),
                                     ListView.builder(
                                       padding: EdgeInsets.zero,
@@ -277,7 +280,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                         return MatchListItem(
                                           match: _matches[index],
                                           currentUserId:
-                                              _currentUserId ?? 'mock-user',
+                                              _currentUserId ?? '',
                                           onTap: () {
                                             final match = _matches[index];
                                             if (match['id'] == null) {
@@ -316,7 +319,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   bottom: false,
                   child: ConversationView(
                     match: _selectedMatch!,
-                    currentUserId: _currentUserId ?? 'mock-user',
+                    currentUserId: _currentUserId ?? '',
                     myProfile: _myProfile ?? {},
                     onBack: () {
                       setState(() => _selectedMatch = null);
@@ -331,7 +334,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -341,14 +344,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: const Color(0xFF152B1E),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(40),
             ),
             child: Center(
               child: Icon(
                 Icons.chat_bubble_outline,
                 size: 36,
-                color: const Color(0xFF4CB572).withValues(alpha: 0.4),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
               ),
             ),
           ),
@@ -358,7 +361,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFFEBF2EE).withValues(alpha: 0.5),
+              color: Theme.of(context).textTheme.titleLarge?.color?.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
@@ -367,7 +370,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: const Color(0xFFEBF2EE).withValues(alpha: 0.3),
+              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
             ),
           ),
           const SizedBox(height: 28),
@@ -377,20 +380,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  color: Theme.of(context).primaryColor,
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withValues(alpha: 0.8),
+                    ],
+                  ),
                 ),
-              ),
-              child: Text(
-                'Go to Discover',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                child: Text(
+                  'Go to Discover',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
             ),
           ),
         ],

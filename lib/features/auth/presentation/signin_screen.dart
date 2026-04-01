@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 import '../../../core/router/auth_gate.dart';
+import '../../../core/constants/colors.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -40,7 +41,6 @@ class _SignInScreenState extends State<SignInScreen> {
       );
 
       if (mounted && response.user != null) {
-        // AuthGate will automatically handle the routing based on session state and profile
         if (mounted) {
           Navigator.pushAndRemoveUntil(
             context,
@@ -57,12 +57,20 @@ class _SignInScreenState extends State<SignInScreen> {
         } else if (e.message.toLowerCase().contains("invalid login credentials")) {
           msg = "Incorrect email or password — please try again";
         }
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Something went wrong — please try again")),
+          const SnackBar(
+            content: Text("Something went wrong — please try again"),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {
@@ -70,28 +78,38 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(BuildContext context, String text) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(
         text,
-        style: GoogleFonts.spaceMono(fontSize: 10, color: const Color(0xFF4CB572), letterSpacing: 2),
+        style: GoogleFonts.spaceMono(
+          fontSize: 10,
+          color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+          letterSpacing: 2,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF080F0C),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
         decoration: BoxDecoration(
           gradient: RadialGradient(
             center: Alignment.bottomCenter,
             radius: 1.5,
             colors: [
-              const Color(0xFF135E4B).withValues(alpha: 0.4),
-              const Color(0xFF080F0C),
+              FifaColors.emeraldForest.withValues(alpha: isLight ? 0.08 : 0.4),
+              theme.scaffoldBackgroundColor,
             ],
           ),
         ),
@@ -104,61 +122,69 @@ class _SignInScreenState extends State<SignInScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.white.withValues(alpha: 0.6), size: 20),
+                    icon: Icon(
+                      Icons.arrow_back_ios_new,
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                      size: 20,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
                 const SizedBox(height: 32),
                 Text(
                   "Welcome back",
-                  style: GoogleFonts.spaceGrotesk(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textTheme.displayLarge?.color,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   "Sign in to continue",
-                  style: GoogleFonts.inter(fontSize: 15, color: Colors.white.withValues(alpha: 0.45)),
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.45),
+                  ),
                 ),
                 const SizedBox(height: 40),
                 
                 // EMAIL
-                _buildLabel("EMAIL"),
+                _buildLabel(context, "EMAIL"),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: Colors.white),
+                  style: theme.textTheme.bodyLarge,
                   decoration: InputDecoration(
                     hintText: "your@email.com",
-                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-                    fillColor: const Color(0xFF152B1E),
-                    filled: true,
-                    prefixIcon: const Icon(Icons.mail_outline, color: Color(0xFF4CB572)),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF4CB572), width: 1.5)),
+                    prefixIcon: Icon(
+                      Icons.mail_outline,
+                      color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 
                 // PASSWORD
-                _buildLabel("PASSWORD"),
+                _buildLabel(context, "PASSWORD"),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  style: const TextStyle(color: Colors.white),
+                  style: theme.textTheme.bodyLarge,
                   decoration: InputDecoration(
                     hintText: "••••••••",
-                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-                    fillColor: const Color(0xFF152B1E),
-                    filled: true,
-                    prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF4CB572)),
+                    prefixIcon: Icon(
+                      Icons.lock_outline,
+                      color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                        color: Colors.white.withValues(alpha: 0.4),
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        size: 20,
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
                       ),
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF4CB572), width: 1.5)),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -167,46 +193,50 @@ class _SignInScreenState extends State<SignInScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
+                    onPressed: () => Navigator.push(
+                      context, 
+                      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                    ),
                     child: Text(
                       "Forgot password?",
-                      style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF4CB572)),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
                 
                 // SIGN IN BUTTON
-                InkWell(
-                  onTap: _isLoading ? null : _signIn,
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    height: 56,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : Text("Sign In", style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
-                  ),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _signIn,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text("Sign In"),
                 ),
                 const SizedBox(height: 24),
                 
                 // DIVIDER
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.12))),
+                    Expanded(child: Divider(color: theme.dividerColor.withValues(alpha: 0.2))),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text("or", style: GoogleFonts.inter(fontSize: 13, color: Colors.white.withValues(alpha: 0.3))),
+                      child: Text(
+                        "or",
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
+                        ),
+                      ),
                     ),
-                    Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.12))),
+                    Expanded(child: Divider(color: theme.dividerColor.withValues(alpha: 0.2))),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -215,10 +245,26 @@ class _SignInScreenState extends State<SignInScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Don't have an account? ", style: GoogleFonts.inter(fontSize: 14, color: Colors.white.withValues(alpha: 0.5))),
+                    Text(
+                      "Don't have an account? ",
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                      ),
+                    ),
                     TextButton(
-                      onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const SignupScreen())),
-                      child: Text("Create Account", style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF4CB572))),
+                      onPressed: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SignupScreen()),
+                      ),
+                      child: Text(
+                        "Create Account",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                        ),
+                      ),
                     ),
                   ],
                 ),

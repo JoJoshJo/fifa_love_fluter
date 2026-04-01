@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
 
 class MatchOverlay extends StatefulWidget {
   final Map<String, dynamic> matchedProfile;
@@ -26,7 +27,9 @@ class _MatchOverlayState extends State<MatchOverlay>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _confettiController;
+  late AnimationController _heartbeatController;
   late Animation<double> _pulseAnimation;
+  late Animation<double> _heartbeatAnimation;
   late List<_ConfettiDot> _dots;
   Timer? _autoDismiss;
 
@@ -41,6 +44,21 @@ class _MatchOverlayState extends State<MatchOverlay>
     )..repeat(reverse: true);
     _pulseAnimation =
         Tween<double>(begin: 0.9, end: 1.1).animate(_pulseController);
+
+    // Heartbeat animation for avatars
+    _heartbeatController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat();
+    _heartbeatAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.15), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 1.15, end: 1.0), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.2), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 1.0), weight: 40),
+    ]).animate(CurvedAnimation(
+      parent: _heartbeatController,
+      curve: Curves.easeInOut,
+    ));
 
     // Confetti animation
     _confettiController = AnimationController(
@@ -76,6 +94,7 @@ class _MatchOverlayState extends State<MatchOverlay>
   void dispose() {
     _pulseController.dispose();
     _confettiController.dispose();
+    _heartbeatController.dispose();
     _autoDismiss?.cancel();
     super.dispose();
   }
@@ -87,7 +106,10 @@ class _MatchOverlayState extends State<MatchOverlay>
     final matchedAvatarUrl = widget.matchedProfile['avatar_url'] as String?;
 
     return Material(
-      color: const Color(0xFF080F0C).withValues(alpha: 0.97),
+      color: (Theme.of(context).brightness == Brightness.light
+              ? FifaColors.emeraldForest
+              : const Color(0xFF080F0C))
+          .withValues(alpha: 0.97),
       child: Stack(
         children: [
           // Confetti layer
@@ -115,7 +137,10 @@ class _MatchOverlayState extends State<MatchOverlay>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildAvatar(widget.myAvatarUrl),
+                      ScaleTransition(
+                        scale: _heartbeatAnimation,
+                        child: _buildAvatar(widget.myAvatarUrl),
+                      ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: ScaleTransition(
@@ -127,23 +152,30 @@ class _MatchOverlayState extends State<MatchOverlay>
                           ),
                         ),
                       ),
-                      _buildAvatar(matchedAvatarUrl),
+                      ScaleTransition(
+                        scale: _heartbeatAnimation,
+                        child: _buildAvatar(matchedAvatarUrl),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 24),
 
-                  // "IT'S A MATCH!" heading with gradient text
-                  ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [Color(0xFFE8437A), Color(0xFFF2C233)],
-                    ).createShader(bounds),
-                    child: Text(
-                      "IT'S A MATCH!",
-                      style: GoogleFonts.spaceGrotesk(
-                        fontSize: 42,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 2,
+                  // "IT'S A MATCH!" heading with gradient text (Heartbeat)
+                  ScaleTransition(
+                    scale: _heartbeatAnimation,
+                    child: ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [Color(0xFF4CB572), Color(0xFFF2C233)],
+                      ).createShader(bounds),
+                      child: Text(
+                        "IT'S A MATCH!",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.spaceGrotesk(
+                          fontSize: 42,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 2,
+                        ),
                       ),
                     ),
                   ),

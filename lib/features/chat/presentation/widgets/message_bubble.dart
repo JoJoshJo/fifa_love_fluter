@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MessageBubble extends StatelessWidget {
@@ -24,85 +25,106 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final content = message['content'] as String? ?? '';
-    final readAt = message['read_at'] as String?;
-
-    final bubbleRadius = isMe
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(18),
-            topRight: Radius.circular(18),
-            bottomRight: Radius.circular(4),
-            bottomLeft: Radius.circular(18),
-          )
-        : const BorderRadius.only(
-            topLeft: Radius.circular(4),
-            topRight: Radius.circular(18),
-            bottomRight: Radius.circular(18),
-            bottomLeft: Radius.circular(18),
-          );
+    final timeStr = _formatTime(message['created_at'] as String?);
+    final isMine = isMe;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 16),
-      child: Row(
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Column(
-            crossAxisAlignment:
-                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-            children: [
-              // The bubble
-              Container(
-                constraints: BoxConstraints(maxWidth: screenWidth * 0.72),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color:
-                      isMe ? const Color(0xFF135E4B) : const Color(0xFF1A3025),
-                  borderRadius: bubbleRadius,
-                ),
-                child: Text(
-                  content,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.90),
-                    height: 1.45,
-                  ),
-                ),
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutBack,
+        tween: Tween(begin: 0.0, end: 1.0),
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value,
+            child: Transform.translate(
+              offset: Offset(0, 20 * (1 - value)),
+              child: Transform.scale(
+                scale: 0.8 + (0.2 * value),
+                alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+                child: child,
               ),
-
-              // Timestamp and Read Receipt
-              if (showTime || isMe)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4, left: 4, right: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isMe) ...[
-                        Icon(
-                          Icons.done_all,
-                          size: 11,
-                          color: readAt != null
-                              ? const Color(0xFF4CB572)
-                              : Colors.white.withValues(alpha: 0.20),
-                        ),
-                        const SizedBox(width: 4),
-                      ],
-                      Text(
-                        _formatTime(message['created_at'] as String?),
-                        style: GoogleFonts.spaceMono(
-                          fontSize: 9,
-                          color: Colors.white.withValues(alpha: 0.25),
-                        ),
+            ),
+          );
+        },
+        child: Column(
+          crossAxisAlignment:
+              isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment:
+                  isMine ? MainAxisAlignment.start : MainAxisAlignment.end,
+              children: [
+                if (isMine) const Spacer(),
+                Flexible(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isMine
+                          ? FifaColors.emeraldForest
+                          : Theme.of(context).cardColor,
+                      borderRadius: isMine
+                          ? const BorderRadius.only(
+                              topLeft: Radius.circular(18),
+                              topRight: Radius.circular(18),
+                              bottomLeft: Radius.circular(18),
+                              bottomRight: Radius.circular(4),
+                            )
+                          : const BorderRadius.only(
+                              topLeft: Radius.circular(18),
+                              topRight: Radius.circular(18),
+                              bottomLeft: Radius.circular(4),
+                              bottomRight: Radius.circular(18),
+                            ),
+                      border: isMine
+                          ? null
+                          : Border.all(
+                              color: Theme.of(context).dividerColor,
+                              width: 1,
+                            ),
+                    ),
+                    child: Text(
+                      message['content'] ?? '',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        color: isMine
+                            ? Colors.white
+                            : Theme.of(context).textTheme.bodyLarge?.color,
+                        height: 1.4,
                       ),
-                    ],
+                    ),
                   ),
                 ),
-            ],
-          ),
-        ],
+                if (!isMine) const Spacer(),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isMine) const SizedBox(width: 40),
+                Text(
+                  timeStr,
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.35),
+                  ),
+                ),
+                if (isMine) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    message['read_at'] != null ? Icons.done_all : Icons.done,
+                    size: 12,
+                    color: message['read_at'] != null
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.35),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

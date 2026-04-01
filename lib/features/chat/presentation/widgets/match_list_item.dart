@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -51,20 +52,20 @@ class MatchListItem extends StatelessWidget {
       previewText = 'Say hello! 👋';
       previewStyle = GoogleFonts.inter(
         fontSize: 13,
-        color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
+        color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
         fontStyle: FontStyle.italic,
       );
     } else if (lastMsg['sender_id'] == currentUserId) {
       previewText = 'You: ${lastMsg['content']}';
       previewStyle = GoogleFonts.inter(
         fontSize: 13,
-        color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
+        color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35),
       );
     } else {
       previewText = lastMsg['content'] as String? ?? '';
       previewStyle = GoogleFonts.inter(
         fontSize: 13,
-        color: const Color(0xFFEBF2EE).withValues(alpha: unread > 0 ? 0.70 : 0.35),
+        color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: unread > 0 ? 0.70 : 0.35),
       );
     }
 
@@ -83,9 +84,9 @@ class MatchListItem extends StatelessWidget {
                     Container(
                       width: 52,
                       height: 52,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Color(0xFF1E3D28),
+                        color: Theme.of(context).cardColor,
                       ),
                       child: ClipOval(
                         child: avatarUrl != null
@@ -93,10 +94,10 @@ class MatchListItem extends StatelessWidget {
                                 imageUrl: avatarUrl,
                                 fit: BoxFit.cover,
                                 errorWidget: (_, __, ___) => _fallbackAvatar(
-                                    other['name'] as String? ?? '?'),
+                                    context, other['name'] as String? ?? '?'),
                               )
                             : _fallbackAvatar(
-                                other['name'] as String? ?? '?'),
+                                context, other['name'] as String? ?? '?'),
                       ),
                     ),
                     if (isActive)
@@ -107,10 +108,10 @@ class MatchListItem extends StatelessWidget {
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF4CB572),
+                            color: Theme.of(context).primaryColor,
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: const Color(0xFF080F0C), width: 1.5),
+                                color: Theme.of(context).scaffoldBackgroundColor, width: 1.5),
                           ),
                         ),
                       ),
@@ -131,15 +132,15 @@ class MatchListItem extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFFEBF2EE),
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
                             ),
                           ),
                           if (isVerified) ...[
                             const SizedBox(width: 4),
-                            const Icon(
+                            Icon(
                               Icons.verified,
                               size: 12,
-                              color: Color(0xFF4CB572),
+                              color: Theme.of(context).primaryColor,
                             ),
                           ],
                           const Spacer(),
@@ -148,8 +149,8 @@ class MatchListItem extends StatelessWidget {
                             style: GoogleFonts.spaceMono(
                               fontSize: 10,
                               color: unread > 0
-                                  ? const Color(0xFF4CB572)
-                                  : const Color(0xFFEBF2EE).withValues(alpha: 0.3),
+                                  ? Theme.of(context).primaryColor
+                                  : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3),
                             ),
                           ),
                         ],
@@ -172,7 +173,7 @@ class MatchListItem extends StatelessWidget {
                     width: 20,
                     height: 20,
                     decoration: const BoxDecoration(
-                      color: Color(0xFFE8437A),
+                      color: FifaColors.pink,
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -193,7 +194,7 @@ class MatchListItem extends StatelessWidget {
             padding: const EdgeInsets.only(left: 80),
             child: Divider(
               height: 1,
-              color: const Color(0xFF4CB572).withValues(alpha: 0.08),
+              color: Theme.of(context).dividerColor,
             ),
           ),
         ],
@@ -201,15 +202,15 @@ class MatchListItem extends StatelessWidget {
     );
   }
 
-  Widget _fallbackAvatar(String name) {
+  Widget _fallbackAvatar(BuildContext context, String name) {
     final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
     return Container(
-      color: const Color(0xFF152B1E),
+      color: Theme.of(context).cardColor,
       child: Center(
         child: Text(
           initials,
           style: GoogleFonts.spaceGrotesk(
-            color: const Color(0xFF4CB572),
+            color: Theme.of(context).primaryColor,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),

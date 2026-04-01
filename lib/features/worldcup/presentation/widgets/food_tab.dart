@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../data/worldcup_data.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
+import 'package:fifalove_mobile/features/worldcup/data/worldcup_data.dart';
 
 class FoodTab extends StatefulWidget {
   const FoodTab({super.key});
@@ -54,13 +55,13 @@ class _FoodTabState extends State<FoodTab> {
                       horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: isActive
-                        ? const Color(0xFF135E4B)
-                        : const Color(0xFF152B1E),
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isActive
-                          ? const Color(0xFF4CB572)
-                          : const Color(0xFF1E4A33),
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).dividerColor,
                     ),
                   ),
                   child: Text(
@@ -69,7 +70,7 @@ class _FoodTabState extends State<FoodTab> {
                       fontSize: 12,
                       color: isActive
                           ? Colors.white
-                          : Colors.white.withValues(alpha: 0.45),
+                          : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.45),
                       fontWeight: isActive
                           ? FontWeight.w600
                           : FontWeight.normal,
@@ -91,14 +92,14 @@ class _FoodTabState extends State<FoodTab> {
                       Text('🍽️',
                           style: TextStyle(
                               fontSize: 48,
-                              color: Colors.white.withValues(alpha: 0.3))),
+                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3))),
                       const SizedBox(height: 12),
                       Text(
                         'No restaurants listed yet\nfor $_selectedCity',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: Colors.white.withValues(alpha: 0.35),
+                          color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.35),
                         ),
                       ),
                     ],
@@ -114,10 +115,10 @@ class _FoodTabState extends State<FoodTab> {
                           horizontal: 12, vertical: 6),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0D1A13),
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(16),
                         border:
-                            Border.all(color: const Color(0xFF1E4A33)),
+                            Border.all(color: Theme.of(context).dividerColor),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +128,7 @@ class _FoodTabState extends State<FoodTab> {
                             width: 52,
                             height: 52,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF152B1E),
+                              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Center(
@@ -152,7 +153,7 @@ class _FoodTabState extends State<FoodTab> {
                                         style: GoogleFonts.inter(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.white,
+                                          color: Theme.of(context).textTheme.titleLarge?.color,
                                         ),
                                       ),
                                     ),
@@ -161,8 +162,8 @@ class _FoodTabState extends State<FoodTab> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 6, vertical: 3),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF135E4B)
-                                            .withValues(alpha: 0.4),
+                                        color: Theme.of(context).primaryColor
+                                            .withValues(alpha: 0.1),
                                         borderRadius:
                                             BorderRadius.circular(10),
                                       ),
@@ -170,7 +171,7 @@ class _FoodTabState extends State<FoodTab> {
                                         r['vibe'] as String,
                                         style: GoogleFonts.spaceMono(
                                           fontSize: 8,
-                                          color: const Color(0xFF4CB572),
+                                          color: Theme.of(context).primaryColor,
                                         ),
                                       ),
                                     ),
@@ -184,36 +185,36 @@ class _FoodTabState extends State<FoodTab> {
                                       r['cuisine'] as String,
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
-                                        color: Colors.white
-                                            .withValues(alpha: 0.50),
+                                        color: Theme.of(context).textTheme.bodySmall?.color
+                                            ?.withValues(alpha: 0.50),
                                       ),
                                     ),
                                     Text(
                                       ' · ',
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
-                                        color: Colors.white
-                                            .withValues(alpha: 0.30),
+                                        color: Theme.of(context).textTheme.bodySmall?.color
+                                            ?.withValues(alpha: 0.30),
                                       ),
                                     ),
                                     Text(
                                       r['price'] as String,
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
-                                        color: const Color(0xFFF2C233),
+                                        color: FifaColors.gold,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                     const Spacer(),
                                     const Icon(Icons.star_rounded,
                                         size: 12,
-                                        color: Color(0xFFF2C233)),
+                                        color: FifaColors.gold),
                                     const SizedBox(width: 2),
                                     Text(
                                       (r['rating'] as double).toString(),
                                       style: GoogleFonts.spaceMono(
                                         fontSize: 11,
-                                        color: Colors.white,
+                                        color: Theme.of(context).textTheme.bodyLarge?.color,
                                       ),
                                     ),
                                   ],
@@ -226,7 +227,7 @@ class _FoodTabState extends State<FoodTab> {
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.inter(
                                     fontSize: 13,
-                                    color: Colors.white.withValues(alpha: 0.55),
+                                    color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.55),
                                   ),
                                 ),
                               ],

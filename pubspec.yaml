@@ -48,10 +48,10 @@ dependencies:
   cached_network_image: ^3.0.0
   
   # Swipe cards
-  flutter_card_swiper: ^7.0.0
-  
-  # Local storage
-  shared_preferences: ^2.0.0
+  flutter_card_swiper: ^7.0.1
+  shimmer: ^3.0.0
+  page_transition: ^2.1.0
+  shared_preferences: ^2.2.2
   
   # Image picker
   image_picker: ^1.0.0

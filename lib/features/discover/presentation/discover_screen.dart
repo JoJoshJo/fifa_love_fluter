@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
 import '../../../core/supabase/supabase_config.dart';
 import '../../../shared/providers/navigation_provider.dart';
 import '../data/discover_repository.dart';
@@ -11,6 +12,7 @@ import 'widgets/swipe_card.dart';
 import 'widgets/match_overlay.dart';
 import 'widgets/country_filter_sheet.dart';
 import '../../../core/notifications/notification_service.dart';
+import '../../../core/widgets/shimmer_card.dart';
 
 class DiscoverScreen extends ConsumerStatefulWidget {
   const DiscoverScreen({super.key});
@@ -81,7 +83,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     setState(() => _loading = true);
 
     final user = SupabaseConfig.client.auth.currentUser;
-    final userId = user?.id ?? 'mock-user';
+    if (user?.id == null) {
+      if (mounted) setState(() => _loading = false);
+      return;
+    }
+    final userId = user!.id;
 
     final profiles = await _repo.fetchProfiles(
       userId: userId,
@@ -98,22 +104,20 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   }
 
   Future<void> _handleSwipe(String action, Map<String, dynamic> profile) async {
-    // Hard limit check
     if (_dailySwipes >= _hardLimit) {
       _showPremiumSheet();
       return;
     }
 
-    // Increment counter
     _dailySwipes++;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_swipePrefsKey, _dailySwipes);
 
     final user = SupabaseConfig.client.auth.currentUser;
-    final swiperId = user?.id ?? 'mock-user';
+    final swiperId = user?.id;
+    if (swiperId == null) return;
     final swipedId = profile['id'] as String;
 
-    // Record swipe & check for match
     final result = await _repo.recordSwipe(
       swiperId: swiperId,
       swipedId: swipedId,
@@ -123,7 +127,6 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
     if (!mounted) return;
 
-    // Mutual match
     if (result != null) {
       setState(() {
         _matchedProfile = profile;
@@ -131,10 +134,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       });
     }
 
-    // Advance index
     setState(() => _currentIndex++);
 
-    // Reload when near the end
     if (_currentIndex >= _profiles.length - 3) {
       _loadProfiles();
     }
@@ -143,7 +144,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   void _showPremiumSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF0D1A13),
+      backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -159,7 +160,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               style: GoogleFonts.spaceGrotesk(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Theme.of(context).textTheme.titleLarge?.color,
               ),
             ),
             const SizedBox(height: 8),
@@ -168,7 +169,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 24),
@@ -177,8 +178,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF2C233),
-                  foregroundColor: Colors.black,
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -222,58 +223,53 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final remaining = _profiles.length - _currentIndex;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080F0C),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // Main content
           SafeArea(
             child: Column(
               children: [
-                // ── Top bar ──────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 12),
                   child: Row(
                     children: [
-                      // App name
                       Text(
                         'FIFA LOVE',
                         style: GoogleFonts.spaceGrotesk(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFFF2C233),
+                          color: FifaColors.gold,
                         ),
                       ),
                       const Spacer(),
-                      // Daily counter
                       if (_dailySwipes > 0)
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.06),
+                            color: Theme.of(context).dividerColor,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '${_freeLimit - _dailySwipes < 0 ? 0 : _freeLimit - _dailySwipes} left',
                             style: GoogleFonts.spaceMono(
                               fontSize: 10,
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
                             ),
                           ),
                         ),
                       const SizedBox(width: 8),
-                      // Country filter button
                       GestureDetector(
                         onTap: _openCountryFilter,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF152B1E),
+                            color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: const Color(0xFF4CB572)
+                              color: Theme.of(context).primaryColor
                                   .withValues(alpha: 0.6),
                             ),
                           ),
@@ -288,7 +284,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                                     : '${_selectedCountries.length}',
                                 style: GoogleFonts.spaceMono(
                                   fontSize: 10,
-                                  color: const Color(0xFF4CB572),
+                                  color: Theme.of(context).primaryColor,
                                 ),
                               ),
                             ],
@@ -299,29 +295,28 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                   ),
                 ),
 
-                // ── Free limit warning banner ───────────────────
                 if (_dailySwipes >= _freeLimit && _dailySwipes < _hardLimit)
                   Container(
                     margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF2C233).withValues(alpha: 0.1),
+                      color: FifaColors.gold.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: const Color(0xFFF2C233).withValues(alpha: 0.3),
+                        color: FifaColors.gold.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Row(
                       children: [
                         const Icon(Icons.star,
-                            size: 16, color: Color(0xFFF2C233)),
+                            size: 16, color: FifaColors.gold),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             "You've used your free swipes today",
                             style: GoogleFonts.inter(
                               fontSize: 12,
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                             ),
                           ),
                         ),
@@ -332,7 +327,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                             style: GoogleFonts.inter(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: const Color(0xFFF2C233),
+                              color: FifaColors.gold,
                             ),
                           ),
                         ),
@@ -340,15 +335,9 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                     ),
                   ),
 
-                // ── Card stack ──────────────────────────────────
                 Expanded(
                   child: _loading
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xFF4CB572),
-                            strokeWidth: 2,
-                          ),
-                        )
+                      ? _buildShimmer()
                       : remaining <= 0
                           ? _buildEmptyState()
                           : Center(
@@ -398,21 +387,19 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                             ),
                 ),
 
-                // ── Action buttons ──────────────────────────────
                 if (!_loading && remaining > 0)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(48, 8, 48, 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // NOPE
                         GestureDetector(
                           onTap: () => _swiperController.swipe(CardSwiperDirection.left),
                           child: Container(
                             width: 56,
                             height: 56,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF152B1E),
+                              color: Theme.of(context).cardColor,
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: const Color(0xFFE8437A).withValues(alpha: 0.5),
@@ -422,40 +409,42 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                             child: const Icon(Icons.close, size: 24, color: Color(0xFFE8437A)),
                           ),
                         ),
-                        // SUPERLIKE
                         GestureDetector(
                           onTap: () => _swiperController.swipe(CardSwiperDirection.top),
                           child: Container(
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF152B1E),
+                              color: Theme.of(context).cardColor,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFFF2C233).withValues(alpha: 0.5),
+                                color: FifaColors.gold.withValues(alpha: 0.5),
                                 width: 1.5,
                               ),
                             ),
-                            child: const Icon(Icons.star_outline, size: 22, color: Color(0xFFF2C233)),
+                            child: const Icon(Icons.star_outline, size: 22, color: FifaColors.gold),
                           ),
                         ),
-                        // LIKE
                         GestureDetector(
                           onTap: () => _swiperController.swipe(CardSwiperDirection.right),
                           child: Container(
                             width: 56,
                             height: 56,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF135E4B),
+                              color: Theme.of(context).primaryColor,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0xFF4CB572),
-                                width: 1.5,
+                                color: Theme.of(context).primaryColor,
+                                width: 2,
                               ),
                             ),
-                            child: const Icon(Icons.favorite_outline, size: 24, color: Color(0xFF4CB572)),
+                            child: const Icon(
+                            Icons.favorite_outline, 
+                            size: 24, 
+                            color: Colors.white,
                           ),
                         ),
+                      ),
                       ],
                     ),
                   ),
@@ -500,7 +489,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
           Icon(
             Icons.explore_outlined,
             size: 64,
-            color: const Color(0xFF4CB572).withValues(alpha: 0.4),
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 16),
           Text(
@@ -508,7 +497,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withValues(alpha: 0.6),
+              color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 8),
@@ -516,18 +505,17 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
             'Try adding more countries',
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.35),
+              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.35),
             ),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _openCountryFilter,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF135E4B),
-              foregroundColor: const Color(0xFF4CB572),
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
-                side: const BorderSide(color: Color(0xFF4CB572)),
               ),
               padding: const EdgeInsets.symmetric(
                   horizontal: 24, vertical: 12),
@@ -541,5 +529,9 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildShimmer() {
+    return const Center(child: ShimmerSwipeCard());
   }
 }
