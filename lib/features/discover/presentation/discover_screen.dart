@@ -201,7 +201,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     );
   }
 
-  void _openCountryFilter() {
+  void _showCountryFilter() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -221,79 +221,103 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   @override
   Widget build(BuildContext context) {
     final remaining = _profiles.length - _currentIndex;
-
+    final isLight = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: isLight
+          ? const Color(0xFFF5F0E8)
+          : const Color(0xFF080F0C),
       body: Stack(
         children: [
-          SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Text(
-                        'FIFA LOVE',
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: FifaColors.gold,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (_dailySwipes > 0)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).dividerColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${_freeLimit - _dailySwipes < 0 ? 0 : _freeLimit - _dailySwipes} left',
-                            style: GoogleFonts.spaceMono(
-                              fontSize: 10,
-                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
-                            ),
+          Column(
+            children: [
+              // DISCOVER SCREEN HEADER
+              Container(
+                padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top + 12,
+                    left: 24,
+                    right: 24,
+                    bottom: 12),
+                color: isLight
+                    ? const Color(0xFFF5F0E8)
+                    : const Color(0xFF080F0C),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Left — screen label
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CURATED FOR YOU',
+                          style: GoogleFonts.spaceMono(
+                            fontSize: 9,
+                            color: const Color(0xFF4CB572),
+                            letterSpacing: 2,
                           ),
                         ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: _openCountryFilter,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Theme.of(context).primaryColor
-                                  .withValues(alpha: 0.6),
-                            ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Discover',
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w700,
+                            color: isLight
+                                ? const Color(0xFF0D2B1E)
+                                : Colors.white,
+                            height: 1.1,
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text('🌍', style: TextStyle(fontSize: 14)),
-                              const SizedBox(width: 4),
-                              Text(
-                                _selectedCountries.isEmpty
-                                    ? 'ALL'
-                                    : '${_selectedCountries.length}',
-                                style: GoogleFonts.spaceMono(
-                                  fontSize: 10,
-                                  color: Theme.of(context).primaryColor,
-                                ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    // Right — country filter pill
+                    GestureDetector(
+                      onTap: _showCountryFilter,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: isLight
+                              ? Colors.white
+                              : const Color(0xFF152B1E),
+                          border: Border.all(
+                            color: isLight
+                                ? const Color(0xFFD4EBE0)
+                                : const Color(0xFF1E4A33),
+                          ),
+                          boxShadow: isLight
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.06),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ]
+                              : null,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('🌍', style: TextStyle(fontSize: 14)),
+                            const SizedBox(width: 6),
+                            Text(
+                              _selectedCountries.isEmpty
+                                  ? 'ALL'
+                                  : '${_selectedCountries.length}',
+                              style: GoogleFonts.spaceMono(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF135E4B),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+              ),
 
                 if (_dailySwipes >= _freeLimit && _dailySwipes < _hardLimit)
                   Container(
@@ -387,70 +411,209 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                             ),
                 ),
 
-                if (!_loading && remaining > 0)
+                if (!_loading && remaining > 0) ...[
+                  // ACTION BUTTONS BELOW CARD
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(48, 8, 48, 16),
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        GestureDetector(
-                          onTap: () => _swiperController.swipe(CardSwiperDirection.left),
-                          child: Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).cardColor,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFFE8437A).withValues(alpha: 0.5),
-                                width: 1.5,
+                        // SKIP
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => _swiperController.swipe(CardSwiperDirection.left),
+                            child: Container(
+                              height: 58,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(29),
+                                color: isLight
+                                    ? Colors.white
+                                    : const Color(0xFF0D1A13),
+                                border: Border.all(
+                                  color: isLight
+                                      ? const Color(0xFFD4EBE0)
+                                      : const Color(0xFF1E4A33),
+                                  width: 1.5,
+                                ),
+                                boxShadow: isLight
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withValues(alpha: 0.06),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        )
+                                      ]
+                                    : null,
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 28,
+                                  color: isLight
+                                      ? const Color(0xFFADB5BD)
+                                      : Colors.white.withValues(alpha: 0.3),
+                                ),
                               ),
                             ),
-                            child: const Icon(Icons.close, size: 24, color: Color(0xFFE8437A)),
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        // SUPER LIKE — smaller center
                         GestureDetector(
                           onTap: () => _swiperController.swipe(CardSwiperDirection.top),
                           child: Container(
-                            width: 48,
-                            height: 48,
+                            width: 52,
+                            height: 52,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).cardColor,
                               shape: BoxShape.circle,
+                              color: isLight
+                                  ? Colors.white
+                                  : const Color(0xFF0D1A13),
                               border: Border.all(
-                                color: FifaColors.gold.withValues(alpha: 0.5),
+                                color: const Color(0xFFF2C233)
+                                    .withValues(alpha: 0.6),
                                 width: 1.5,
                               ),
+                              boxShadow: isLight
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withValues(alpha: 0.06),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      )
+                                    ]
+                                  : null,
                             ),
-                            child: const Icon(Icons.star_outline, size: 22, color: FifaColors.gold),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => _swiperController.swipe(CardSwiperDirection.right),
-                          child: Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Theme.of(context).primaryColor,
-                                width: 2,
+                            child: const Center(
+                              child: Icon(
+                                Icons.star_outline_rounded,
+                                size: 24,
+                                color: Color(0xFFF2C233),
                               ),
                             ),
-                            child: const Icon(
-                            Icons.favorite_outline, 
-                            size: 24, 
-                            color: Colors.white,
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        // LIKE
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => _swiperController.swipe(CardSwiperDirection.right),
+                            child: Container(
+                              height: 58,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(29),
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF135E4B),
+                                    Color(0xFF1E7A5A),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF135E4B)
+                                        .withValues(alpha: 0.4),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.favorite_rounded,
+                                  size: 28,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
+
+                  // ACTIVE USER BADGES BELOW BUTTONS
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isLight
+                                ? Colors.white
+                                : const Color(0xFF0D1A13),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isLight
+                                  ? const Color(0xFFD4EBE0)
+                                  : const Color(0xFF1E4A33),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF4CB572),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'ACTIVE NOW',
+                                style: GoogleFonts.spaceMono(
+                                  fontSize: 9,
+                                  color: const Color(0xFF4CB572),
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: isLight
+                                ? Colors.white
+                                : const Color(0xFF0D1A13),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isLight
+                                  ? const Color(0xFFD4EBE0)
+                                  : const Color(0xFF1E4A33),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.verified,
+                                  size: 12, color: Color(0xFF4CB572)),
+                              const SizedBox(width: 6),
+                              Text(
+                                'ID VERIFIED',
+                                style: GoogleFonts.spaceMono(
+                                  fontSize: 9,
+                                  color: const Color(0xFF4CB572),
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
-          ),
 
           // ── Match overlay layer ──────────────────────────────
           if (_showMatch && _matchedProfile != null)
@@ -510,7 +673,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: _openCountryFilter,
+            onPressed: _showCountryFilter,
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Colors.white,
