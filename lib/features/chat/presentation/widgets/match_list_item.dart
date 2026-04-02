@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fifalove_mobile/core/constants/colors.dart';
 
 class MatchListItem extends StatelessWidget {
@@ -136,15 +137,23 @@ class MatchListItem extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            other['name'] as String? ?? 'Unknown',
-                            style: GoogleFonts.playfairDisplay(
-                              fontSize: 17,
-                              fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w600,
-                              fontStyle: FontStyle.italic,
-                              color: isLight ? FifaColors.textPrimaryLight : Colors.white,
-                              letterSpacing: -0.2,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                other['name'] as String? ?? 'Unknown',
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 17,
+                                  fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w600,
+                                  fontStyle: FontStyle.italic,
+                                  color: isLight ? FifaColors.textPrimaryLight : Colors.white,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              if (other['is_verified'] == true) ...[
+                                const SizedBox(width: 4),
+                                const Icon(LucideIcons.badgeCheck, size: 14, color: Color(0xFF4CB572)),
+                              ],
+                            ],
                           ),
                           Text(
                             timeStr.toUpperCase(),

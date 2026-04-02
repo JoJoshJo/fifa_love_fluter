@@ -193,15 +193,23 @@ class SwipeCard extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // Name
-                                  Text(name,
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.w700,
-                                        color: isLight
-                                            ? FifaColors.textPrimaryLight
-                                            : Colors.white,
-                                        height: 1.1,
-                                      )),
+                                  Row(
+                                    children: [
+                                      Text(name,
+                                          style: GoogleFonts.playfairDisplay(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.w700,
+                                            color: isLight
+                                                ? FifaColors.textPrimaryLight
+                                                : Colors.white,
+                                            height: 1.1,
+                                          )),
+                                      if (isVerified) ...[
+                                        const SizedBox(width: 6),
+                                        const Icon(LucideIcons.badgeCheck, size: 16, color: Color(0xFF4CB572)),
+                                      ],
+                                    ],
+                                  ),
                                   const SizedBox(height: 3),
                                   // Age + nationality
                                   Row(children: [
