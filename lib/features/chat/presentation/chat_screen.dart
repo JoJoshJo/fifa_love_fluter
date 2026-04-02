@@ -395,7 +395,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           GradientButton(
             text: 'Go to Discover',
             onPressed: () {
-              // Navigate to Discover
+              ref.read(currentTabProvider.notifier).state = 0;
             },
           ),
         ],

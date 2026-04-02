@@ -104,7 +104,7 @@ class DiscoverRepository {
       // Check for mutual like
       final mutual = await SupabaseConfig.client
           .from('swipe_actions')
-          .select()
+          .select('id')
           .eq('swiper_id', swipedId)
           .eq('swiped_id', swiperId)
           .inFilter('action', ['like', 'superlike']);

@@ -10,7 +10,6 @@ class SwipeCard extends StatelessWidget {
   final int stackPosition; // 0 = front, 1 = middle, 2 = back
   final double dragOffset; // horizontal drag amount (-1 to 1)
   final double dragVertical; // vertical drag amount
-
   const SwipeCard({
     super.key,
     required this.profile,
@@ -19,6 +18,15 @@ class SwipeCard extends StatelessWidget {
     this.dragOffset = 0,
     this.dragVertical = 0,
   });
+
+  static const _vignetteGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.center,
+    colors: [
+      Color(0x4D000000), // black 0.3
+      Colors.transparent,
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -75,14 +83,7 @@ class SwipeCard extends StatelessWidget {
                       Positioned.fill(
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.center,
-                              colors: [
-                                Colors.black.withValues(alpha: 0.3),
-                                Colors.transparent,
-                              ],
-                            ),
+                            gradient: _vignetteGradient,
                           ),
                         ),
                       ),
@@ -319,7 +320,7 @@ class SwipeCard extends StatelessWidget {
       );
     }
 
-    return card;
+    return RepaintBoundary(child: card);
   }
 
   // Flag helper
@@ -375,14 +376,7 @@ class _FlagFallback extends StatelessWidget {
 
     return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF135E4B),
-            Color(0xFF0A2018),
-          ],
-        ),
+        gradient: _flagGradient,
       ),
       child: Center(
         child: Column(
@@ -401,4 +395,13 @@ class _FlagFallback extends StatelessWidget {
       ),
     );
   }
+
+  static const _flagGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF135E4B),
+      Color(0xFF0A2018),
+    ],
+  );
 }

@@ -8,7 +8,7 @@ class MeRepository {
   Future<Map<String, dynamic>> fetchProfile(String userId) async {
     final res = await _client
         .from('profiles')
-        .select('*')
+        .select('id, name, age, bio, avatar_url, nationality, gender, city, interests, languages, team_supported, countries_to_match, phone_number, is_verified, is_local')
         .eq('id', userId)
         .single();
     return res;

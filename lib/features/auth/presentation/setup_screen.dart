@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/supabase/supabase_config.dart';
 import '../../../shared/presentation/main_screen.dart';
 import '../../me/data/me_repository.dart';
@@ -25,7 +26,15 @@ class _SetupScreenState extends State<SetupScreen> {
 
   String get _userId => SupabaseConfig.client.auth.currentUser?.id ?? '';
 
-  static const _countries = [
+  static const _worldCupTeams = [
+    'USA', 'Mexico', 'Canada', 'Argentina', 'Brazil', 'Uruguay', 'Colombia', 'Ecuador', 'Chile', 'Peru',
+    'France', 'England', 'Germany', 'Spain', 'Portugal', 'Italy', 'Netherlands', 'Belgium', 'Croatia', 'Switzerland',
+    'Denmark', 'Poland', 'Serbia', 'Scotland', 'Wales', 'Morocco', 'Senegal', 'Nigeria', 'Egypt', 'Ivory Coast',
+    'Cameroon', 'Tunisia', 'Algeria', 'Ghana', 'Japan', 'South Korea', 'Australia', 'Saudi Arabia', 'Iran', 'Iraq',
+    'Uzbekistan', 'Costa Rica', 'Panama', 'Jamaica', 'Honduras', 'New Zealand', 'South Africa', 'Mali'
+  ];
+
+  static const _countriesForNationality = [
     {'name': 'Brazil', 'flag': '🇧🇷'},
     {'name': 'France', 'flag': '🇫🇷'},
     {'name': 'Argentina', 'flag': '🇦🇷'},
@@ -49,9 +58,9 @@ class _SetupScreenState extends State<SetupScreen> {
   ];
 
   static const _matchTypeOptions = [
-    {'emoji': '❤️', 'label': 'Dating & Romance', 'sub': 'Find a connection'},
-    {'emoji': '⚽', 'label': 'Fan Friends', 'sub': 'Watch matches together'},
-    {'emoji': '🗺️', 'label': 'Local Guide', 'sub': 'Show me your city'},
+    {'icon': LucideIcons.heart, 'label': 'Dating & Romance', 'sub': 'Find a connection'},
+    {'icon': LucideIcons.trophy, 'label': 'Fan Friends', 'sub': 'Watch matches together'},
+    {'icon': LucideIcons.map, 'label': 'Local Guide', 'sub': 'Show me your city'},
   ];
 
   void _showNationalityPicker() {
@@ -66,7 +75,7 @@ class _SetupScreenState extends State<SetupScreen> {
       ),
       builder: (_) => StatefulBuilder(
         builder: (ctx, setSheetState) {
-          final filtered = _countries.where((c) {
+          final filtered = _countriesForNationality.where((c) {
             return c['name']!.toLowerCase().contains(search.toLowerCase());
           }).toList();
 
@@ -138,7 +147,7 @@ class _SetupScreenState extends State<SetupScreen> {
 
   void _showTeamPicker() {
     final theme = Theme.of(context);
-    final controller = TextEditingController(text: _team);
+    String search = '';
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -146,39 +155,69 @@ class _SetupScreenState extends State<SetupScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => Padding(
-        padding: EdgeInsets.fromLTRB(
-            24, 24, 24, 24 + MediaQuery.of(context).viewInsets.bottom),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('TEAM YOU SUPPORT',
-                style: GoogleFonts.spaceMono(
-                    fontSize: 10,
-                    color: FifaColors.emeraldSpring,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2)),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              style: theme.textTheme.bodyLarge,
-              decoration: const InputDecoration(
-                hintText: 'e.g. Barcelona, Arsenal...',
-                prefixIcon: Icon(Icons.sports_soccer_outlined, color: FifaColors.emeraldSpring),
-              ),
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          final filtered = _worldCupTeams.where((t) {
+            return t.toLowerCase().contains(search.toLowerCase());
+          }).toList();
+
+          return DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: 0.7,
+            maxChildSize: 0.9,
+            builder: (_, controller) => Column(
+              children: [
+                const SizedBox(height: 12),
+                Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.dividerColor.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextField(
+                    style: theme.textTheme.bodyLarge,
+                    decoration: const InputDecoration(
+                      hintText: 'Search for your team...',
+                      prefixIcon: Icon(Icons.search, color: FifaColors.emeraldSpring),
+                    ),
+                    onChanged: (v) => setSheetState(() => search = v),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: controller,
+                    itemCount: filtered.length,
+                    itemBuilder: (_, i) {
+                      final t = filtered[i];
+                      final sel = t == _team;
+                      return ListTile(
+                        title: Text(
+                          t,
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            color: theme.textTheme.bodyLarge?.color,
+                            fontWeight: sel ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        trailing: sel
+                            ? const Icon(Icons.check_circle,
+                                color: FifaColors.emeraldSpring, size: 20)
+                            : null,
+                        onTap: () {
+                          setState(() => _team = t);
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                setState(() => _team = controller.text.trim());
-                Navigator.pop(context);
-              },
-              child: const Text('Done'),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -291,14 +330,15 @@ class _SetupScreenState extends State<SetupScreen> {
 
   Widget _buildStep0(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
         Text(
-          'Your football identity ⚽',
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 26, 
+          'Your football identity',
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 28, 
             fontWeight: FontWeight.bold, 
             color: theme.textTheme.displayLarge?.color,
           ),
@@ -365,45 +405,29 @@ class _SetupScreenState extends State<SetupScreen> {
         GestureDetector(
           onTap: _showTeamPicker,
           child: Container(
-            height: 56,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: theme.inputDecorationTheme.fillColor,
+              color: isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E),
               borderRadius: BorderRadius.circular(12),
-              border: _team.isNotEmpty
-                  ? Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.4))
-                  : null,
+              border: Border.all(
+                color: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33),
+              ),
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.sports_soccer_outlined,
-                  size: 18,
-                  color: FifaColors.emeraldSpring.withValues(alpha: 0.6),
-                ),
-                const SizedBox(width: 12),
-                if (_team.isEmpty)
-                  Text(
-                    'Select your team',
+                Expanded(
+                  child: Text(
+                    _team.isEmpty ? 'Select your team...' : _team,
                     style: GoogleFonts.inter(
                       fontSize: 15,
-                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
-                    ),
-                  )
-                else
-                  Text(
-                    _team,
-                    style: GoogleFonts.inter(
-                      fontSize: 15, 
-                      color: theme.textTheme.bodyLarge?.color,
-                      fontWeight: FontWeight.bold,
+                      color: _team.isNotEmpty 
+                          ? (isLight ? FifaColors.textPrimaryLight : Colors.white) 
+                          : (isLight ? FifaColors.mutedTextLight : FifaColors.textMuted),
+                      fontWeight: _team.isNotEmpty ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
-                const Spacer(),
-                Icon(
-                  Icons.expand_more,
-                  color: theme.textTheme.bodySmall?.color,
                 ),
+                Icon(LucideIcons.chevronDown, size: 18, color: FifaColors.textMuted),
               ],
             ),
           ),
@@ -416,13 +440,27 @@ class _SetupScreenState extends State<SetupScreen> {
         const SizedBox(height: 8),
         Row(
           children: [
-            _localVisitCard(context, '🏠', 'I Live Here', _isLocal, () {
-              setState(() => _isLocal = true);
-            }),
-            const SizedBox(width: 10),
-            _localVisitCard(context, "✈️", "I'm Visiting", !_isLocal, () {
-              setState(() => _isLocal = false);
-            }),
+            Expanded(
+              child: _localVisitCard(
+                title: "I'm a Local",
+                subtitle: "I live here",
+                icon: LucideIcons.home,
+                iconColor: Colors.white,
+                isSelected: _isLocal == true,
+                onTap: () => setState(() => _isLocal = true),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _localVisitCard(
+                title: "Visiting",
+                subtitle: "In for the games",
+                icon: LucideIcons.plane,
+                iconColor: isLight ? const Color(0xFF0D2B1E) : Colors.white,
+                isSelected: _isLocal == false,
+                onTap: () => setState(() => _isLocal = false),
+              ),
+            ),
           ],
         ),
 
@@ -432,7 +470,7 @@ class _SetupScreenState extends State<SetupScreen> {
         _label(context, 'LOOKING FOR...'),
         const SizedBox(height: 8),
         ..._matchTypeOptions.map((opt) {
-          final label = opt['label']!;
+          final label = opt['label'] as String;
           final isSelected = _matchTypes.contains(label);
           return GestureDetector(
             onTap: () {
@@ -469,7 +507,11 @@ class _SetupScreenState extends State<SetupScreen> {
               ),
               child: Row(
                 children: [
-                  Text(opt['emoji']!, style: const TextStyle(fontSize: 22)),
+                  Icon(
+                    opt['icon'] as IconData,
+                    size: 22,
+                    color: isSelected ? Colors.white : FifaColors.accent,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -485,7 +527,7 @@ class _SetupScreenState extends State<SetupScreen> {
                           ),
                         ),
                         Text(
-                          opt['sub']!,
+                          opt['sub'] as String,
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             color: isSelected ? Colors.white.withValues(alpha: 0.7) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
@@ -508,6 +550,7 @@ class _SetupScreenState extends State<SetupScreen> {
         }),
 
         const SizedBox(height: 16),
+        SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
       ],
     );
   }
@@ -519,8 +562,8 @@ class _SetupScreenState extends State<SetupScreen> {
       children: [
         const SizedBox(height: 32),
         Text(
-          'Who do you want to meet? 🌍',
-          style: GoogleFonts.spaceGrotesk(
+          'Who do you want to meet?',
+          style: GoogleFonts.playfairDisplay(
             fontSize: 26, 
             fontWeight: FontWeight.bold, 
             color: theme.textTheme.displayLarge?.color,
@@ -549,7 +592,7 @@ class _SetupScreenState extends State<SetupScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: _countries.map((c) {
+          children: _countriesForNationality.map((c) {
             final name = c['name']!;
             final flag = c['flag']!;
             final isSelected = _selectedCountries.contains(name);
@@ -662,52 +705,93 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 
   Widget _label(BuildContext context, String text) {
-    return Text(
-      text,
-      style: GoogleFonts.spaceMono(
-        fontSize: 9,
-        color: FifaColors.emeraldSpring,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 2,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        text.toUpperCase(),
+        style: GoogleFonts.spaceMono(
+          fontSize: 11,
+          color: FifaColors.accent,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 2.0,
+        ),
       ),
     );
   }
 
-  Widget _localVisitCard(
-      BuildContext context, String emoji, String label, bool isActive, VoidCallback onTap) {
-    final theme = Theme.of(context);
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          height: 72,
-          decoration: BoxDecoration(
-            color: isActive
-                ? FifaColors.emeraldForest
-                : theme.cardColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isActive
-                  ? FifaColors.emeraldSpring
-                  : theme.dividerColor.withValues(alpha: 0.1),
-            ),
+  Widget _localVisitCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final muted = isLight ? FifaColors.mutedTextLight : FifaColors.textMuted;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? const LinearGradient(
+                  colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isSelected
+              ? null
+              : (isLight ? Colors.white : const Color(0xFF0D1A13)),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? Colors.transparent
+                : (isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33)),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(emoji, style: const TextStyle(fontSize: 24)),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: isActive ? Colors.white : theme.textTheme.bodyLarge?.color,
-                ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: FifaColors.accent.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+              : [],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 28, color: isSelected ? Colors.white : iconColor),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              softWrap: true,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: isSelected
+                    ? Colors.white
+                    : (isLight ? FifaColors.textPrimaryLight : Colors.white),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              softWrap: true,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.8)
+                    : muted,
+              ),
+            ),
+          ],
         ),
       ),
     );

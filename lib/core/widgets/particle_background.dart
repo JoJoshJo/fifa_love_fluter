@@ -23,20 +23,21 @@ class Particle {
 class ParticlePainter extends CustomPainter {
   final List<Particle> particles;
   final Color color;
+  final _paint = Paint();
 
-  ParticlePainter(this.particles, this.color);
+  ParticlePainter(this.particles, this.color, {required Listenable repaint})
+      : super(repaint: repaint);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint();
     for (var p in particles) {
-      paint.color = color.withValues(alpha: p.opacity);
-      canvas.drawCircle(Offset(p.x, p.y), p.size, paint);
+      _paint.color = color.withValues(alpha: p.opacity);
+      canvas.drawCircle(Offset(p.x, p.y), p.size, _paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant ParticlePainter oldDelegate) => false;
 }
 
 class ParticleBackground extends StatefulWidget {
@@ -60,24 +61,27 @@ class _ParticleBackgroundState extends State<ParticleBackground> with SingleTick
   @override
   void initState() {
     super.initState();
-    _particles = List.generate(40, (_) => Particle(0, 0));
+    _particles = List.generate(45, (_) => Particle(0, 0));
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..addListener(() {
+        final size = MediaQuery.maybeOf(context)?.size ?? Size.zero;
         for (var p in _particles) {
-          p.move(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
+          p.move(size.width, size.height);
         }
-        setState(() {});
       })..repeat();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_particles.first.x == 0) {
+    if (_particles.isNotEmpty && _particles.first.x == 0) {
       final size = MediaQuery.of(context).size;
-      _particles = List.generate(45, (_) => Particle(size.width, size.height));
+      for (var p in _particles) {
+        p.x = Random().nextDouble() * size.width;
+        p.y = Random().nextDouble() * size.height;
+      }
     }
   }
 
@@ -91,12 +95,15 @@ class _ParticleBackgroundState extends State<ParticleBackground> with SingleTick
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        CustomPaint(
-          painter: ParticlePainter(
-            _particles, 
-            widget.particleColor ?? Colors.white.withValues(alpha: 0.2),
+        RepaintBoundary(
+          child: CustomPaint(
+            painter: ParticlePainter(
+              _particles, 
+              widget.particleColor ?? Colors.white.withValues(alpha: 0.2),
+              repaint: _controller,
+            ),
+            size: Size.infinite,
           ),
-          size: Size.infinite,
         ),
         widget.child,
       ],

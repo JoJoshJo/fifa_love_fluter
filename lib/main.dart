@@ -13,12 +13,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   await dotenv.load(fileName: ".env");
-  await Supabase.initialize(
-    url: SupabaseConfig.supabaseUrl,
-    anonKey: SupabaseConfig.supabaseAnonKey,
-  );
   
-  await NotificationService().initialize();
+  await Future.wait([
+    Supabase.initialize(
+      url: SupabaseConfig.supabaseUrl,
+      anonKey: SupabaseConfig.supabaseAnonKey,
+    ),
+    NotificationService().initialize(),
+  ]);
   
   runApp(const ProviderScope(child: FifaLoveApp()));
 }

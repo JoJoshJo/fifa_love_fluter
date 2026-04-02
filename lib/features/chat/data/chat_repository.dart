@@ -14,63 +14,78 @@ class ChatRepository {
           .or('user_a.eq.$userId,user_b.eq.$userId')
           .eq('status', 'active');
 
+      if ((matchesRaw as List).isEmpty) return [];
+
+      final List<Map<String, dynamic>> matches = 
+          (matchesRaw as List).map((m) => Map<String, dynamic>.from(m as Map)).toList();
+      
+      final List<String> matchIds = matches.map((m) => m['id'] as String).toList();
+      final List<String> otherIds = matches.map((m) {
+        return m['user_a'] == userId ? m['user_b'] as String : m['user_a'] as String;
+      }).toList();
+
+      // 1. Batch fetch all other user profiles
+      final profilesRaw = await _client
+          .from('profiles')
+          .select('id, name, avatar_url, nationality, is_verified, interests, languages, countries_to_match, last_active')
+          .inFilter('id', otherIds);
+      
+      final Map<String, dynamic> profilesMap = {
+        for (var p in (profilesRaw as List)) p['id']: p
+      };
+
+      // 2. Batch fetch unread counts
+      // We fetch all unread messages for these matches where sender is NOT the current user
+      final unreadRaw = await _client
+          .from('messages')
+          .select('match_id')
+          .inFilter('match_id', matchIds)
+          .neq('sender_id', userId)
+          .isFilter('read_at', null);
+      
+      final Map<String, int> unreadCounts = {};
+      for (var msg in (unreadRaw as List)) {
+        final mid = msg['match_id'] as String;
+        unreadCounts[mid] = (unreadCounts[mid] ?? 0) + 1;
+      }
+
+      // 3. Batch fetch last messages
+      // This is tricky in Supabase without RPC. A common trick is to fetch the last 100 messages 
+      // of the user and group them, or just fetch the latest for each in parallel (better than sequential).
+      // However, we can also use a "order by created_at desc" on a view if we had one.
+      // For now, we'll fetch the most recent 1 message for EACH match in parallel to avoid the N+1 blocking.
+      final lastMessagesResults = await Future.wait(matchIds.map((mid) => _client
+          .from('messages')
+          .select('content, created_at, sender_id, read_at')
+          .eq('match_id', mid)
+          .order('created_at', ascending: false)
+          .limit(1)
+          .maybeSingle()));
+
+      final Map<String, dynamic> lastMessagesMap = {};
+      for (int i = 0; i < matchIds.length; i++) {
+        if (lastMessagesResults[i] != null) {
+          lastMessagesMap[matchIds[i]] = lastMessagesResults[i];
+        }
+      }
+
       final List<Map<String, dynamic>> enriched = [];
+      for (var m in matches) {
+        final otherId = m['user_a'] == userId ? m['user_b'] : m['user_a'];
+        
+        m['other_user'] = profilesMap[otherId] ?? {
+          'id': otherId,
+          'name': 'Unknown',
+          'avatar_url': null,
+          'nationality': 'Unknown',
+          'is_verified': false,
+          'interests': <String>[],
+          'languages': <String>[],
+          'countries_to_match': <String>[],
+        };
 
-      for (final match in (matchesRaw as List)) {
-        final m = Map<String, dynamic>.from(match as Map);
-        final otherId =
-            m['user_a'] == userId ? m['user_b'] : m['user_a'];
-
-        // Fetch other user's profile
-        try {
-          final profile = await _client
-              .from('profiles')
-              .select(
-                  'id, name, avatar_url, nationality, is_verified, interests, languages, countries_to_match')
-              .eq('id', otherId)
-              .single();
-          m['other_user'] = Map<String, dynamic>.from(profile as Map);
-        } catch (_) {
-          m['other_user'] = {
-            'id': otherId,
-            'name': 'Unknown',
-            'avatar_url': null,
-            'nationality': 'Unknown',
-            'is_verified': false,
-            'interests': <String>[],
-            'languages': <String>[],
-            'countries_to_match': <String>[],
-          };
-        }
-
-        // Fetch last message
-        try {
-          final lastMsg = await _client
-              .from('messages')
-              .select('content, created_at, sender_id, read_at')
-              .eq('match_id', m['id'])
-              .order('created_at', ascending: false)
-              .limit(1)
-              .maybeSingle();
-          m['last_message'] =
-              lastMsg != null ? Map<String, dynamic>.from(lastMsg as Map) : null;
-        } catch (_) {
-          m['last_message'] = null;
-        }
-
-        // Count unread messages
-        try {
-          final unreadRes = await _client
-              .from('messages')
-              .select('id')
-              .eq('match_id', m['id'])
-              .neq('sender_id', userId)
-              .isFilter('read_at', null);
-          m['unread_count'] = (unreadRes as List).length;
-        } catch (_) {
-          m['unread_count'] = 0;
-        }
-
+        m['last_message'] = lastMessagesMap[m['id']];
+        m['unread_count'] = unreadCounts[m['id']] ?? 0;
         enriched.add(m);
       }
 
