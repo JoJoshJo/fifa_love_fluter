@@ -377,21 +377,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         ),
         const SizedBox(height: 24),
         _buildPreferenceCard(
-          '❤️', 'Dating & Romance', 
+          const Icon(LucideIcons.heart, size: 22, color: Color(0xFFE8437A)),
+          'Dating & Romance', 
           _hasMatchType('Dating & Romance'),
           () => _toggleMatchType('Dating & Romance'),
           isLight, textColor
         ),
         const SizedBox(height: 12),
         _buildPreferenceCard(
-          '⚽', 'Fan Friends', 
+          const Icon(LucideIcons.trophy, size: 22, color: Color(0xFF4CB572)),
+          'Fan Friends', 
           _hasMatchType('Fan Friends'),
           () => _toggleMatchType('Fan Friends'),
           isLight, textColor
         ),
         const SizedBox(height: 12),
         _buildPreferenceCard(
-          '🗺️', 'Local Guide', 
+          const Icon(LucideIcons.mapPin, size: 22, color: Color(0xFFF2C233)),
+          'Local Guide', 
           _hasMatchType('Local Guide'),
           () => _toggleMatchType('Local Guide'),
           isLight, textColor
@@ -400,7 +403,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     );
   }
 
-  Widget _buildPreferenceCard(String emoji, String title, bool isSelected, VoidCallback onTap, bool isLight, Color textColor) {
+  Widget _buildPreferenceCard(Widget icon, String title, bool isSelected, VoidCallback onTap, bool isLight, Color textColor) {
     final cardColor = isLight ? Colors.white : const Color(0xFF0D1A13);
     
     return GestureDetector(
@@ -425,7 +428,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         ),
         child: Row(
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 24)),
+            icon,
             const SizedBox(width: 16),
             Text(
               title,
