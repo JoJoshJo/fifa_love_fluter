@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+
 import '../data/me_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/theme_provider.dart';
@@ -7,6 +9,9 @@ import 'edit_profile_screen.dart';
 import '../../../core/supabase/supabase_config.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:page_transition/page_transition.dart';
+import 'privacy_policy_screen.dart';
+import 'terms_screen.dart';
+
 
 class MeScreen extends ConsumerStatefulWidget {
   const MeScreen({super.key});
@@ -155,7 +160,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
     if (_loading) {
       return Scaffold(
         backgroundColor: bg,
-        body: Center(
+        body: const Center(
           child: CircularProgressIndicator(
             color: accentGreen,
             strokeWidth: 2,
@@ -173,9 +178,6 @@ class _MeScreenState extends ConsumerState<MeScreen> {
       _profile['avatar_url'] as String?;
     final name =
       _profile['name'] as String? ?? 'Your Name';
-    String? _nationality;
-    String? _team;
-    final List<String> _interests = [];
     final isVerified =
       _profile['is_verified'] as bool? ?? false;
     final currentLang =
@@ -237,14 +239,14 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                       decoration: BoxDecoration(
                         borderRadius:
                           BorderRadius.circular(20),
-                        border: Border.all(
-                          color: border),
+                        border: isLight ? Border.all(
+                          color: border) : null,
                         color: card,
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.edit_outlined,
+                          const Icon(
+                            LucideIcons.edit3,
                             size: 13,
                             color: accent),
                           const SizedBox(width: 5),
@@ -273,11 +275,11 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                     width: 110, height: 110,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
+                      border: isLight ? Border.all(
                         color: isVerified
                           ? accentGreen
                           : border,
-                        width: 2.5),
+                        width: 2.5) : null,
                       color: isLight
                         ? const Color(0xFFE8F5EE)
                         : const Color(0xFF152B1E),
@@ -313,7 +315,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                         border: Border.all(
                           color: bg, width: 2)),
                       child: const Icon(
-                        Icons.camera_alt_rounded,
+                        LucideIcons.camera,
                         size: 15,
                         color: Colors.white),
                     ),
@@ -331,7 +333,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                           border: Border.all(
                             color: bg, width: 2)),
                         child: const Icon(
-                          Icons.check_rounded,
+                          LucideIcons.checkCircle2,
                           size: 14,
                           color: Colors.white),
                       ),
@@ -383,7 +385,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                   color: card,
                   borderRadius:
                     BorderRadius.circular(16),
-                  border: Border.all(color: border),
+                  border: isLight ? Border.all(color: border) : null,
                   boxShadow: isLight ? [
                     BoxShadow(
                       color: Colors.black
@@ -451,8 +453,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                             .only(top: 5),
                           child: Row(children: [
                             Icon(
-                              Icons
-                                .add_circle_outline,
+                              LucideIcons.plusCircle,
                               size: 13,
                               color: const Color(
                                 0xFFE83535)
@@ -485,7 +486,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
               isLight: isLight,
               children: [
                 _settingRow(
-                  icon: Icons.dark_mode_outlined,
+                  icon: LucideIcons.moon,
                   title: 'Dark Mode',
                   text: text,
                   iconColor: accent,
@@ -512,7 +513,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                 ),
                 _divider(border),
                 _settingRow(
-                  icon: Icons.language_outlined,
+                  icon: LucideIcons.languages,
                   title: 'Language',
                   subtitle: currentLang,
                   text: text,
@@ -536,55 +537,44 @@ class _MeScreenState extends ConsumerState<MeScreen> {
               isLight: isLight,
               children: [
                 _settingRow(
-                  icon: Icons.lock_outline_rounded,
+                  icon: LucideIcons.lock,
                   title: 'Change Password',
                   text: text,
                   iconColor: muted,
                   border: border,
                   onTap: () async {
-                    final email = SupabaseConfig
-                      .client.auth.currentUser
-                      ?.email;
+                    final email = SupabaseConfig.client.auth.currentUser?.email;
                     if (email == null) return;
+                    final messenger = ScaffoldMessenger.of(context);
                     try {
-                      await SupabaseConfig.client
-                        .auth.resetPasswordForEmail(
-                          email);
-                      if (!mounted) return;
-                      if (mounted) {
-                        ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(
-                            content: Text(
-                              'Reset email sent ✅'),
-                            backgroundColor: accent,
-                            behavior: SnackBarBehavior
-                              .floating,
-                            shape:
-                              RoundedRectangleBorder(
-                                borderRadius:
-                                  BorderRadius
-                                    .circular(12)),
-                          ));
-                      }
+                      await SupabaseConfig.client.auth.resetPasswordForEmail(email);
+                      messenger.showSnackBar(
+                        SnackBar(
+                          content: const Text('Reset email sent ✅'),
+                          backgroundColor: accent,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
                     } catch (e) {
-                      if (!mounted) return;
-                      if (mounted) {
-                        ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(
-                            content: Text(
-                              'Could not send email'),
-                            backgroundColor:
-                              const Color(0xFFE83535),
-                            behavior: SnackBarBehavior
-                              .floating,
-                          ));
-                      }
+                      messenger.showSnackBar(
+                        SnackBar(
+                          content: const Text('Could not send email'),
+                          backgroundColor: const Color(0xFFE83535),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
                     }
                   },
                 ),
                 _divider(border),
                 _settingRow(
-                  icon: Icons.logout_rounded,
+                  icon: LucideIcons.logOut,
                   title: 'Sign Out',
                   text: const Color(0xFFE83535)
                     .withValues(alpha: 0.8),
@@ -617,31 +607,41 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                 MainAxisAlignment.center,
               children: [
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                  ),
                   style: TextButton.styleFrom(
                     minimumSize: Size.zero,
-                    padding:
-                      const EdgeInsets.symmetric(
-                        horizontal: 8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
                   child: Text('Privacy',
                     style: GoogleFonts.inter(
                       fontSize: 11,
-                      color: muted))),
+                      color: muted,
+                    ),
+                  ),
+                ),
                 Text('·',
                   style: TextStyle(
                     color: muted
                       .withValues(alpha: 0.4))),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TermsScreen()),
+                  ),
                   style: TextButton.styleFrom(
                     minimumSize: Size.zero,
-                    padding:
-                      const EdgeInsets.symmetric(
-                        horizontal: 8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
                   child: Text('Terms',
                     style: GoogleFonts.inter(
                       fontSize: 11,
-                      color: muted))),
+                      color: muted,
+                    ),
+                  ),
+                ),
               ],
             ),
             Text(
@@ -691,7 +691,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
         decoration: BoxDecoration(
           color: card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: border),
+          border: isLight ? Border.all(color: border) : null,
           boxShadow: isLight ? [
             BoxShadow(
               color: Colors.black
@@ -737,7 +737,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
         : null,
       trailing: trailing ?? (onTap != null
         ? Icon(
-            Icons.chevron_right_rounded,
+            LucideIcons.chevronRight,
             size: 18,
             color: text
               .withValues(alpha: 0.25))

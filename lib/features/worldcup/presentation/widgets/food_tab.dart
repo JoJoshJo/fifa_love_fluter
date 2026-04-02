@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fifalove_mobile/core/constants/colors.dart';
 import 'package:fifalove_mobile/features/worldcup/data/worldcup_data.dart';
 
@@ -25,6 +26,9 @@ class _FoodTabState extends State<FoodTab> {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? FifaColors.textPrimaryLight : FifaColors.textPrimaryDark;
+    const accentGreen = FifaColors.accent;
     final filtered = _filtered;
 
     return Column(
@@ -55,14 +59,14 @@ class _FoodTabState extends State<FoodTab> {
                       horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: isActive
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).cardColor,
+                        ? accentGreen
+                        : (isLight ? FifaColors.lightCard : FifaColors.darkCard),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
+                    border: isLight ? Border.all(
                       color: isActive
-                          ? Theme.of(context).primaryColor
-                          : Theme.of(context).dividerColor,
-                    ),
+                          ? accentGreen
+                          : FifaColors.lightBorder,
+                    ) : null,
                   ),
                   child: Text(
                     '${cityData['flag']} $city',
@@ -106,7 +110,7 @@ class _FoodTabState extends State<FoodTab> {
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.only(bottom: 24, top: 8),
                   itemCount: filtered.length,
                   itemBuilder: (context, index) {
                     final r = filtered[index];
@@ -115,10 +119,16 @@ class _FoodTabState extends State<FoodTab> {
                           horizontal: 12, vertical: 6),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
+                        color: isLight ? FifaColors.lightCard : FifaColors.darkCard,
                         borderRadius: BorderRadius.circular(16),
-                        border:
-                            Border.all(color: Theme.of(context).dividerColor),
+                        boxShadow: isLight ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          )
+                        ] : null,
+                        border: isLight ? Border.all(color: FifaColors.lightBorder) : null,
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,13 +138,14 @@ class _FoodTabState extends State<FoodTab> {
                             width: 52,
                             height: 52,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                              color: accentGreen.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Center(
-                              child: Text(
-                                r['icon'] as String,
-                                style: const TextStyle(fontSize: 26),
+                            child: const Center(
+                              child: Icon(
+                                LucideIcons.utensils,
+                                size: 24,
+                                color: accentGreen,
                               ),
                             ),
                           ),
@@ -150,10 +161,10 @@ class _FoodTabState extends State<FoodTab> {
                                     Expanded(
                                       child: Text(
                                         r['name'] as String,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 15,
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: 18,
                                           fontWeight: FontWeight.w600,
-                                          color: Theme.of(context).textTheme.titleLarge?.color,
+                                          color: text,
                                         ),
                                       ),
                                     ),
@@ -162,8 +173,7 @@ class _FoodTabState extends State<FoodTab> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 6, vertical: 3),
                                       decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor
-                                            .withValues(alpha: 0.1),
+                                        color: accentGreen.withValues(alpha: 0.1),
                                         borderRadius:
                                             BorderRadius.circular(10),
                                       ),
@@ -171,7 +181,7 @@ class _FoodTabState extends State<FoodTab> {
                                         r['vibe'] as String,
                                         style: GoogleFonts.spaceMono(
                                           fontSize: 8,
-                                          color: Theme.of(context).primaryColor,
+                                          color: accentGreen,
                                         ),
                                       ),
                                     ),
@@ -206,7 +216,7 @@ class _FoodTabState extends State<FoodTab> {
                                       ),
                                     ),
                                     const Spacer(),
-                                    const Icon(Icons.star_rounded,
+                                    const Icon(LucideIcons.star,
                                         size: 12,
                                         color: FifaColors.gold),
                                     const SizedBox(width: 2),

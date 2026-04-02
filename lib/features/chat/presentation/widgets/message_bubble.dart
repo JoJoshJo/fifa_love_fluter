@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
 
 class MessageBubble extends StatelessWidget {
   final Map<String, dynamic> message;
@@ -43,7 +44,7 @@ class MessageBubble extends StatelessWidget {
                     fontSize: 10,
                     letterSpacing: 2,
                     fontWeight: FontWeight.bold,
-                    color: isLight ? const Color(0xFF9BB3AF) : Colors.white10,
+                    color: isLight ? FifaColors.mutedTextLight : Colors.white10,
                   ),
                 ),
               ),
@@ -58,8 +59,8 @@ class MessageBubble extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                   decoration: BoxDecoration(
                     color: isMe
-                        ? const Color(0xFF135E4B)
-                        : (isLight ? Colors.white : const Color(0xFF1D2F28)),
+                        ? FifaColors.accent
+                        : (isLight ? FifaColors.white : FifaColors.darkCard),
                     borderRadius: isMe
                         ? const BorderRadius.only(
                             topLeft: Radius.circular(20),
@@ -75,12 +76,10 @@ class MessageBubble extends StatelessWidget {
                           ),
                     border: isMe
                         ? null
-                        : Border.all(
-                            color: isLight
-                                ? const Color(0xFFE8DDD0)
-                                : const Color(0xFF1E4A33),
+                        : (isLight ? Border.all(
+                            color: FifaColors.lightBorder,
                             width: 1,
-                          ),
+                          ) : null),
                     boxShadow: isLight && !isMe
                         ? [
                             BoxShadow(
@@ -103,7 +102,7 @@ class MessageBubble extends StatelessWidget {
                       height: 1.5,
                       color: isMe
                           ? Colors.white
-                          : (isLight ? const Color(0xFF0D2B1E) : Colors.white70),
+                          : (isLight ? FifaColors.textPrimaryLight : Colors.white70),
                     ),
                   ),
                 ),

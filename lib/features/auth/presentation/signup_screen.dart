@@ -153,7 +153,6 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
@@ -806,7 +805,6 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildLabel(BuildContext context, String text) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(

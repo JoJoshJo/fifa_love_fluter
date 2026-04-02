@@ -1,4 +1,7 @@
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../../shared/widgets/gradient_button.dart';
 import 'package:flutter/material.dart';
+import '../../../core/constants/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -188,12 +191,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                                     width: 68, height: 84,
                                                     decoration: BoxDecoration(
                                                       borderRadius: BorderRadius.circular(12),
-                                                      border: Border.all(
-                                                        color: isLight 
-                                                          ? const Color(0xFFD4EBE0)
-                                                          : Colors.white10,
-                                                        width: 1,
-                                                      ),
+                                                      border: isLight 
+                                                          ? Border.all(
+                                                              color: const Color(0xFFD4EBE0),
+                                                              width: 1,
+                                                            )
+                                                          : null,
                                                       color: isLight 
                                                         ? Colors.white 
                                                         : Colors.white.withValues(alpha: 0.05),
@@ -232,12 +235,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                                     width: 68, height: 84,
                                                     decoration: BoxDecoration(
                                                       borderRadius: BorderRadius.circular(12),
-                                                      border: Border.all(
-                                                        color: isLight 
-                                                          ? const Color(0xFFE5E0D8)
-                                                          : Colors.white10,
-                                                        width: 1,
-                                                      ),
+                                                      border: isLight 
+                                                          ? Border.all(
+                                                              color: const Color(0xFFE5E0D8),
+                                                              width: 1,
+                                                            )
+                                                          : null,
                                                       image: avatarUrl != null
                                                           ? DecorationImage(
                                                               image: CachedNetworkImageProvider(avatarUrl),
@@ -251,12 +254,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                                   ),
                                                   const SizedBox(height: 8),
                                                   Text(
-                                                    name.split(' ').first.toUpperCase(),
-                                                    style: GoogleFonts.spaceMono(
-                                                      fontSize: 10,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: isLight ? const Color(0xFF333333) : Colors.white70,
-                                                      letterSpacing: 0.5,
+                                                    name.split(' ').first,
+                                                    style: GoogleFonts.playfairDisplay(
+                                                      fontSize: 12,
+                                                      fontWeight: FontWeight.w500,
+                                                      fontStyle: FontStyle.italic,
+                                                      color: isLight ? FifaColors.textPrimaryLight : Colors.white70,
                                                     ),
                                                     overflow: TextOverflow.ellipsis,
                                                   ),
@@ -362,6 +365,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 40),
+          Icon(
+            LucideIcons.messageSquare,
+            size: 48,
+            color: const Color(0xFF4CB572).withValues(alpha: 0.2),
+          ),
+          const SizedBox(height: 24),
           Text(
             'YOU HAVEN\'T CONNECTED YET',
             style: GoogleFonts.spaceMono(
@@ -383,37 +392,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ),
           const SizedBox(height: 32),
-          GestureDetector(
-            onTap: () {
-              // Navigate to Discover or perform action
+          GradientButton(
+            text: 'Go to Discover',
+            onPressed: () {
+              // Navigate to Discover
             },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF135E4B),
-                    Color(0xFF4CB572),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF135E4B).withValues(alpha: 0.2),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Text(
-                'Go to Discover',
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
           ),
         ],
       ),

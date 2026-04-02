@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
 
 class MatchListItem extends StatelessWidget {
   final Map<String, dynamic> match;
@@ -85,10 +86,10 @@ class MatchListItem extends StatelessWidget {
                       height: 54,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
+                        border: isLight ? Border.all(
                           color: const Color(0xFF4CB572).withValues(alpha: 0.2),
                           width: 1.5,
-                        ),
+                        ) : null,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(2),
@@ -137,10 +138,11 @@ class MatchListItem extends StatelessWidget {
                         children: [
                           Text(
                             other['name'] as String? ?? 'Unknown',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 17,
                               fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w600,
-                              color: isLight ? const Color(0xFF0D2B1E) : Colors.white,
+                              fontStyle: FontStyle.italic,
+                              color: isLight ? FifaColors.textPrimaryLight : Colors.white,
                               letterSpacing: -0.2,
                             ),
                           ),
@@ -150,8 +152,8 @@ class MatchListItem extends StatelessWidget {
                               fontSize: 9,
                               fontWeight: unread > 0 ? FontWeight.bold : FontWeight.normal,
                               color: unread > 0
-                                  ? const Color(0xFF4CB572)
-                                  : (isLight ? const Color(0xFF9BB3AF) : Colors.white24),
+                                  ? FifaColors.accent
+                                  : (isLight ? FifaColors.mutedTextLight : Colors.white24),
                             ),
                           ),
                         ],
@@ -164,8 +166,8 @@ class MatchListItem extends StatelessWidget {
                         style: previewStyle.copyWith(
                           fontSize: 13,
                           color: unread > 0
-                              ? (isLight ? const Color(0xFF0D2B1E).withValues(alpha: 0.8) : Colors.white70)
-                              : (isLight ? const Color(0xFF9BB3AF) : Colors.white38),
+                              ? (isLight ? FifaColors.textPrimaryLight.withValues(alpha: 0.8) : Colors.white70)
+                              : (isLight ? FifaColors.mutedTextLight : Colors.white38),
                         ),
                       ),
                     ],
@@ -179,7 +181,7 @@ class MatchListItem extends StatelessWidget {
                     width: 7,
                     height: 7,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF4CB572),
+                      color: FifaColors.gold,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -188,10 +190,10 @@ class MatchListItem extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(left: 90),
-            child: Divider(
+            child: isLight ? const Divider(
               height: 1,
-              color: isLight ? const Color(0xFFE5E0D8) : const Color(0xFF1A1A1A),
-            ),
+              color: Color(0xFFE5E0D8),
+            ) : null,
           ),
         ],
       ),

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fifalove_mobile/core/constants/colors.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../data/chat_repository.dart';
 import '../../../../core/supabase/supabase_config.dart';
 import '../../../../core/notifications/notification_service.dart';
@@ -33,7 +35,7 @@ class _ConversationViewState extends State<ConversationView> {
 
   int _lastMessageCount = 0;
 
-  bool _otherTyping = false;
+  final bool _otherTyping = false;
   bool _showMatchReasons = true;
   bool _inputHasText = false;
   Timer? _typingTimer;
@@ -140,7 +142,7 @@ class _ConversationViewState extends State<ConversationView> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.person_remove_outlined,
+              leading: const Icon(LucideIcons.userMinus,
                   color: Color(0xFFE8437A)),
               title: Text('Unmatch',
                   style: GoogleFonts.inter(
@@ -152,7 +154,7 @@ class _ConversationViewState extends State<ConversationView> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.block, color: Color(0xFFE8437A)),
+              leading: const Icon(LucideIcons.ban, color: Color(0xFFE8437A)),
               title: Text('Block & Report',
                   style: GoogleFonts.inter(
                       color: const Color(0xFFE8437A),
@@ -222,18 +224,18 @@ class _ConversationViewState extends State<ConversationView> {
             ),
             decoration: BoxDecoration(
               color: backgroundColor,
-              border: Border(
+              border: isLight ? const Border(
                 bottom: BorderSide(
-                  color: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33),
+                  color: FifaColors.lightBorder,
                   width: 1,
                 ),
-              ),
+              ) : null,
             ),
             child: Row(
               children: [
                 IconButton(
                   icon: Icon(
-                    Icons.arrow_back_rounded,
+                    LucideIcons.chevronLeft,
                     size: 24,
                     color: isLight ? const Color(0xFF0D2B1E) : Colors.white70,
                   ),
@@ -292,7 +294,7 @@ class _ConversationViewState extends State<ConversationView> {
                 ),
                 IconButton(
                   icon: Icon(
-                    Icons.more_vert_rounded,
+                    LucideIcons.moreVertical,
                     color: isLight ? const Color(0xFF9BB3AF) : Colors.white24,
                   ),
                   onPressed: _showOptionsSheet,
@@ -308,9 +310,9 @@ class _ConversationViewState extends State<ConversationView> {
               decoration: BoxDecoration(
                 color: const Color(0xFF4CB572).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
+                border: isLight ? Border.all(
                   color: const Color(0xFF4CB572).withValues(alpha: 0.25),
-                ),
+                ) : null,
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +344,7 @@ class _ConversationViewState extends State<ConversationView> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.close,
+                    icon: Icon(LucideIcons.x,
                         size: 16,
                         color: isLight ? const Color(0xFF9BB3AF) : Colors.white24),
                     constraints: const BoxConstraints(),
@@ -417,7 +419,7 @@ class _ConversationViewState extends State<ConversationView> {
                                     ),
                                   ],
                                 ),
-                                child: const Icon(Icons.favorite,
+                                child: const Icon(LucideIcons.heart,
                                     size: 16, color: Color(0xFFE8437A)),
                               ),
                             ],
@@ -495,11 +497,11 @@ class _ConversationViewState extends State<ConversationView> {
             padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomPad),
             decoration: BoxDecoration(
               color: backgroundColor,
-              border: Border(
+              border: isLight ? const Border(
                 top: BorderSide(
-                    color: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33),
+                    color: Color(0xFFE8DDD0),
                     width: 1),
-              ),
+              ) : null,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -510,9 +512,9 @@ class _ConversationViewState extends State<ConversationView> {
                     decoration: BoxDecoration(
                       color: isLight ? Colors.white : Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33),
-                      ),
+                      border: isLight ? Border.all(
+                        color: const Color(0xFFE8DDD0),
+                      ) : null,
                     ),
                     child: TextField(
                       controller: _messageController,
@@ -523,10 +525,11 @@ class _ConversationViewState extends State<ConversationView> {
                       maxLines: 4,
                       minLines: 1,
                       decoration: InputDecoration(
-                        hintText: 'Add a message...',
-                        hintStyle: GoogleFonts.inter(
+                        hintText: 'Write to ${other['name']?.split(' ')?.first}...',
+                        hintStyle: GoogleFonts.playfairDisplay(
                           fontSize: 15,
-                          color: isLight ? const Color(0xFF9BB3AF) : Colors.white24,
+                          fontStyle: FontStyle.italic,
+                          color: isLight ? FifaColors.mutedTextLight : Colors.white24,
                         ),
                         border: InputBorder.none,
                         isDense: true,
@@ -550,11 +553,11 @@ class _ConversationViewState extends State<ConversationView> {
                         ),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.send_rounded,
-                        size: 20,
-                        color: Colors.white,
-                      ),
+                        child: const Icon(
+                          LucideIcons.send,
+                          size: 20,
+                          color: Colors.white,
+                        ),
                     ),
                   )
                 else
@@ -565,11 +568,11 @@ class _ConversationViewState extends State<ConversationView> {
                       color: isLight ? Colors.black.withValues(alpha: 0.03) : Colors.white.withValues(alpha: 0.05),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      Icons.mic_none_rounded,
-                      size: 22,
-                      color: isLight ? const Color(0xFF9BB3AF) : Colors.white24,
-                    ),
+                      child: Icon(
+                        LucideIcons.mic,
+                        size: 22,
+                        color: isLight ? const Color(0xFF9BB3AF) : Colors.white24,
+                      ),
                   ),
               ],
             ),

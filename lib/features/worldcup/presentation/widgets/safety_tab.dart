@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fifalove_mobile/core/constants/colors.dart';
 import 'package:fifalove_mobile/features/worldcup/data/worldcup_data.dart';
 
@@ -19,19 +20,20 @@ class _SafetyTabState extends State<SafetyTab> {
   ];
 
   Color _scoreColor(double score) {
-    if (score >= 8.0) return FifaColors.emeraldSpring;
+    if (score >= 8.0) return FifaColors.accent;
     if (score >= 7.0) return FifaColors.gold;
-    return const Color(0xFFE83535);
+    return FifaColors.error;
   }
 
   Widget _card({required Widget child, Color? borderColor}) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: isLight ? FifaColors.lightCard : FifaColors.darkCard,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor ?? Theme.of(context).dividerColor),
+        border: isLight ? Border.all(color: borderColor ?? FifaColors.lightBorder) : null,
       ),
       child: child,
     );
@@ -47,6 +49,8 @@ class _SafetyTabState extends State<SafetyTab> {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    const accentGreen = FifaColors.accent;
     final data = safetyData.firstWhere(
       (d) => d['city'] == _selectedCity,
       orElse: () => safetyData.first,
@@ -66,11 +70,6 @@ class _SafetyTabState extends State<SafetyTab> {
             itemBuilder: (context, i) {
               final city = _cities[i];
               final isActive = city == _selectedCity;
-              final d = safetyData.firstWhere(
-                (x) => x['city'] == city,
-                orElse: () => {'safety_score': 7.0},
-              );
-              final cs = _scoreColor((d['safety_score'] as num).toDouble());
               return GestureDetector(
                 onTap: () => setState(() => _selectedCity = city),
                 child: AnimatedContainer(
@@ -78,9 +77,9 @@ class _SafetyTabState extends State<SafetyTab> {
                   margin: const EdgeInsets.only(right: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isActive ? Theme.of(context).primaryColor : Theme.of(context).cardColor,
+                    color: isActive ? accentGreen : (isLight ? FifaColors.lightCard : FifaColors.darkCard),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: isActive ? cs : Theme.of(context).dividerColor),
+                    border: isLight ? Border.all(color: isActive ? accentGreen : FifaColors.lightBorder) : null,
                   ),
                   child: Text(
                     city,
@@ -109,13 +108,13 @@ class _SafetyTabState extends State<SafetyTab> {
                       children: [
                         Text('SAFETY SCORE',
                             style: GoogleFonts.spaceMono(
-                                fontSize: 9, color: Theme.of(context).primaryColor, letterSpacing: 1.5)),
+                                fontSize: 9, color: accentGreen, letterSpacing: 1.5)),
                         const SizedBox(height: 6),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(score.toString(),
-                                style: GoogleFonts.spaceGrotesk(
+                                style: GoogleFonts.playfairDisplay(
                                     fontSize: 36, fontWeight: FontWeight.bold, color: scoreColor)),
                             Padding(
                               padding: const EdgeInsets.only(bottom: 4),
@@ -136,7 +135,7 @@ class _SafetyTabState extends State<SafetyTab> {
                         shape: BoxShape.circle,
                         color: scoreColor.withValues(alpha: 0.15),
                       ),
-                      child: Icon(Icons.shield_outlined, size: 28, color: scoreColor),
+                      child: Icon(LucideIcons.shield, size: 24, color: scoreColor),
                     ),
                   ],
                 ),
@@ -148,17 +147,23 @@ class _SafetyTabState extends State<SafetyTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('✅ SAFE AREAS',
-                        style: GoogleFonts.spaceMono(
-                            fontSize: 9, color: Theme.of(context).primaryColor, letterSpacing: 1.5)),
+                    Row(
+                      children: [
+                        const Icon(LucideIcons.checkCircle, size: 14, color: accentGreen),
+                        const SizedBox(width: 4),
+                        Text('SAFE AREAS',
+                            style: GoogleFonts.spaceMono(
+                                fontSize: 9, color: accentGreen, letterSpacing: 1.5)),
+                      ],
+                    ),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 8, runSpacing: 6,
                       children: (data['best_areas'] as List)
                           .map((area) => _chip(
                                 label: area as String,
-                                bg: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                                textColor: Theme.of(context).primaryColor,
+                                bg: accentGreen.withValues(alpha: 0.1),
+                                textColor: accentGreen,
                               ))
                           .toList(),
                     ),
@@ -175,12 +180,12 @@ class _SafetyTabState extends State<SafetyTab> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined,
-                            size: 14, color: FifaColors.emeraldSpring),
+                        const Icon(LucideIcons.alertTriangle,
+                            size: 14, color: FifaColors.error),
                         const SizedBox(width: 4),
-                        Text('⚠️ CAUTION AT NIGHT',
+                        Text('CAUTION AT NIGHT',
                             style: GoogleFonts.spaceMono(
-                                fontSize: 9, color: const Color(0xFFE83535), letterSpacing: 1.5)),
+                                fontSize: 9, color: FifaColors.error, letterSpacing: 1.5)),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -189,8 +194,8 @@ class _SafetyTabState extends State<SafetyTab> {
                       children: (data['avoid_at_night'] as List)
                           .map((area) => _chip(
                                 label: area as String,
-                                bg: const Color(0xFFE83535).withValues(alpha: 0.12),
-                                textColor: const Color(0xFFE83535).withValues(alpha: 0.80),
+                                bg: FifaColors.error.withValues(alpha: 0.12),
+                                textColor: FifaColors.error.withValues(alpha: 0.80),
                               ))
                           .toList(),
                     ),
@@ -203,14 +208,14 @@ class _SafetyTabState extends State<SafetyTab> {
               _card(
                 child: Row(
                   children: [
-                    Icon(Icons.local_hospital_outlined, size: 18, color: Theme.of(context).primaryColor),
+                    const Icon(LucideIcons.phone, size: 18, color: accentGreen),
                     const SizedBox(width: 10),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('EMERGENCY NUMBER',
                             style: GoogleFonts.spaceMono(
-                                fontSize: 9, color: Theme.of(context).primaryColor, letterSpacing: 1.5)),
+                                fontSize: 9, color: accentGreen, letterSpacing: 1.5)),
                         const SizedBox(height: 2),
                         Text(data['emergency'] as String,
                             style: GoogleFonts.spaceGrotesk(
@@ -234,7 +239,7 @@ class _SafetyTabState extends State<SafetyTab> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.lightbulb_outline, size: 18, color: FifaColors.gold),
+                    const Icon(LucideIcons.lightbulb, size: 18, color: FifaColors.gold),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(

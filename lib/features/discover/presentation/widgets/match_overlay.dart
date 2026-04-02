@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fifalove_mobile/core/constants/colors.dart';
 
@@ -146,7 +147,7 @@ class _MatchOverlayState extends State<MatchOverlay>
                         child: ScaleTransition(
                           scale: _pulseAnimation,
                           child: const Icon(
-                            Icons.favorite,
+                            LucideIcons.heart,
                             size: 32,
                             color: Color(0xFFE8437A),
                           ),
@@ -208,7 +209,7 @@ class _MatchOverlayState extends State<MatchOverlay>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.chat_bubble_outline,
+                            const Icon(LucideIcons.messageCircle,
                                 size: 18, color: Colors.white),
                             const SizedBox(width: 8),
                             Text(
@@ -235,7 +236,7 @@ class _MatchOverlayState extends State<MatchOverlay>
                       style: OutlinedButton.styleFrom(
                         backgroundColor: Colors.white.withValues(alpha: 0.08),
                         side: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.15)),
+                            color: Theme.of(context).brightness == Brightness.light ? Colors.white.withValues(alpha: 0.15) : Colors.transparent),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -265,7 +266,7 @@ class _MatchOverlayState extends State<MatchOverlay>
       height: 80,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFF4CB572), width: 2),
+        border: Theme.of(context).brightness == Brightness.light ? Border.all(color: const Color(0xFF4CB572), width: 2) : null,
         color: const Color(0xFF152B1E),
       ),
       child: ClipOval(
@@ -274,13 +275,13 @@ class _MatchOverlayState extends State<MatchOverlay>
                 imageUrl: url,
                 fit: BoxFit.cover,
                 errorWidget: (_, __, ___) => const Icon(
-                  Icons.person,
+                  LucideIcons.user,
                   size: 40,
                   color: Color(0xFF4CB572),
                 ),
               )
             : const Icon(
-                Icons.person,
+                LucideIcons.user,
                 size: 40,
                 color: Color(0xFF4CB572),
               ),

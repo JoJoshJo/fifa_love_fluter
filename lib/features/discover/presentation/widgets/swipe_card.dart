@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'score_gauge.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/constants/colors.dart';
 
 class SwipeCard extends StatelessWidget {
   final Map<String, dynamic> profile;
@@ -193,10 +194,10 @@ class SwipeCard extends StatelessWidget {
                                   // Name
                                   Text(name,
                                       style: GoogleFonts.playfairDisplay(
-                                        fontSize: 26,
+                                        fontSize: 28,
                                         fontWeight: FontWeight.w700,
                                         color: isLight
-                                            ? const Color(0xFF0D2B1E)
+                                            ? FifaColors.textPrimaryLight
                                             : Colors.white,
                                         height: 1.1,
                                       )),
@@ -208,10 +209,11 @@ class SwipeCard extends StatelessWidget {
                                         '${_flag(nationality)}'
                                         ' $nationality',
                                         style: GoogleFonts.inter(
-                                          fontSize: 13,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
                                           color: isLight
-                                              ? const Color(0xFF6B9E8A)
-                                              : const Color(0xFF9BB3AF),
+                                              ? FifaColors.emeraldSpring
+                                              : FifaColors.accent,
                                         )),
                                   ]),
                                   if (city != null && city.isNotEmpty) ...[
@@ -237,10 +239,17 @@ class SwipeCard extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            // Score gauge
-                            ScoreGauge(
-                              score: score,
-                              size: 56,
+                            // Premium Zap Score
+                            Column(
+                              children: [
+                                const Icon(LucideIcons.zap, color: FifaColors.gold, size: 24),
+                                const SizedBox(height: 4),
+                                Text('$score%',
+                                    style: GoogleFonts.spaceMono(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: FifaColors.gold)),
+                              ],
                             ),
                           ],
                         ),

@@ -1,27 +1,38 @@
 import 'package:flutter/material.dart';
 
 class FifaColors {
-  // Emerald Spring Whisper palette
-  static const emeraldForest = Color(0xFF135E4B);
-  static const emeraldSpring = Color(0xFF4CB572);
-  static const emeraldMint   = Color(0xFFA1D8B5);
-  static const emeraldMist   = Color(0xFFCCDCDB);
+  // Brand Colors
+  static const Color accent = Color(0xFF4CB572);
+  static const Color accentDark = Color(0xFF135E4B);
+  static const Color emeraldForest = Color(0xFF135E4B);
+  static const Color emeraldSpring = Color(0xFF4CB572);
+  static const Color pink = Color(0xFFE8437A);
+  static const Color gold = Color(0xFFF2C233);
 
-  // App surfaces
-  static const deepBackground = Color(0xFF080F0C);
-  static const cardSurface    = Color(0xFF0D1A13);
-  static const cardElevated   = Color(0xFF152B1E);
-  static const inputSurface   = Color(0xFF1E3D28);
+  // Surface Colors - Light Mode
+  static const Color backgroundLight = Color(0xFFF5F0E8);
+  static const Color lightBackground = Color(0xFFF5F0E8);
+  static const Color white = Colors.white;
+  static const Color lightCard = Colors.white;
+  static const Color lightBorder = Color(0xFFE8DDD0);
 
-  // Brand
-  static const pink = Color(0xFFE8437A);
-  static const gold = Color(0xFFF2C233);
+  // Surface Colors - Dark Mode
+  static const Color backgroundDark = Color(0xFF080F0C);
+  static const Color darkBackground = Color(0xFF080F0C);
+  static const Color deepBackground = Color(0xFF080F0C);
+  static const Color darkCard = Color(0xFF0D1A13);
+  static const Color cardSurface = Color(0xFF0D1A13);
+  static const Color darkElevated = Color(0xFF152B1E);
+  static const Color inputSurface = Color(0xFF152B1E);
 
-  // Text
-  static const textPrimary = Color(0xFFEBF2EE);
-  static const textMuted   = Color(0xFF9BB3AF);
+  // Text Colors
+  static const Color textPrimaryLight = Color(0xFF0D2B1E);
+  static const Color textPrimaryDark = Colors.white;
+  static const Color textPrimary = Colors.white;
+  static const Color mutedTextLight = Color(0xFF9BB3AF);
+  static const Color textMuted = Color(0xFF9BB3AF);
 
   // Semantic
-  static const success = Color(0xFFA1D8B5);
-  static const error   = Color(0xFFE83535);
+  static const Color error = Color(0xFFE83535);
+  static const Color black = Colors.black;
 }

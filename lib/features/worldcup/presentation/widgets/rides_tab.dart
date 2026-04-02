@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/constants/colors.dart';
 
 class RidesTab extends StatefulWidget {
   const RidesTab({super.key});
@@ -18,16 +20,17 @@ class _RidesTabState extends State<RidesTab> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.directions_car,
-              size: 64,
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+              LucideIcons.car,
+              size: 56,
+              color: FifaColors.accent.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 24),
             Text(
-              'Rides & Tours',
-              style: GoogleFonts.spaceGrotesk(
+              'Rides & Transport',
+              style: GoogleFonts.playfairDisplay(
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
+                fontStyle: FontStyle.italic,
                 color: Theme.of(context).textTheme.titleLarge?.color?.withValues(alpha: 0.6),
               ),
             ),
@@ -36,7 +39,7 @@ class _RidesTabState extends State<RidesTab> {
               'COMING SOON',
               style: GoogleFonts.spaceMono(
                 fontSize: 11,
-                color: Theme.of(context).primaryColor,
+                color: FifaColors.accent,
                 letterSpacing: 2,
               ),
             ),

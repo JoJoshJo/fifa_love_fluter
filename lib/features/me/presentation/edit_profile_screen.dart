@@ -1,7 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/constants/colors.dart';
 import '../data/me_repository.dart';
 import '../../../core/supabase/supabase_config.dart';
@@ -153,6 +154,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         'team_supported': _teamController.text.trim(),
         'avatar_url': finalAvatarUrl,
         'interests': _matchTypes,
+        'is_local': _isLocal,
+        'city': _city,
+        'countries_to_match': _countriesToMatch,
       };
 
       await _repo.updateProfile(userId, updates);
@@ -205,7 +209,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, color: textColor),
+          icon: Icon(LucideIcons.x, color: textColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('Edit Profile',
@@ -292,14 +296,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
                   radius: 50,
                   backgroundColor: textColor.withValues(alpha: 0.1),
                   backgroundImage: _localImage != null ? FileImage(_localImage!) : (_avatarUrl != null ? NetworkImage(_avatarUrl!) : null) as ImageProvider?,
-                  child: (_localImage == null && _avatarUrl == null) ? Icon(Icons.person, size: 50, color: textMuted) : null,
+                  child: (_localImage == null && _avatarUrl == null) ? Icon(LucideIcons.user, size: 50, color: textMuted) : null,
                 ),
                 Positioned(
                   bottom: 0, right: 0,
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: const BoxDecoration(color: FifaColors.emeraldSpring, shape: BoxShape.circle),
-                    child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                    child: const Icon(LucideIcons.camera, size: 16, color: Colors.white),
                   ),
                 ),
               ],
@@ -326,7 +330,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        _buildPickerField('Nationality', _nationality.isEmpty ? 'Select Country' : _nationality, _showNationalityPicker, isLight, textColor, textMuted, icon: Icons.flag_outlined),
+        _buildPickerField('Nationality', _nationality.isEmpty ? 'Select Country' : _nationality, _showNationalityPicker, isLight, textColor, textMuted, icon: LucideIcons.flag),
         const SizedBox(height: 20),
         _buildTextField('Supported Team', _teamController, isLight, textColor, textMuted, hint: 'e.g. Real Madrid, Brazil, etc.'),
         const SizedBox(height: 32),
@@ -335,11 +339,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
           decoration: BoxDecoration(
             color: FifaColors.emeraldSpring.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.1)),
+            border: isLight ? Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.1)) : null,
           ),
           child: Row(
             children: [
-              const Icon(Icons.info_outline, size: 20, color: FifaColors.emeraldSpring),
+              const Icon(LucideIcons.info, size: 20, color: FifaColors.emeraldSpring),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -409,12 +413,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
             ? const Color(0xFF135E4B) 
             : cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected 
-              ? const Color(0xFF4CB572) 
-              : (isLight ? const Color(0xFFE8DDD0) : Colors.white.withValues(alpha: 0.1)),
-            width: 1.5,
-          ),
+          border: isSelected 
+            ? Border.all(
+                color: const Color(0xFF4CB572),
+                width: 1.5,
+              )
+            : (isLight ? Border.all(
+                color: const Color(0xFFE8DDD0),
+                width: 1.5,
+              ) : null),
         ),
         child: Row(
           children: [
@@ -430,7 +437,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
             ),
             const Spacer(),
             if (isSelected)
-              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const Icon(LucideIcons.checkCircle, color: Colors.white, size: 20),
           ],
         ),
       ),
@@ -460,16 +467,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
             hintStyle: GoogleFonts.inter(color: textMuted.withValues(alpha: 0.5)),
             filled: true,
             fillColor: inputColor,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: isLight 
-                ? const BorderSide(color: Color(0xFFE8DDD0))
-                : BorderSide.none),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: isLight 
-                ? const BorderSide(color: Color(0xFFE8DDD0))
-                : BorderSide.none),
+            border: isLight 
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE8DDD0)))
+                : OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none),
+            enabledBorder: isLight 
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE8DDD0)))
+                : OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
@@ -531,7 +542,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
                 if (icon != null) ...[Icon(icon, size: 20, color: FifaColors.emeraldSpring), const SizedBox(width: 12)],
                 Text(value, style: GoogleFonts.inter(fontSize: 15, color: textColor)),
                 const Spacer(),
-                Icon(Icons.chevron_right, size: 20, color: textMuted.withValues(alpha: 0.5)),
+                Icon(LucideIcons.chevronRight, size: 20, color: textMuted.withValues(alpha: 0.5)),
               ],
             ),
           ),
@@ -578,7 +589,7 @@ class _CountryPickerSheet extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Search country...',
                 hintStyle: GoogleFonts.inter(color: textMuted.withValues(alpha: 0.5)),
-                prefixIcon: Icon(Icons.search, color: textMuted),
+                prefixIcon: Icon(LucideIcons.search, color: textMuted, size: 20),
                 filled: true,
                 fillColor: inputColor,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),

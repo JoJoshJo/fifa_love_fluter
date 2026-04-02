@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../../shared/widgets/gradient_button.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fifalove_mobile/core/constants/colors.dart';
@@ -173,27 +175,9 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: Text(
-                  'GO PREMIUM',
-                  style: GoogleFonts.spaceGrotesk(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    letterSpacing: 2,
-                  ),
-                ),
-              ),
+            GradientButton(
+              text: 'GO PREMIUM',
+              onPressed: () => Navigator.pop(context),
             ),
           ],
         ),
@@ -281,11 +265,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                           color: isLight
                               ? Colors.white
                               : const Color(0xFF152B1E),
-                          border: Border.all(
-                            color: isLight
-                                ? const Color(0xFFD4EBE0)
-                                : const Color(0xFF1E4A33),
-                          ),
+                           border: isLight
+                                ? Border.all(
+                                    color: const Color(0xFFD4EBE0),
+                                  )
+                                : null,
                           boxShadow: isLight
                               ? [
                                   BoxShadow(
@@ -299,7 +283,13 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text('🌍', style: TextStyle(fontSize: 14)),
+                             Icon(
+                                LucideIcons.globe,
+                                size: 14,
+                                color: isLight
+                                    ? const Color(0xFF135E4B)
+                                    : Colors.white.withValues(alpha: 0.5),
+                              ),
                             const SizedBox(width: 6),
                             Text(
                               _selectedCountries.isEmpty
@@ -414,121 +404,34 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                 if (!_loading && remaining > 0) ...[
                   // ACTION BUTTONS BELOW CARD
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                    padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // SKIP
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => _swiperController.swipe(CardSwiperDirection.left),
-                            child: Container(
-                              height: 58,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(29),
-                                color: isLight
-                                    ? Colors.white
-                                    : const Color(0xFF0D1A13),
-                                border: Border.all(
-                                  color: isLight
-                                      ? const Color(0xFFD4EBE0)
-                                      : const Color(0xFF1E4A33),
-                                  width: 1.5,
-                                ),
-                                boxShadow: isLight
-                                    ? [
-                                        BoxShadow(
-                                          color: Colors.black
-                                              .withValues(alpha: 0.06),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 2),
-                                        )
-                                      ]
-                                    : null,
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  Icons.close_rounded,
-                                  size: 28,
-                                  color: isLight
-                                      ? const Color(0xFFADB5BD)
-                                      : Colors.white.withValues(alpha: 0.3),
-                                ),
-                              ),
-                            ),
-                          ),
+                        // PASS
+                        _actionCircle(
+                          icon: LucideIcons.x,
+                          color: FifaColors.error,
+                          size: 64,
+                          iconSize: 32,
+                          onTap: () => _swiperController.swipe(CardSwiperDirection.left),
                         ),
-                        const SizedBox(width: 12),
-                        // SUPER LIKE — smaller center
-                        GestureDetector(
+                        // SUPER LIKE
+                        _actionCircle(
+                          icon: LucideIcons.star,
+                          color: FifaColors.gold,
+                          size: 48,
+                          iconSize: 24,
                           onTap: () => _swiperController.swipe(CardSwiperDirection.top),
-                          child: Container(
-                            width: 52,
-                            height: 52,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isLight
-                                  ? Colors.white
-                                  : const Color(0xFF0D1A13),
-                              border: Border.all(
-                                color: const Color(0xFFF2C233)
-                                    .withValues(alpha: 0.6),
-                                width: 1.5,
-                              ),
-                              boxShadow: isLight
-                                  ? [
-                                      BoxShadow(
-                                        color: Colors.black
-                                            .withValues(alpha: 0.06),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      )
-                                    ]
-                                  : null,
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.star_outline_rounded,
-                                size: 24,
-                                color: Color(0xFFF2C233),
-                              ),
-                            ),
-                          ),
                         ),
-                        const SizedBox(width: 12),
                         // LIKE
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => _swiperController.swipe(CardSwiperDirection.right),
-                            child: Container(
-                              height: 58,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(29),
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF135E4B),
-                                    Color(0xFF1E7A5A),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF135E4B)
-                                        .withValues(alpha: 0.4),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.favorite_rounded,
-                                  size: 28,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
+                        _actionCircle(
+                          icon: LucideIcons.heart,
+                          color: FifaColors.accent,
+                          size: 64,
+                          iconSize: 32,
+                          onTap: () => _swiperController.swipe(CardSwiperDirection.right),
+                          isFilled: true,
                         ),
                       ],
                     ),
@@ -547,11 +450,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                                 ? Colors.white
                                 : const Color(0xFF0D1A13),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isLight
-                                  ? const Color(0xFFD4EBE0)
-                                  : const Color(0xFF1E4A33),
-                            ),
+                            border: isLight 
+                                ? Border.all(
+                                    color: const Color(0xFFD4EBE0),
+                                  )
+                                : null,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -594,7 +497,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.verified,
+                              const Icon(LucideIcons.checkCircle2,
                                   size: 12, color: Color(0xFF4CB572)),
                               const SizedBox(width: 6),
                               Text(
@@ -672,22 +575,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          ElevatedButton(
+          GradientButton(
+            text: 'Change Countries',
             onPressed: _showCountryFilter,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 24, vertical: 12),
-            ),
-            child: Text(
-              'Change Countries',
-              style: GoogleFonts.inter(
-                  fontSize: 14, fontWeight: FontWeight.w600),
-            ),
+            width: 220,
           ),
         ],
       ),
@@ -696,5 +587,36 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
   Widget _buildShimmer() {
     return const Center(child: ShimmerSwipeCard());
+  }
+
+  Widget _actionCircle({
+      required IconData icon,
+      required Color color,
+      required double size,
+      required double iconSize,
+      required VoidCallback onTap,
+      bool isFilled = false}) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isLight ? Colors.white : const Color(0xFF1E2B25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isLight ? 0.08 : 0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Icon(icon, size: iconSize, color: color),
+        ),
+      ),
+    );
   }
 }

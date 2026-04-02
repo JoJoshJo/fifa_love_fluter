@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/supabase/supabase_config.dart';
+
 
 class FifaBottomNav extends StatefulWidget {
   final int currentIndex;
@@ -42,41 +44,29 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final theme = Theme.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF080F0C);
     
     return Container(
       height: 64 + bottomPadding,
       padding: EdgeInsets.only(bottom: bottomPadding),
       decoration: BoxDecoration(
-        color: theme.cardColor,
-        border: Border(
-          top: BorderSide(
-            color: theme.dividerColor,
-            width: 1,
-          ),
-        ),
+        color: bgColor,
       ),
       child: Stack(
         children: [
-          // Moving Indicator Line
+          // Subtle Active Indicator Dot
           AnimatedPositioned(
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeOutBack,
-            left: (MediaQuery.of(context).size.width / 4) * widget.currentIndex + (MediaQuery.of(context).size.width / 8) - 12,
-            top: 0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.elasticOut,
+            left: (MediaQuery.of(context).size.width / 4) * widget.currentIndex + (MediaQuery.of(context).size.width / 8) - 2,
+            bottom: 8,
             child: Container(
-              width: 24,
-              height: 3,
-              decoration: BoxDecoration(
-                color: theme.primaryColor,
-                borderRadius: BorderRadius.circular(1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.primaryColor.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                  ),
-                ],
+              width: 4,
+              height: 4,
+              decoration: const BoxDecoration(
+                color: Color(0xFF4CB572),
+                shape: BoxShape.circle,
               ),
             ),
           ),
@@ -85,16 +75,14 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
               _AnimatedNavItem(
                 index: 0,
                 currentIndex: widget.currentIndex,
-                icon: Icons.local_fire_department_outlined,
-                activeIcon: Icons.local_fire_department,
+                icon: LucideIcons.home,
                 label: 'DISCOVER',
                 onTap: () => widget.onTap(0),
               ),
               _AnimatedNavItem(
                 index: 1,
                 currentIndex: widget.currentIndex,
-                icon: Icons.chat_bubble_outline,
-                activeIcon: Icons.chat_bubble,
+                icon: LucideIcons.messageCircle,
                 label: 'CHAT',
                 onTap: () => widget.onTap(1),
                 showBadge: true,
@@ -103,16 +91,14 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
               _AnimatedNavItem(
                 index: 2,
                 currentIndex: widget.currentIndex,
-                icon: Icons.emoji_events_outlined,
-                activeIcon: Icons.emoji_events,
+                icon: LucideIcons.trophy,
                 label: 'WORLD CUP',
                 onTap: () => widget.onTap(2),
               ),
               _AnimatedNavItem(
                 index: 3,
                 currentIndex: widget.currentIndex,
-                icon: Icons.person_outline,
-                activeIcon: Icons.person,
+                icon: LucideIcons.user,
                 label: 'ME',
                 onTap: () => widget.onTap(3),
               ),
@@ -128,7 +114,6 @@ class _AnimatedNavItem extends StatefulWidget {
   final int index;
   final int currentIndex;
   final IconData icon;
-  final IconData activeIcon;
   final String label;
   final VoidCallback onTap;
   final bool showBadge;
@@ -138,7 +123,6 @@ class _AnimatedNavItem extends StatefulWidget {
     required this.index,
     required this.currentIndex,
     required this.icon,
-    required this.activeIcon,
     required this.label,
     required this.onTap,
     this.showBadge = false,
@@ -183,8 +167,10 @@ class _AnimatedNavItemState extends State<_AnimatedNavItem> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     final isActive = widget.currentIndex == widget.index;
-    final theme = Theme.of(context);
-    final color = isActive ? theme.primaryColor : theme.hintColor.withValues(alpha: 0.4);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final color = isActive 
+      ? const Color(0xFF135E4B) 
+      : (isLight ? const Color(0xFF9BB3AF) : Colors.white.withValues(alpha: 0.2));
 
     return Expanded(
       child: GestureDetector(
@@ -200,9 +186,9 @@ class _AnimatedNavItemState extends State<_AnimatedNavItem> with SingleTickerPro
                 clipBehavior: Clip.none,
                 children: [
                   Icon(
-                    isActive ? widget.activeIcon : widget.icon, 
+                    widget.icon, 
                     color: color, 
-                    size: 24,
+                    size: 22,
                   ),
                   if (widget.showBadge)
                     Positioned(
