@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:fifalove_mobile/core/constants/colors.dart';
 import 'package:fifalove_mobile/features/worldcup/data/worldcup_data.dart';
 
 class SafetyTab extends StatefulWidget {
@@ -117,7 +117,7 @@ class _SafetyTabState extends State<SafetyTab> {
                                 style: GoogleFonts.playfairDisplay(
                                     fontSize: 36, fontWeight: FontWeight.bold, color: scoreColor)),
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 4),
+                              padding: const EdgeInsets.only(bottom: 32),
                               child: Text(' /10',
                                   style: GoogleFonts.inter(
                                       fontSize: 16,

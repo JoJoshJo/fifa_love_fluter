@@ -103,7 +103,7 @@ class AppTheme {
 
   static ThemeData get light => ThemeData(
     brightness: Brightness.light,
-    scaffoldBackgroundColor: const Color(0xFFF8FAF9),
+    scaffoldBackgroundColor: const Color(0xFFF5F0E8),
     colorScheme: const ColorScheme.light(
       primary: FifaColors.emeraldForest,
       secondary: FifaColors.emeraldSpring,
@@ -111,18 +111,18 @@ class AppTheme {
       error: FifaColors.error,
     ),
     textTheme: TextTheme(
-      displayLarge: GoogleFonts.spaceGrotesk(
+      displayLarge: GoogleFonts.playfairDisplay(
         fontSize: 48,
         fontWeight: FontWeight.w700,
         color: const Color(0xFF0D1A13),
         letterSpacing: 1.5,
       ),
-      displayMedium: GoogleFonts.spaceGrotesk(
+      displayMedium: GoogleFonts.playfairDisplay(
         fontSize: 32,
         fontWeight: FontWeight.w700,
         color: const Color(0xFF0D1A13),
       ),
-      titleLarge: GoogleFonts.spaceGrotesk(
+      titleLarge: GoogleFonts.playfairDisplay(
         fontSize: 22,
         fontWeight: FontWeight.w700,
         color: const Color(0xFF0D1A13),
