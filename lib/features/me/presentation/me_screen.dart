@@ -354,7 +354,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                     color: text,
                     height: 1.1,
                   )),
-                if (isVerified && verificationStatus == 'approved') ...[
+                if (isVerified || verificationStatus == 'approved') ...[
                   const SizedBox(width: 8),
                   const Icon(LucideIcons.badgeCheck, size: 22, color: accentGreen),
                 ],
@@ -781,22 +781,20 @@ class _MeScreenState extends ConsumerState<MeScreen> {
   }
 
   Widget _buildVerificationCard(String status, bool isLight, Color text, Color muted) {
-    final isNone = status == 'none';
+    final isNone = status == 'none' || status == 'rejected';
     
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isLight ? Colors.white : const Color(0xFF0D1A13),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isNone 
-            ? const Color(0xFF4CB572) 
-            : (isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33)),
+          color: isNone ? const Color(0xFF4CB572) : const Color(0xFFF2C233),
           width: 1,
         ),
       ),
-      child: InkWell(
+      child: GestureDetector(
         onTap: isNone ? () => Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const VerificationScreen()),
