@@ -8,7 +8,7 @@ class MeRepository {
   Future<Map<String, dynamic>> fetchProfile(String userId) async {
     final res = await _client
         .from('profiles')
-        .select('id, name, age, bio, avatar_url, nationality, gender, city, interests, languages, team_supported, countries_to_match, phone_number, is_verified, is_local')
+        .select('id, name, age, bio, avatar_url, nationality, gender, city, interests, languages, team_supported, countries_to_match, phone_number, is_verified, is_local, verification_status')
         .eq('id', userId)
         .single();
     return res;
@@ -40,6 +40,37 @@ class MeRepository {
   Future<void> deleteAccount(String userId) async {
     await _client.from('profiles').delete().eq('id', userId);
     await _client.auth.signOut();
+  }
+
+  Future<void> submitVerificationRequest({
+    required String userId,
+    required File idPhoto,
+    required File selfie,
+  }) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    
+    // 1. Upload ID Photo
+    final idPath = '$userId/verification/id_$timestamp.jpg';
+    await _client.storage.from('verification-docs').upload(idPath, idPhoto);
+    final idUrl = _client.storage.from('verification-docs').getPublicUrl(idPath);
+
+    // 2. Upload Selfie
+    final selfiePath = '$userId/verification/selfie_$timestamp.jpg';
+    await _client.storage.from('verification-docs').upload(selfiePath, selfie);
+    final selfieUrl = _client.storage.from('verification-docs').getPublicUrl(selfiePath);
+
+    // 3. Insert into verification_requests
+    await _client.from('verification_requests').insert({
+      'user_id': userId,
+      'id_photo_url': idUrl,
+      'selfie_url': selfieUrl,
+      'status': 'pending',
+    });
+
+    // 4. Update profile status
+    await _client.from('profiles').update({
+      'verification_status': 'pending',
+    }).eq('id', userId);
   }
 
   Map<String, dynamic> calculateCompletion(Map<String, dynamic> profile) {

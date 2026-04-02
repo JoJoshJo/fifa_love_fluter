@@ -427,7 +427,7 @@ class _SetupScreenState extends State<SetupScreen> {
                     ),
                   ),
                 ),
-                Icon(LucideIcons.chevronDown, size: 18, color: FifaColors.textMuted),
+                const Icon(LucideIcons.chevronDown, size: 18, color: FifaColors.textMuted),
               ],
             ),
           ),

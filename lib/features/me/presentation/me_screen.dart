@@ -11,6 +11,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:page_transition/page_transition.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_screen.dart';
+import 'verification_screen.dart';
 
 
 class MeScreen extends ConsumerStatefulWidget {
@@ -178,11 +179,9 @@ class _MeScreenState extends ConsumerState<MeScreen> {
       _profile['avatar_url'] as String?;
     final name =
       _profile['name'] as String? ?? 'Your Name';
-    final isVerified =
-      _profile['is_verified'] as bool? ?? false;
-    final currentLang =
-      _profile['app_language'] as String?
-        ?? 'English';
+    final isVerified = _profile['is_verified'] as bool? ?? false;
+    final verificationStatus = _profile['verification_status'] as String? ?? 'none';
+    final currentLang = _profile['app_language'] as String? ?? 'English';
     final themeMode = ref.watch(themeProvider);
 
     return Scaffold(
@@ -345,13 +344,22 @@ class _MeScreenState extends ConsumerState<MeScreen> {
             const SizedBox(height: 14),
 
             // ── NAME ───────────────────────────
-            Text(name,
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-                color: text,
-                height: 1.1,
-              )),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(name,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    color: text,
+                    height: 1.1,
+                  )),
+                if (isVerified && verificationStatus == 'approved') ...[
+                  const SizedBox(width: 8),
+                  const Icon(LucideIcons.badgeCheck, size: 22, color: accentGreen),
+                ],
+              ],
+            ),
 
             const SizedBox(height: 6),
             
@@ -372,6 +380,26 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                   ));
               },
             ),
+
+            const SizedBox(height: 20),
+
+            // ── VERIFICATION ───────────────────
+            if (verificationStatus != 'approved')
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 10 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: _buildVerificationCard(verificationStatus, isLight, text, muted),
+              ),
 
             const SizedBox(height: 20),
 
@@ -750,6 +778,66 @@ class _MeScreenState extends ConsumerState<MeScreen> {
       height: 1, thickness: 1,
       color: border,
       indent: 52);
+  }
+
+  Widget _buildVerificationCard(String status, bool isLight, Color text, Color muted) {
+    final isNone = status == 'none';
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isLight ? Colors.white : const Color(0xFF0D1A13),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isNone 
+            ? const Color(0xFF4CB572) 
+            : (isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33)),
+          width: 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: isNone ? () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const VerificationScreen()),
+        ).then((_) => _loadProfile()) : null,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: (isNone ? const Color(0xFF4CB572) : const Color(0xFFF2C233))
+                  .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                isNone ? LucideIcons.shieldCheck : LucideIcons.clock,
+                size: 22,
+                color: isNone ? const Color(0xFF4CB572) : const Color(0xFFF2C233),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isNone ? 'Verify Your Identity' : 'Verification Pending',
+                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: text),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    isNone ? 'Build trust with a verified badge' : "We're reviewing your submission",
+                    style: GoogleFonts.inter(fontSize: 13, color: muted),
+                  ),
+                ],
+              ),
+            ),
+            if (isNone) Icon(LucideIcons.chevronRight, size: 18, color: muted.withValues(alpha: 0.5)),
+          ],
+        ),
+      ),
+    );
   }
 
   String _flag(String? n) {
