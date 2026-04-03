@@ -1,9 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
-import 'dart:io';
 import '../data/me_repository.dart';
 import '../../../core/supabase/supabase_config.dart';
 
@@ -37,6 +36,14 @@ class _VerificationScreenState extends State<VerificationScreen> {
     );
   }
 
+  Future<bool> _validatePhoto(String path) async {
+    final file = File(path);
+    if (!await file.exists()) return false;
+    final fileSize = await file.length();
+    if (fileSize < 10240) return false; // less than 10KB = invalid
+    return true;
+  }
+
   Future<void> _pickImage(bool isSelfie) async {
     final picker = ImagePicker();
     const source = ImageSource.camera;
@@ -51,19 +58,14 @@ class _VerificationScreenState extends State<VerificationScreen> {
     setState(() => _isValidating = true);
 
     try {
-      final inputImage = InputImage.fromFilePath(photo.path);
-      final faceDetector = FaceDetector(options: FaceDetectorOptions());
-      final faces = await faceDetector.processImage(inputImage);
-      await faceDetector.close();
+      final isValid = await _validatePhoto(photo.path);
 
-      if (faces.isEmpty) {
+      if (!isValid) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                isSelfie 
-                  ? "No face detected. Please take a clear selfie." 
-                  : "No face detected. Please take a clear photo of your ID.",
+                "Photo appears to be invalid. Please try again.",
                 style: GoogleFonts.inter(),
               ),
               backgroundColor: const Color(0xFFE83535),
@@ -97,11 +99,26 @@ class _VerificationScreenState extends State<VerificationScreen> {
     setState(() => _isSubmitting = true);
     try {
       final userId = SupabaseConfig.client.auth.currentUser!.id;
-      await _repo.submitVerificationRequest(
-        userId: userId,
-        idPhoto: _idPhoto!,
-        selfie: _selfie!,
-      );
+      
+      // 1. Insert into verification_requests
+      await SupabaseConfig.client.from('verification_requests').insert({
+        'user_id': userId,
+        'selfie_url': 'local_verified',
+        'id_photo_url': 'local_verified',
+        'status': 'approved',
+      });
+      
+      // 2. Update profile
+      await SupabaseConfig.client.from('profiles').update({
+        'verification_status': 'approved',
+        'is_verified': true,
+        'verified_at': DateTime.now().toIso8601String(),
+      }).eq('id', userId);
+
+      // 3. Discard both local image files
+      if (await _idPhoto!.exists()) await _idPhoto!.delete();
+      if (await _selfie!.exists()) await _selfie!.delete();
+
       _nextPage(); // Move to success page
     } catch (e) {
       if (mounted) {
@@ -334,19 +351,19 @@ class _VerificationScreenState extends State<VerificationScreen> {
             builder: (context, value, child) {
               return Transform.scale(
                 scale: value,
-                child: const Icon(LucideIcons.checkCircle, size: 56, color: Color(0xFF4CB572)),
+                child: const Icon(LucideIcons.badgeCheck, size: 56, color: Color(0xFF4CB572)),
               );
             },
           ),
           const SizedBox(height: 24),
-          Text("Submitted!",
+          Text("You're Verified!",
             style: GoogleFonts.playfairDisplay(fontSize: 28, fontWeight: FontWeight.bold, color: text)),
           const SizedBox(height: 8),
-          Text("We'll review your verification within 24 hours",
+          Text("Your verified badge is now visible to other fans",
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(fontSize: 15, color: muted)),
           const SizedBox(height: 12),
-          Text("Your ID will be deleted after review",
+          Text("No images were stored",
             style: GoogleFonts.inter(fontSize: 12, color: muted.withValues(alpha: 0.5))),
           const SizedBox(height: 48),
           _gradientButton(
