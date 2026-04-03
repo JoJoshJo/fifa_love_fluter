@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' show File;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -15,7 +15,6 @@ class VerificationScreen extends StatefulWidget {
 
 class _VerificationScreenState extends State<VerificationScreen> {
   final PageController _pageController = PageController();
-  final _repo = MeRepository();
   int _currentPage = 0;
 
   File? _idPhoto;
@@ -44,20 +43,33 @@ class _VerificationScreenState extends State<VerificationScreen> {
     return true;
   }
 
-  Future<void> _pickImage(bool isSelfie) async {
+  Future<XFile?> _pickImage({bool frontCamera = false}) async {
     final picker = ImagePicker();
-    const source = ImageSource.camera;
-    final photo = await picker.pickImage(
-      source: source,
-      preferredCameraDevice: isSelfie ? CameraDevice.front : CameraDevice.rear,
-      imageQuality: 85,
-    );
+    try {
+      final photo = await picker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: frontCamera ? CameraDevice.front : CameraDevice.rear,
+        imageQuality: 85,
+      );
+      return photo;
+    } catch (e) {
+      // Camera not available (simulator) — fall back to photo gallery
+      final photo = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      return photo;
+    }
+  }
 
-    if (photo == null) return;
-
+  Future<void> _handlePickImage(bool isSelfie) async {
     setState(() => _isValidating = true);
 
     try {
+      final photo = await _pickImage(frontCamera: isSelfie);
+
+      if (photo == null) return;
+
       final isValid = await _validatePhoto(photo.path);
 
       if (!isValid) {
@@ -162,7 +174,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
             title: "Photo of Your ID",
             subtitle: "Take a clear photo of the front of your driver's license or passport",
             image: _idPhoto,
-            onTap: () => _pickImage(false),
+            onTap: () => _handlePickImage(false),
             onContinue: _nextPage,
             isIconUser: false,
           ),
@@ -174,7 +186,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
             title: "Take a Selfie",
             subtitle: "Make sure your face is clearly visible and matches your ID",
             image: _selfie,
-            onTap: () => _pickImage(true),
+            onTap: () => _handlePickImage(true),
             onContinue: _submit,
             isIconUser: true,
             isSubmitting: _isSubmitting,
