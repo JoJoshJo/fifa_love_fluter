@@ -320,29 +320,7 @@ class SwipeCard extends StatelessWidget {
                                           )),
                                       if (isVerified) ...[
                                         const SizedBox(width: 6),
-                                        StatefulBuilder(
-                                          builder: (context, setState) {
-                                            return TweenAnimationBuilder<double>(
-                                              tween: Tween<double>(begin: 0.7, end: 1.0),
-                                              duration: const Duration(seconds: 1),
-                                              curve: Curves.easeInOut,
-                                              builder: (context, opacity, child) {
-                                                return Opacity(
-                                                  opacity: opacity,
-                                                  child: const Icon(LucideIcons.badgeCheck, size: 16, color: Color(0xFF4CB572)),
-                                                );
-                                              },
-                                              onEnd: () {
-                                                // This is a common hack to repeat TWB animations
-                                                // But since we are in a Stateless SwipeCard, we can't easily rebuild.
-                                                // However, for this task, a 1-second fade-in on appear is a good start.
-                                                // To get a true loop in a Stateless widget without an external controller,
-                                                // we'd need a more complex setup. I will stick to a clean 1-second pulse on appear
-                                                // or just use the current logic which is solid for a swipe card.
-                                              },
-                                            );
-                                          },
-                                        ),
+                                        const _VerifiedPulse(),
                                       ],
                                     ],
                                   ),
@@ -563,4 +541,43 @@ class _FlagFallback extends StatelessWidget {
       Color(0xFF0A2018),
     ],
   );
+}
+
+class _VerifiedPulse extends StatefulWidget {
+  const _VerifiedPulse();
+
+  @override
+  State<_VerifiedPulse> createState() => _VerifiedPulseState();
+}
+
+class _VerifiedPulseState extends State<_VerifiedPulse> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.7, end: 1.0).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _animation,
+      child: const Icon(LucideIcons.badgeCheck, size: 16, color: Color(0xFF4CB572)),
+    );
+  }
 }
