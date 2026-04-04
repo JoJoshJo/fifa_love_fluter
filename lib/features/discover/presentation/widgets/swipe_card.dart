@@ -359,6 +359,17 @@ class SwipeCard extends StatelessWidget {
       );
     }
 
+    // Apply parallax tilt on drag (only for front card)
+    if (isFront && dragOffset != 0) {
+      card = Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, 0.001) // perspective
+          ..rotateZ(dragOffset * 0.05), // subtle tilt (adjusted for normalized dragOffset)
+        child: card,
+      );
+    }
+
     return RepaintBoundary(child: card);
   }
 

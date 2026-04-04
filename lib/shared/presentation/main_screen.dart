@@ -40,14 +40,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: IndexedStack(
-        index: _currentIndex,
-        children: const [
-          DiscoverScreen(),
-          ChatScreen(),
-          WorldCupScreen(),
-          MeScreen(),
-        ],
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        switchInCurve: Curves.easeIn,
+        switchOutCurve: Curves.easeOut,
+        child: IndexedStack(
+          key: ValueKey<int>(_currentIndex),
+          index: _currentIndex,
+          children: const [
+            DiscoverScreen(),
+            ChatScreen(),
+            WorldCupScreen(),
+            MeScreen(),
+          ],
+        ),
       ),
       bottomNavigationBar: FifaBottomNav(
         currentIndex: _currentIndex,

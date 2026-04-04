@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../shared/widgets/gradient_button.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fifalove_mobile/core/constants/colors.dart';
 import '../../../core/supabase/supabase_config.dart';
@@ -23,7 +24,7 @@ class DiscoverScreen extends ConsumerStatefulWidget {
   ConsumerState<DiscoverScreen> createState() => _DiscoverScreenState();
 }
 
-class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
+class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProviderStateMixin {
   final _repo = DiscoverRepository();
   final _swiperController = CardSwiperController();
 
@@ -35,6 +36,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   String? _myAvatarUrl;
   List<String> _selectedCountries = [];
   int _dailySwipes = 0;
+  late AnimationController _hintController;
+  late Animation<Offset> _hintAnimation;
 
   static const int _freeLimit = 20;
   static const int _hardLimit = 25;
@@ -51,6 +54,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   @override
   void dispose() {
     _swiperController.dispose();
+    _hintController.dispose();
     super.dispose();
   }
 
@@ -60,6 +64,49 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
 
     final raw = prefs.getStringList('selected_countries');
     if (raw != null) _selectedCountries = raw;
+
+    // Initialize swipe hint
+    _hintController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _hintAnimation = TweenSequence<Offset>([
+      TweenSequenceItem(
+        tween: Tween<Offset>(begin: Offset.zero, end: const Offset(30, 0))
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 20, // Move right
+      ),
+      TweenSequenceItem(
+        tween: ConstantTween<Offset>(const Offset(30, 0)),
+        weight: 20, // Pause
+      ),
+      TweenSequenceItem(
+        tween: Tween<Offset>(begin: const Offset(30, 0), end: const Offset(-30, 0))
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 20, // Move left
+      ),
+      TweenSequenceItem(
+        tween: ConstantTween<Offset>(const Offset(-30, 0)),
+        weight: 20, // Pause
+      ),
+      TweenSequenceItem(
+        tween: Tween<Offset>(begin: const Offset(-30, 0), end: Offset.zero)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 20, // Return
+      ),
+    ]).animate(_hintController);
+
+    final hasSeenHint = prefs.getBool('has_seen_swipe_hint') ?? false;
+    if (!hasSeenHint) {
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (mounted && _profiles.isNotEmpty) {
+          _hintController.forward().then((_) {
+            prefs.setBool('has_seen_swipe_hint', true);
+          });
+        }
+      });
+    }
 
     await _fetchMyAvatar();
     await _loadProfiles();
@@ -358,23 +405,37 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                               child: SizedBox(
                                 height: MediaQuery.of(context).size.height * 0.68,
                                 width: MediaQuery.of(context).size.width - 32,
-                                  child: CardSwiper(
-                                    controller: _swiperController,
-                                    cardsCount: min(3, remaining),
-                                    numberOfCardsDisplayed: 2,
-                                    backCardOffset: const Offset(0, -16),
-                                    scale: 0.95,
-                                    isLoop: false,
-                                    duration: const Duration(milliseconds: 200),
-                                    padding: EdgeInsets.zero,
+                                  child: AnimatedBuilder(
+                                    animation: _hintAnimation,
+                                    builder: (context, child) {
+                                      return Transform.translate(
+                                        offset: _currentIndex == 0 ? _hintAnimation.value : Offset.zero,
+                                        child: child,
+                                      );
+                                    },
+                                    child: CardSwiper(
+                                      controller: _swiperController,
+                                      cardsCount: min(3, remaining),
+                                      numberOfCardsDisplayed: 2,
+                                      backCardOffset: const Offset(0, -16),
+                                      scale: 0.95,
+                                      isLoop: false,
+                                      duration: const Duration(milliseconds: 200),
+                                      padding: EdgeInsets.zero,
                                   onSwipe: (prevIndex, currentIndex, direction) {
                                     String action = 'nope';
                                     if (direction ==
                                         CardSwiperDirection.right) {
                                       action = 'like';
+                                      HapticFeedback.mediumImpact();
+                                    } else if (direction ==
+                                        CardSwiperDirection.left) {
+                                      action = 'nope';
+                                      HapticFeedback.lightImpact();
                                     } else if (direction ==
                                         CardSwiperDirection.top) {
                                       action = 'superlike';
+                                      HapticFeedback.heavyImpact();
                                     }
                                     _handleSwipe(
                                         action, _profiles[_currentIndex + prevIndex]);
@@ -399,6 +460,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                                 ),
                               ),
                             ),
+                          ),
                 ),
 
                 if (!_loading && remaining > 0) ...[
@@ -646,11 +708,18 @@ class _ActionButtonState extends State<_ActionButton> with SingleTickerProviderS
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 150),
+      duration: const Duration(milliseconds: 300),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.9).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 1.3).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.3, end: 1.0).chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 50,
+      ),
+    ]).animate(_controller);
   }
 
   @override
@@ -659,16 +728,12 @@ class _ActionButtonState extends State<_ActionButton> with SingleTickerProviderS
     super.dispose();
   }
 
-  void _onTapDown(TapDownDetails details) {
-    _controller.forward();
-  }
-
-  void _onTapUp(TapUpDetails details) {
-    _controller.reverse();
-  }
-
-  void _onTapCancel() {
-    _controller.reverse();
+  void _onTap() {
+    if (widget.isHero) {
+      _controller.forward(from: 0.0);
+      HapticFeedback.mediumImpact();
+    }
+    widget.onTap();
   }
 
   @override
@@ -677,10 +742,7 @@ class _ActionButtonState extends State<_ActionButton> with SingleTickerProviderS
     return Transform.translate(
       offset: widget.offset,
       child: GestureDetector(
-        onTapDown: widget.isHero ? _onTapDown : null,
-        onTapUp: widget.isHero ? _onTapUp : null,
-        onTapCancel: widget.isHero ? _onTapCancel : null,
-        onTap: widget.onTap,
+        onTap: _onTap,
         child: ScaleTransition(
           scale: _scaleAnimation,
           child: Container(

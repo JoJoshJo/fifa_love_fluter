@@ -49,65 +49,82 @@ class MessageBubble extends StatelessWidget {
                 ),
               ),
             ),
-          Row(
-            mainAxisAlignment:
-                isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-            children: [
-              Flexible(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: isMe
-                        ? FifaColors.accent
-                        : (isLight ? FifaColors.white : FifaColors.darkCard),
-                    borderRadius: isMe
-                        ? const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                            bottomLeft: Radius.circular(20),
-                            bottomRight: Radius.circular(4),
-                          )
-                        : const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                            bottomLeft: Radius.circular(4),
-                            bottomRight: Radius.circular(20),
-                          ),
-                    border: isMe
-                        ? null
-                        : (isLight ? Border.all(
-                            color: FifaColors.lightBorder,
-                            width: 1,
-                          ) : null),
-                    boxShadow: isLight && !isMe
-                        ? [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 4,
-                              offset: const Offset(0, 1),
-                            )
-                          ]
-                        : null,
-                    image: isMe ? const DecorationImage(
-                      image: AssetImage('assets/images/bubbles_pattern.png'),
-                      opacity: 0.05,
-                      fit: BoxFit.cover,
-                    ) : null,
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(
+                    isMe ? (1.0 - value) * 40 : (value - 1.0) * 40,
+                    0,
                   ),
-                  child: Text(
-                    message['content'] ?? '',
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      height: 1.5,
+                  child: child,
+                ),
+              );
+            },
+            child: Row(
+              mainAxisAlignment:
+                  isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                    decoration: BoxDecoration(
                       color: isMe
-                          ? Colors.white
-                          : (isLight ? FifaColors.textPrimaryLight : Colors.white70),
+                          ? FifaColors.accent
+                          : (isLight ? FifaColors.white : FifaColors.darkCard),
+                      borderRadius: isMe
+                          ? const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                              bottomLeft: Radius.circular(20),
+                              bottomRight: Radius.circular(4),
+                            )
+                          : const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                              bottomLeft: Radius.circular(4),
+                              bottomRight: Radius.circular(20),
+                            ),
+                      border: isMe
+                          ? null
+                          : (isLight ? Border.all(
+                              color: FifaColors.lightBorder,
+                              width: 1,
+                            ) : null),
+                      boxShadow: isLight && !isMe
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.02),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              )
+                            ]
+                          : null,
+                      image: isMe ? const DecorationImage(
+                        image: AssetImage('assets/images/bubbles_pattern.png'),
+                        opacity: 0.05,
+                        fit: BoxFit.cover,
+                      ) : null,
+                    ),
+                    child: Text(
+                      message['content'] ?? '',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        height: 1.5,
+                        color: isMe
+                            ? Colors.white
+                            : (isLight ? FifaColors.textPrimaryLight : Colors.white70),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
