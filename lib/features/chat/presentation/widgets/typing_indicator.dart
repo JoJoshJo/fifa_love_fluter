@@ -8,87 +8,89 @@ class TypingIndicator extends StatefulWidget {
 }
 
 class _TypingIndicatorState extends State<TypingIndicator>
-    with TickerProviderStateMixin {
-  late List<AnimationController> _controllers;
-  late List<Animation<double>> _animations;
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controllers = List.generate(3, (i) {
-      return AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 600),
-      );
-    });
-
-    _animations = _controllers.map((c) {
-      return Tween<double>(begin: 0, end: -6).animate(
-        CurvedAnimation(parent: c, curve: Curves.easeInOut),
-      );
-    }).toList();
-
-    // Stagger the dots
-    _startAnimations();
-  }
-
-  void _startAnimations() async {
-    final delays = [0, 200, 400];
-    for (int i = 0; i < 3; i++) {
-      Future.delayed(Duration(milliseconds: delays[i]), () {
-        if (mounted) {
-          _controllers[i].repeat(reverse: true);
-        }
-      });
-    }
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..repeat(reverse: true);
   }
 
   @override
   void dispose() {
-    for (final c in _controllers) {
-      c.dispose();
-    }
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    
     return Padding(
-      padding: const EdgeInsets.only(left: 16, bottom: 4),
+      padding: const EdgeInsets.only(left: 20, bottom: 8),
       child: Container(
-        width: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: const BoxDecoration(
-          color: Color(0xFF1E3D28),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(4),
-            topRight: Radius.circular(18),
-            bottomLeft: Radius.circular(18),
-            bottomRight: Radius.circular(18),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isLight ? Colors.white : const Color(0xFF1E3D28),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomLeft: Radius.circular(4),
+            bottomRight: Radius.circular(20),
           ),
+          border: isLight ? Border.all(color: const Color(0xFFE8DDD0), width: 1) : null,
+          boxShadow: isLight ? [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            )
+          ] : null,
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(3, (i) {
-            return AnimatedBuilder(
-              animation: _animations[i],
-              builder: (_, __) {
-                return Transform.translate(
-                  offset: Offset(0, _animations[i].value),
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF4CB572),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                );
-              },
-            );
-          }),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (int i = 0; i < 3; i++)
+              _AnimatedDot(
+                index: i,
+                controller: _controller,
+              ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class _AnimatedDot extends StatelessWidget {
+  final int index;
+  final AnimationController controller;
+
+  const _AnimatedDot({required this.index, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) {
+        // Stagger the value slightly based on index
+        final delay = index * 0.2;
+        double value = (controller.value - delay).clamp(0.0, 1.0);
+        
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: const Color(0xFF6B9E8A).withValues(alpha: 0.3 + (value * 0.5)),
+          ),
+        );
+      },
     );
   }
 }

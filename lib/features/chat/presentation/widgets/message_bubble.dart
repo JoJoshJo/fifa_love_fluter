@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fifalove_mobile/core/constants/colors.dart';
 
 class MessageBubble extends StatelessWidget {
   final Map<String, dynamic> message;
   final bool isMe;
   final bool showTime;
+  final String? status; // 'sent', 'read', or null
+  final bool showStatus;
 
   const MessageBubble({
     super.key,
     required this.message,
     required this.isMe,
     required this.showTime,
+    this.status,
+    this.showStatus = false,
   });
 
   String _formatTime(String? isoString) {
@@ -126,6 +131,23 @@ class MessageBubble extends StatelessWidget {
               ],
             ),
           ),
+          if (isMe && showStatus && status != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2, right: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    status == 'read' ? LucideIcons.checkCheck : LucideIcons.check,
+                    size: 12,
+                    color: status == 'read'
+                        ? const Color(0xFF4CB572)
+                        : (isLight ? const Color(0xFF9BB3AF) : Colors.white24),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

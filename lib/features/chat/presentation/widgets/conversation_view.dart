@@ -112,12 +112,27 @@ class _ConversationViewState extends State<ConversationView> {
     }
   }
 
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  String _formatDateHeader(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final checkDate = DateTime(date.year, date.month, date.day);
+
+    if (checkDate == today) return "Today";
+    if (checkDate == yesterday) return "Yesterday";
+    
+    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
+  }
+
   bool _shouldShowTime(List<Map<String, dynamic>> messages, int index) {
-    if (index == messages.length - 1) return true;
-    final curr = DateTime.tryParse(messages[index]['created_at'] as String? ?? '');
-    final next = DateTime.tryParse(messages[index + 1]['created_at'] as String? ?? '');
-    if (curr == null || next == null) return false;
-    return next.difference(curr).inMinutes > 5;
+    // Hidden for cleaner grouping as per latest prompt "Group messages by date"
+    return false; 
   }
 
   void _showOptionsSheet() {
@@ -469,7 +484,7 @@ class _ConversationViewState extends State<ConversationView> {
 
                 return ListView.builder(
                   controller: _scrollController,
-                  padding: const EdgeInsets.only(top: 8, bottom: 8),
+                  padding: const EdgeInsets.only(top: 8, bottom: 20),
                   itemCount: messages.length + (_otherTyping ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (_otherTyping && index == messages.length) {
@@ -478,13 +493,66 @@ class _ConversationViewState extends State<ConversationView> {
                         child: TypingIndicator(),
                       );
                     }
+                    
                     final msg = messages[index];
                     final isMe = msg['sender_id'] == widget.currentUserId;
-                    final showTime = _shouldShowTime(messages, index);
-                    return MessageBubble(
-                      message: msg,
-                      isMe: isMe,
-                      showTime: showTime,
+                    
+                    // Logic for Date Header
+                    bool showDateHeader = false;
+                    String? dateHeaderText;
+                    final currDate = DateTime.tryParse(msg['created_at'] as String? ?? '');
+                    
+                    if (index == 0) {
+                      showDateHeader = true;
+                    } else {
+                      final prevDate = DateTime.tryParse(messages[index - 1]['created_at'] as String? ?? '');
+                      if (currDate != null && prevDate != null && !_isSameDay(currDate, prevDate)) {
+                        showDateHeader = true;
+                      }
+                    }
+                    
+                    if (showDateHeader && currDate != null) {
+                      dateHeaderText = _formatDateHeader(currDate);
+                    }
+
+                    // Logic for Read Status (only show on LAST sent message in a block)
+                    bool showStatus = false;
+                    if (isMe) {
+                      if (index == messages.length - 1) {
+                        showStatus = true;
+                      } else {
+                        final nextMsg = messages[index + 1];
+                        if (nextMsg['sender_id'] != widget.currentUserId) {
+                          showStatus = true;
+                        }
+                      }
+                    }
+
+                    return Column(
+                      children: [
+                        if (showDateHeader && dateHeaderText != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: Text(
+                                dateHeaderText,
+                                style: GoogleFonts.spaceMono(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5,
+                                  color: const Color(0xFF6B9E8A),
+                                ),
+                              ),
+                            ),
+                          ),
+                        MessageBubble(
+                          message: msg,
+                          isMe: isMe,
+                          showTime: _shouldShowTime(messages, index),
+                          status: msg['status'] ?? 'sent',
+                          showStatus: showStatus,
+                        ),
+                      ],
                     );
                   },
                 );
@@ -494,86 +562,72 @@ class _ConversationViewState extends State<ConversationView> {
 
           // ─── Input bar ───
           Container(
-            padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomPad),
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottomPad),
             decoration: BoxDecoration(
               color: backgroundColor,
-              border: isLight ? const Border(
-                top: BorderSide(
-                    color: Color(0xFFE8DDD0),
-                    width: 1),
-              ) : null,
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    height: 52,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: isLight ? Colors.white : Colors.white.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(24),
-                      border: isLight ? Border.all(
-                        color: const Color(0xFFE8DDD0),
-                      ) : null,
-                    ),
-                    child: TextField(
-                      controller: _messageController,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        color: isLight ? const Color(0xFF0D2B1E) : Colors.white,
+                      color: isLight ? Colors.white : const Color(0xFF152B1E),
+                      borderRadius: BorderRadius.circular(26),
+                      border: Border.all(
+                        color: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33),
+                        width: 1,
                       ),
-                      maxLines: 4,
-                      minLines: 1,
-                      decoration: InputDecoration(
-                        hintText: 'Write to ${other['name']?.split(' ')?.first}...',
-                        hintStyle: GoogleFonts.playfairDisplay(
+                    ),
+                    child: Center(
+                      child: TextField(
+                        controller: _messageController,
+                        style: GoogleFonts.inter(
                           fontSize: 15,
-                          fontStyle: FontStyle.italic,
-                          color: isLight ? FifaColors.mutedTextLight : Colors.white24,
+                          color: isLight ? const Color(0xFF0D2B1E) : Colors.white,
                         ),
-                        border: InputBorder.none,
-                        isDense: true,
+                        maxLines: 1,
+                        decoration: InputDecoration(
+                          hintText: 'Type a message...',
+                          hintStyle: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: isLight ? FifaColors.mutedTextLight : Colors.white24,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                if (_inputHasText)
-                  GestureDetector(
-                    onTap: _sendMessage,
-                    child: Container(
-                      height: 48,
-                      width: 48,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFF135E4B),
-                            Color(0xFF4CB572),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                        child: const Icon(
-                          LucideIcons.send,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                    ),
-                  )
-                else
-                  Container(
-                    height: 48,
-                    width: 48,
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: _inputHasText ? _sendMessage : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    height: _inputHasText ? 36 : 48,
+                    width: _inputHasText ? 36 : 48,
                     decoration: BoxDecoration(
-                      color: isLight ? Colors.black.withValues(alpha: 0.03) : Colors.white.withValues(alpha: 0.05),
-                      shape: BoxShape.circle,
+                      color: _inputHasText 
+                          ? const Color(0xFFE8437A) 
+                          : (isLight ? Colors.black.withValues(alpha: 0.03) : Colors.white10),
+                      borderRadius: BorderRadius.circular(_inputHasText ? 18 : 24),
                     ),
+                    child: Center(
                       child: Icon(
-                        LucideIcons.mic,
-                        size: 22,
-                        color: isLight ? const Color(0xFF9BB3AF) : Colors.white24,
+                        _inputHasText ? LucideIcons.send : LucideIcons.smile,
+                        size: _inputHasText ? 18 : 22,
+                        color: _inputHasText 
+                            ? Colors.white 
+                            : (isLight ? const Color(0xFF9BB3AF) : Colors.white24),
                       ),
+                    ),
                   ),
+                ),
               ],
             ),
           ),
