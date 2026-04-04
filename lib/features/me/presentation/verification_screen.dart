@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:image_picker/image_picker.dart';
-import '../data/me_repository.dart';
-import '../../../core/supabase/supabase_config.dart';
+import 'package:fifalove_mobile/core/supabase/supabase_config.dart';
 
 class VerificationScreen extends StatefulWidget {
   const VerificationScreen({super.key});

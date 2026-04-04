@@ -70,11 +70,10 @@ class _MatchOverlayState extends State<MatchOverlay>
     // Generate confetti dots
     final rand = Random();
     _dots = List.generate(40, (i) {
-      const colors = [
-        Color(0xFFE8437A),
-        Color(0xFFF2C233),
-        Color(0xFF4CB572),
-        Color(0xFFA1D8B5),
+      final colors = [
+        FifaColors.gold,
+        Colors.white,
+        const Color(0xFFF8BBD0), // faint pink
       ];
       return _ConfettiDot(
         x: rand.nextDouble(),
@@ -107,10 +106,18 @@ class _MatchOverlayState extends State<MatchOverlay>
     final matchedAvatarUrl = widget.matchedProfile['avatar_url'] as String?;
 
     return Material(
-      color: (Theme.of(context).brightness == Brightness.light
-              ? FifaColors.emeraldForest
-              : const Color(0xFF080F0C))
-          .withValues(alpha: 0.97),
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              FifaColors.pink,
+              FifaColors.pinkBlush,
+              FifaColors.roseWhisper,
+            ],
+          ),
+        ),
       child: Stack(
         children: [
           // Confetti layer
@@ -164,20 +171,48 @@ class _MatchOverlayState extends State<MatchOverlay>
                   // "IT'S A MATCH!" heading with gradient text (Heartbeat)
                   ScaleTransition(
                     scale: _heartbeatAnimation,
-                    child: ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [Color(0xFF4CB572), Color(0xFFF2C233)],
-                      ).createShader(bounds),
-                      child: Text(
-                        "IT'S A MATCH!",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 42,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 2,
+                    child: Column(
+                      children: [
+                        Text(
+                          "IT'S A MATCH!",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 48,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            height: 1.0,
+                            letterSpacing: -1,
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 12),
+                        // Compatibility score badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(LucideIcons.star,
+                                  size: 14, color: FifaColors.gold),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${widget.matchedProfile['match_score'] ?? 80}% COMPATIBILITY',
+                                style: GoogleFonts.spaceMono(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -193,34 +228,31 @@ class _MatchOverlayState extends State<MatchOverlay>
                   ),
                   const SizedBox(height: 40),
 
-                  // Send Message button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: DecoratedBox(
+                  GestureDetector(
+                    onTap: widget.onMessage,
+                    child: Container(
+                      width: double.infinity,
+                      height: 56,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFE8437A), Color(0xFFB43360)],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
-                      child: TextButton(
-                        onPressed: widget.onMessage,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(LucideIcons.messageCircle,
-                                size: 18, color: Colors.white),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Send a Message',
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                      child: Center(
+                        child: Text(
+                          "SEND A MESSAGE",
+                          style: GoogleFonts.spaceMono(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: FifaColors.pink,
+                            letterSpacing: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -236,7 +268,7 @@ class _MatchOverlayState extends State<MatchOverlay>
                       style: OutlinedButton.styleFrom(
                         backgroundColor: Colors.white.withValues(alpha: 0.08),
                         side: BorderSide(
-                            color: Theme.of(context).brightness == Brightness.light ? Colors.white.withValues(alpha: 0.15) : Colors.transparent),
+                            color: Colors.white.withValues(alpha: 0.15)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -266,7 +298,7 @@ class _MatchOverlayState extends State<MatchOverlay>
       height: 80,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Theme.of(context).brightness == Brightness.light ? Border.all(color: const Color(0xFF4CB572), width: 2) : null,
+        border: Border.all(color: FifaColors.gold, width: 2),
         color: const Color(0xFF152B1E),
       ),
       child: ClipOval(
@@ -277,13 +309,13 @@ class _MatchOverlayState extends State<MatchOverlay>
                 errorWidget: (_, __, ___) => const Icon(
                   LucideIcons.user,
                   size: 40,
-                  color: Color(0xFF4CB572),
+                  color: FifaColors.gold,
                 ),
               )
             : const Icon(
                 LucideIcons.user,
                 size: 40,
-                color: Color(0xFF4CB572),
+                color: FifaColors.gold,
               ),
       ),
     );

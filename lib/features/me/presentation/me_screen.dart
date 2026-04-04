@@ -12,6 +12,7 @@ import 'package:page_transition/page_transition.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_screen.dart';
 import 'verification_screen.dart';
+import '../../../core/constants/colors.dart';
 
 
 class MeScreen extends ConsumerStatefulWidget {
@@ -458,19 +459,8 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                       child: LinearProgressIndicator(
                         value: score / 100,
                         minHeight: 5,
-                        backgroundColor: isLight
-                          ? const Color(0xFFF0EBE3)
-                          : Colors.white
-                            .withValues(alpha: 0.08),
-                        valueColor:
-                          AlwaysStoppedAnimation(
-                            score < 50
-                              ? const Color(
-                                  0xFFE83535)
-                              : score < 80
-                                ? const Color(
-                                    0xFFF2C233)
-                                : accentGreen),
+                        backgroundColor: FifaColors.mint.withValues(alpha: 0.3),
+                        valueColor: const AlwaysStoppedAnimation(FifaColors.accent),
                       ),
                     ),
                     if (missing.isNotEmpty) ...[

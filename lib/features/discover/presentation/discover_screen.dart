@@ -411,7 +411,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                         // PASS
                         _actionCircle(
                           icon: LucideIcons.x,
-                          color: FifaColors.error,
+                          color: FifaColors.accentDark,
                           size: 64,
                           iconSize: 32,
                           onTap: () => _swiperController.swipe(CardSwiperDirection.left),
@@ -423,15 +423,18 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                           size: 48,
                           iconSize: 24,
                           onTap: () => _swiperController.swipe(CardSwiperDirection.top),
+                          hasBorder: true,
+                          borderColor: FifaColors.gold,
                         ),
                         // LIKE
                         _actionCircle(
                           icon: LucideIcons.heart,
-                          color: FifaColors.accent,
+                          color: Colors.white,
                           size: 64,
                           iconSize: 32,
                           onTap: () => _swiperController.swipe(CardSwiperDirection.right),
                           isFilled: true,
+                          backgroundColor: FifaColors.pink,
                         ),
                       ],
                     ),
@@ -595,7 +598,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       required double size,
       required double iconSize,
       required VoidCallback onTap,
-      bool isFilled = false}) {
+      bool isFilled = false,
+      bool hasBorder = false,
+      Color? borderColor,
+      Color? backgroundColor}) {
     final isLight = Theme.of(context).brightness == Brightness.light;
     return GestureDetector(
       onTap: onTap,
@@ -604,7 +610,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isLight ? Colors.white : const Color(0xFF1E2B25),
+          color: backgroundColor ?? (isLight ? Colors.white : const Color(0xFF1E2B25)),
+          border: hasBorder ? Border.all(color: borderColor ?? Colors.transparent, width: 2) : null,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isLight ? 0.08 : 0.2),

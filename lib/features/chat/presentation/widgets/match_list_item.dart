@@ -153,6 +153,24 @@ class MatchListItem extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 const Icon(LucideIcons.badgeCheck, size: 14, color: Color(0xFF4CB572)),
                               ],
+                              const SizedBox(width: 8),
+                              // Match score badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: FifaColors.champagneGlow,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '${match['match_score'] ?? 80}%',
+                                  style: GoogleFonts.spaceMono(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF5A4500),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                           Text(

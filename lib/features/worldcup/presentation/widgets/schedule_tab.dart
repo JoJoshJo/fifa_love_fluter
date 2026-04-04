@@ -117,15 +117,15 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   height: 80,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
+                    color: FifaColors.champagneGlow,
                     borderRadius: BorderRadius.circular(12),
-                    border: Theme.of(context).brightness == Brightness.light ? Border.all(
-                      color: Theme.of(context).dividerColor,
-                    ) : null,
+                    border: Border.all(
+                      color: FifaColors.gold.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.ticket, size: 20, color: Theme.of(context).primaryColor),
+                      const Icon(LucideIcons.ticket, size: 20, color: Color(0xFF5A4500)),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -136,15 +136,16 @@ class _ScheduleTabState extends State<ScheduleTab> {
                               'FAN ZONE',
                               style: GoogleFonts.spaceMono(
                                 fontSize: 8,
-                                color: FifaColors.accent,
+                                fontWeight: FontWeight.bold,
+                                color: FifaColors.gold,
                               ),
                             ),
                             Text(
                               'Ticket Marketplace',
                               style: GoogleFonts.inter(
                                 fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).textTheme.titleLarge?.color,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF5A4500),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -161,15 +162,15 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   height: 80,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
+                    color: FifaColors.mint,
                     borderRadius: BorderRadius.circular(12),
-                    border: Theme.of(context).brightness == Brightness.light ? Border.all(
-                      color: Theme.of(context).dividerColor,
-                    ) : null,
+                    border: Border.all(
+                      color: FifaColors.accent.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.utensils, size: 20, color: Theme.of(context).primaryColor),
+                      const Icon(LucideIcons.utensils, size: 20, color: FifaColors.accentDark),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -180,15 +181,16 @@ class _ScheduleTabState extends State<ScheduleTab> {
                               'LOCAL EATS',
                               style: GoogleFonts.spaceMono(
                                 fontSize: 8,
-                                color: FifaColors.accent,
+                                fontWeight: FontWeight.bold,
+                                color: FifaColors.accentDark,
                               ),
                             ),
                             Text(
                               'Stadium Food Guide',
                               style: GoogleFonts.inter(
                                 fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).textTheme.titleLarge?.color,
+                                fontWeight: FontWeight.w700,
+                                color: FifaColors.accentDark,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),

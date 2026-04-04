@@ -80,7 +80,7 @@ class SwipeCard extends StatelessWidget {
                             ),
 
                       // Top vignette
-                      Positioned.fill(
+                      const Positioned.fill(
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             gradient: _vignetteGradient,
@@ -92,7 +92,7 @@ class SwipeCard extends StatelessWidget {
                       if (isVerified)
                         Positioned(
                           top: 14,
-                          right: 14,
+                          left: 14,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 5),
@@ -117,6 +117,33 @@ class SwipeCard extends StatelessWidget {
                             ),
                           ),
                         ),
+
+                      // Match Score badge
+                      Positioned(
+                        top: 14,
+                        right: 14,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: FifaColors.champagneGlow,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: FifaColors.gold,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            '$score% MATCH',
+                            style: GoogleFonts.spaceMono(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF5A4500),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
 
                       // Swipe Labels (LIKE/NOPE) based on drag
                       if (isFront && dragOffset > 0.1)
@@ -263,40 +290,44 @@ class SwipeCard extends StatelessWidget {
                           ],
                         ),
                         const Spacer(),
-                        // Interest chips
                         if (interests.isNotEmpty)
                           Wrap(
                             spacing: 6,
                             runSpacing: 4,
-                            children: interests
-                                .take(3)
-                                .map((i) => Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        color: isLight
-                                            ? const Color(0xFF135E4B)
-                                                .withValues(alpha: 0.08)
-                                            : const Color(0xFF4CB572)
-                                                .withValues(alpha: 0.1),
-                                        border: Border.all(
-                                          color: isLight
-                                              ? const Color(0xFF135E4B)
-                                                  .withValues(alpha: 0.2)
-                                              : const Color(0xFF4CB572)
-                                                  .withValues(alpha: 0.2),
-                                        ),
-                                      ),
-                                      child: Text(i,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 11,
-                                            color: isLight
-                                                ? const Color(0xFF135E4B)
-                                                : const Color(0xFFA1D8B5),
-                                          )),
-                                    ))
-                                .toList(),
+                            children: interests.take(3).map((interest) {
+                              final isFootballTag = [
+                                'STADIUM',
+                                'MAN CITY',
+                                'REAL MADRID',
+                                'ARSENAL',
+                                'CHELSEA',
+                                'LIVERPOOL',
+                                'FOOTBALL',
+                                'FIFA',
+                                'SOCCER',
+                              ].contains(interest.toUpperCase());
+
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: isFootballTag
+                                      ? FifaColors.mint
+                                      : FifaColors.roseWhisper,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  interest.toUpperCase(),
+                                  style: GoogleFonts.spaceMono(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w600,
+                                    color: isFootballTag
+                                        ? FifaColors.accentDark
+                                        : const Color(0xFF8A3058),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
                       ],
                     ),

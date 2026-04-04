@@ -59,7 +59,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                         'WORLD CUP 2026',
                         style: GoogleFonts.spaceMono(
                           fontSize: 9,
-                          color: accentGreen,
+                          color: FifaColors.gold,
                           letterSpacing: 2,
                           fontWeight: FontWeight.bold,
                         ),
@@ -82,9 +82,9 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: isLight ? FifaColors.lightCard : FifaColors.darkCard,
+                    color: FifaColors.champagneGlow,
                     borderRadius: BorderRadius.circular(16),
-                    border: isLight ? Border.all(color: FifaColors.lightBorder) : null,
+                    border: Border.all(color: FifaColors.gold),
                   ),
                   child: Column(
                     children: [
@@ -93,14 +93,14 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
-                          color: FifaColors.gold,
+                          color: FifaColors.passionRed,
                         ),
                       ),
                       Text(
                         'DAYS',
                         style: GoogleFonts.spaceMono(
                           fontSize: 8,
-                          color: accentGreen,
+                          color: const Color(0xFF5A4500),
                           letterSpacing: 1,
                           fontWeight: FontWeight.bold,
                         ),
