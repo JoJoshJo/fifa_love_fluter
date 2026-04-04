@@ -47,6 +47,18 @@ class MatchListItem extends StatelessWidget {
       }
     }
 
+    // New Match / Verified Glow Logic
+    final isVerified = other['is_verified'] as bool? ?? false;
+    final createdAt = match['created_at'] as String?;
+    bool isRecent = false;
+    if (createdAt != null) {
+      final createdTime = DateTime.tryParse(createdAt);
+      if (createdTime != null && DateTime.now().difference(createdTime).inHours < 24) {
+        isRecent = true;
+      }
+    }
+    final showGlow = isVerified || isRecent;
+
     if (lastMsg == null) {
       previewText = 'Say hello! 👋';
       previewStyle = GoogleFonts.inter(
@@ -87,10 +99,22 @@ class MatchListItem extends StatelessWidget {
                       height: 54,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: isLight ? Border.all(
-                          color: const Color(0xFF4CB572).withValues(alpha: 0.2),
-                          width: 1.5,
-                        ) : null,
+                        boxShadow: showGlow ? [
+                          BoxShadow(
+                            color: FifaColors.pink.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            spreadRadius: 1,
+                          )
+                        ] : null,
+                        border: showGlow 
+                          ? Border.all(
+                              color: FifaColors.pink.withValues(alpha: 0.6),
+                              width: 2,
+                            )
+                          : isLight ? Border.all(
+                              color: const Color(0xFF4CB572).withValues(alpha: 0.2),
+                              width: 1.5,
+                            ) : null,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(2),

@@ -404,37 +404,50 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                 if (!_loading && remaining > 0) ...[
                   // ACTION BUTTONS BELOW CARD
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 20),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // PASS
-                        _actionCircle(
+                        // SKIP (X)
+                        _ActionButton(
                           icon: LucideIcons.x,
-                          color: FifaColors.accentDark,
-                          size: 64,
-                          iconSize: 32,
+                          color: isLight ? FifaColors.textPrimaryLight : Colors.white,
+                          size: 48,
+                          iconSize: 22,
+                          hasBorder: true,
+                          borderColor: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33),
                           onTap: () => _swiperController.swipe(CardSwiperDirection.left),
                         ),
-                        // SUPER LIKE
-                        _actionCircle(
+                        const SizedBox(width: 16),
+                        // LIKE (Hero)
+                        _ActionButton(
+                          icon: Icons.favorite, // Using Material favorite for filled heart look as requested
+                          color: Colors.white,
+                          size: 60,
+                          iconSize: 26,
+                          isHero: true,
+                          backgroundColor: FifaColors.pink,
+                          boxShadow: [
+                            BoxShadow(
+                              color: FifaColors.pink.withValues(alpha: 0.35),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                          offset: const Offset(0, -4),
+                          onTap: () => _swiperController.swipe(CardSwiperDirection.right),
+                        ),
+                        const SizedBox(width: 16),
+                        // SUPER LIKE (Star)
+                        _ActionButton(
                           icon: LucideIcons.star,
                           color: FifaColors.gold,
                           size: 48,
-                          iconSize: 24,
-                          onTap: () => _swiperController.swipe(CardSwiperDirection.top),
+                          iconSize: 22,
                           hasBorder: true,
                           borderColor: FifaColors.gold,
-                        ),
-                        // LIKE
-                        _actionCircle(
-                          icon: LucideIcons.heart,
-                          color: Colors.white,
-                          size: 64,
-                          iconSize: 32,
-                          onTap: () => _swiperController.swipe(CardSwiperDirection.right),
-                          isFilled: true,
-                          backgroundColor: FifaColors.pink,
+                          backgroundColor: Colors.transparent,
+                          onTap: () => _swiperController.swipe(CardSwiperDirection.top),
                         ),
                       ],
                     ),
@@ -591,37 +604,104 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   Widget _buildShimmer() {
     return const Center(child: ShimmerSwipeCard());
   }
+}
 
-  Widget _actionCircle({
-      required IconData icon,
-      required Color color,
-      required double size,
-      required double iconSize,
-      required VoidCallback onTap,
-      bool isFilled = false,
-      bool hasBorder = false,
-      Color? borderColor,
-      Color? backgroundColor}) {
+class _ActionButton extends StatefulWidget {
+  final IconData icon;
+  final Color color;
+  final double size;
+  final double iconSize;
+  final VoidCallback onTap;
+  final bool hasBorder;
+  final Color? borderColor;
+  final Color? backgroundColor;
+  final List<BoxShadow>? boxShadow;
+  final Offset offset;
+  final bool isHero;
+
+  const _ActionButton({
+    required this.icon,
+    required this.color,
+    required this.size,
+    required this.iconSize,
+    required this.onTap,
+    this.hasBorder = false,
+    this.borderColor,
+    this.backgroundColor,
+    this.boxShadow,
+    this.offset = Offset.zero,
+    this.isHero = false,
+  });
+
+  @override
+  State<_ActionButton> createState() => _ActionButtonState();
+}
+
+class _ActionButtonState extends State<_ActionButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.9).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    _controller.forward();
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    _controller.reverse();
+  }
+
+  void _onTapCancel() {
+    _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: backgroundColor ?? (isLight ? Colors.white : const Color(0xFF1E2B25)),
-          border: hasBorder ? Border.all(color: borderColor ?? Colors.transparent, width: 2) : null,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isLight ? 0.08 : 0.2),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+    return Transform.translate(
+      offset: widget.offset,
+      child: GestureDetector(
+        onTapDown: widget.isHero ? _onTapDown : null,
+        onTapUp: widget.isHero ? _onTapUp : null,
+        onTapCancel: widget.isHero ? _onTapCancel : null,
+        onTap: widget.onTap,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: Container(
+            width: widget.size,
+            height: widget.size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: widget.backgroundColor ?? (isLight ? Colors.white : const Color(0xFF0D1A13)),
+              border: widget.hasBorder ? Border.all(color: widget.borderColor ?? Colors.transparent, width: 1) : null,
+              boxShadow: widget.boxShadow ?? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isLight ? 0.08 : 0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Center(
-          child: Icon(icon, size: iconSize, color: color),
+            child: Center(
+              child: Icon(widget.icon, size: widget.iconSize, color: widget.color),
+            ),
+          ),
         ),
       ),
     );

@@ -112,9 +112,9 @@ class _MatchOverlayState extends State<MatchOverlay>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              FifaColors.pink,
-              FifaColors.pinkBlush,
-              FifaColors.roseWhisper,
+              Color(0xFFE8437A),
+              Color(0xFFF8BBD0),
+              Color(0xFFFFF0F5),
             ],
           ),
         ),
@@ -141,30 +141,47 @@ class _MatchOverlayState extends State<MatchOverlay>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Avatar pair
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ScaleTransition(
-                        scale: _heartbeatAnimation,
-                        child: _buildAvatar(widget.myAvatarUrl),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: ScaleTransition(
-                          scale: _pulseAnimation,
-                          child: const Icon(
-                            LucideIcons.heart,
-                            size: 32,
-                            color: Color(0xFFE8437A),
+                  // Overlapping Avatar pair
+                  SizedBox(
+                    height: 80,
+                    width: 140,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Positioned(
+                          left: 0,
+                          child: ScaleTransition(
+                            scale: _heartbeatAnimation,
+                            child: _buildAvatar(widget.myAvatarUrl),
                           ),
                         ),
-                      ),
-                      ScaleTransition(
-                        scale: _heartbeatAnimation,
-                        child: _buildAvatar(matchedAvatarUrl),
-                      ),
-                    ],
+                        Positioned(
+                          right: 0,
+                          child: ScaleTransition(
+                            scale: _heartbeatAnimation,
+                            child: _buildAvatar(matchedAvatarUrl),
+                          ),
+                        ),
+                        // Small floating heart in middle
+                        Center(
+                          child: ScaleTransition(
+                            scale: _pulseAnimation,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                LucideIcons.heart,
+                                size: 16,
+                                color: Color(0xFFE8437A),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 24),
 
@@ -177,8 +194,8 @@ class _MatchOverlayState extends State<MatchOverlay>
                           "IT'S A MATCH!",
                           textAlign: TextAlign.center,
                           style: GoogleFonts.playfairDisplay(
-                            fontSize: 48,
-                            fontWeight: FontWeight.w900,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
                             color: Colors.white,
                             height: 1.0,
                             letterSpacing: -1,
@@ -222,8 +239,8 @@ class _MatchOverlayState extends State<MatchOverlay>
                     'You and $matchedName both want to connect!',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      fontSize: 16,
-                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.85),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -232,15 +249,15 @@ class _MatchOverlayState extends State<MatchOverlay>
                     onTap: widget.onMessage,
                     child: Container(
                       width: double.infinity,
-                      height: 56,
+                      height: 44,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(22),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -248,10 +265,10 @@ class _MatchOverlayState extends State<MatchOverlay>
                         child: Text(
                           "SEND A MESSAGE",
                           style: GoogleFonts.spaceMono(
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: FifaColors.pink,
-                            letterSpacing: 1.5,
+                            color: const Color(0xFFE8437A),
+                            letterSpacing: 1.2,
                           ),
                         ),
                       ),
@@ -260,25 +277,17 @@ class _MatchOverlayState extends State<MatchOverlay>
                   const SizedBox(height: 12),
 
                   // Keep Swiping button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: OutlinedButton(
-                      onPressed: widget.onKeepSwiping,
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white.withValues(alpha: 0.08),
-                        side: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.15)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
+                  GestureDetector(
+                    onTap: widget.onKeepSwiping,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
                         'Keep Swiping',
                         style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white.withValues(alpha: 0.7),
+                          decoration: TextDecoration.underline,
                         ),
                       ),
                     ),
@@ -288,17 +297,18 @@ class _MatchOverlayState extends State<MatchOverlay>
             ),
           ),
         ],
+        ),
       ),
     );
   }
 
   Widget _buildAvatar(String? url) {
     return Container(
-      width: 80,
-      height: 80,
+      width: 72,
+      height: 72,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: FifaColors.gold, width: 2),
+        border: Border.all(color: Colors.white, width: 3),
         color: const Color(0xFF152B1E),
       ),
       child: ClipOval(
@@ -308,13 +318,13 @@ class _MatchOverlayState extends State<MatchOverlay>
                 fit: BoxFit.cover,
                 errorWidget: (_, __, ___) => const Icon(
                   LucideIcons.user,
-                  size: 40,
+                  size: 36,
                   color: FifaColors.gold,
                 ),
               )
             : const Icon(
                 LucideIcons.user,
-                size: 40,
+                size: 36,
                 color: FifaColors.gold,
               ),
       ),
