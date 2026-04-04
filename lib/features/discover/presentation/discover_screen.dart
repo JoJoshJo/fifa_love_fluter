@@ -75,25 +75,25 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
       TweenSequenceItem(
         tween: Tween<Offset>(begin: Offset.zero, end: const Offset(30, 0))
             .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 20, // Move right
+        weight: 20, // Slide right (300ms)
       ),
       TweenSequenceItem(
         tween: ConstantTween<Offset>(const Offset(30, 0)),
-        weight: 20, // Pause
+        weight: 20, // Pause (300ms)
       ),
       TweenSequenceItem(
         tween: Tween<Offset>(begin: const Offset(30, 0), end: const Offset(-30, 0))
             .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 20, // Move left
+        weight: 20, // Slide left (300ms - goes to -30 relative to center)
       ),
       TweenSequenceItem(
         tween: ConstantTween<Offset>(const Offset(-30, 0)),
-        weight: 20, // Pause
+        weight: 20, // Pause (300ms)
       ),
       TweenSequenceItem(
         tween: Tween<Offset>(begin: const Offset(-30, 0), end: Offset.zero)
             .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 20, // Return
+        weight: 20, // Return to center (300ms)
       ),
     ]).animate(_hintController);
 
@@ -447,14 +447,15 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                                     if (profileIndex >= _profiles.length) {
                                       return const SizedBox.shrink();
                                     }
+                                    final cardWidth = MediaQuery.of(context).size.width - 32;
                                     return SwipeCard(
                                       profile: _profiles[profileIndex],
                                       isFront: index == 0,
                                       stackPosition: index,
-                                      dragOffset:
-                                          index == 0 ? percentThresholdX / 100 : 0,
-                                      dragVertical:
-                                          index == 0 ? percentThresholdY / 100 : 0,
+                                      dragOffset: index == 0
+                                          ? Offset(percentThresholdX / 100 * cardWidth,
+                                              percentThresholdY / 100 * cardWidth)
+                                          : Offset.zero,
                                     );
                                   },
                                 ),
@@ -713,11 +714,11 @@ class _ActionButtonState extends State<_ActionButton> with SingleTickerProviderS
     _scaleAnimation = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween<double>(begin: 1.0, end: 1.3).chain(CurveTween(curve: Curves.easeOut)),
-        weight: 50,
+        weight: 40,
       ),
       TweenSequenceItem(
         tween: Tween<double>(begin: 1.3, end: 1.0).chain(CurveTween(curve: Curves.elasticOut)),
-        weight: 50,
+        weight: 60,
       ),
     ]).animate(_controller);
   }

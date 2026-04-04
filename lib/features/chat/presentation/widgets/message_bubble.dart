@@ -56,9 +56,9 @@ class MessageBubble extends StatelessWidget {
             builder: (context, value, child) {
               return Opacity(
                 opacity: value,
-                child: Transform.translate(
-                  offset: Offset(
-                    isMe ? (1.0 - value) * 40 : (value - 1.0) * 40,
+                child: FractionalTranslation(
+                  translation: Offset(
+                    isMe ? (1.0 - value) * 0.3 : (value - 1.0) * 0.3,
                     0,
                   ),
                   child: child,

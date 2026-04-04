@@ -8,15 +8,13 @@ class SwipeCard extends StatelessWidget {
   final Map<String, dynamic> profile;
   final bool isFront;
   final int stackPosition; // 0 = front, 1 = middle, 2 = back
-  final double dragOffset; // horizontal drag amount (-1 to 1)
-  final double dragVertical; // vertical drag amount
+  final Offset dragOffset; // drag amount in pixels
   const SwipeCard({
     super.key,
     required this.profile,
     required this.isFront,
     this.stackPosition = 0,
-    this.dragOffset = 0,
-    this.dragVertical = 0,
+    this.dragOffset = Offset.zero,
   });
 
   static const _vignetteGradient = LinearGradient(
@@ -146,7 +144,7 @@ class SwipeCard extends StatelessWidget {
                       ),
 
                       // Swipe Labels (LIKE/NOPE) based on drag
-                      if (isFront && dragOffset > 0.1)
+                      if (isFront && dragOffset.dx > 20)
                         Positioned(
                           top: 24,
                           left: 20,
@@ -171,7 +169,7 @@ class SwipeCard extends StatelessWidget {
                           ),
                         ),
 
-                      if (isFront && dragOffset < -0.1)
+                      if (isFront && dragOffset.dx < -20)
                         Positioned(
                           top: 24,
                           right: 20,
@@ -360,12 +358,12 @@ class SwipeCard extends StatelessWidget {
     }
 
     // Apply parallax tilt on drag (only for front card)
-    if (isFront && dragOffset != 0) {
+    if (isFront && dragOffset != Offset.zero) {
       card = Transform(
         alignment: Alignment.center,
         transform: Matrix4.identity()
           ..setEntry(3, 2, 0.001) // perspective
-          ..rotateZ(dragOffset * 0.05), // subtle tilt (adjusted for normalized dragOffset)
+          ..rotateZ(dragOffset.dx * 0.0002), // subtle tilt
         child: card,
       );
     }
