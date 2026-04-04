@@ -24,7 +24,7 @@ class DiscoverRepository {
 
       // 3. Build profiles query
       var query = SupabaseConfig.client.from('profiles').select(
-          'id, name, age, nationality, avatar_url, bio, interests, city, is_local, team_supported, languages, is_verified, last_active_at');
+          'id, name, age, nationality, avatar_url, photo_urls, bio, interests, city, is_local, team_supported, languages, is_verified, last_active_at, created_at');
 
       // Filter by target countries if provided
       if (countriesToMatch.isNotEmpty) {
