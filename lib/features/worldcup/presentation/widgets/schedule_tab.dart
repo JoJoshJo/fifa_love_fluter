@@ -15,6 +15,24 @@ class _ScheduleTabState extends State<ScheduleTab> {
   String _cityFilter = '';
   String _teamFilter = '';
 
+  static const _teamColors = {
+    'Brazil': Color(0xFF009B3A),
+    'Portugal': Color(0xFFC62828),
+    'Argentina': Color(0xFF6CACE4),
+    'France': Color(0xFF002395),
+    'Germany': Color(0xFF000000),
+    'England': Color(0xFFC62828),
+    'USA': Color(0xFF002868),
+    'Mexico': Color(0xFF006341),
+    'Japan': Color(0xFFC62828),
+    'Nigeria': Color(0xFF008751),
+  };
+
+  Color _getTeamColor(String team) {
+    if (team.contains('TBD')) return const Color(0xFF9BB3AF);
+    return _teamColors[team] ?? const Color(0xFF9BB3AF);
+  }
+
   List<Map<String, dynamic>> get _filtered {
     return matchSchedule.where((m) {
       final cityMatch =
@@ -117,15 +135,16 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   height: 80,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: FifaColors.champagneGlow,
+                    color: const Color(0xFFFFF8E1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: FifaColors.gold.withValues(alpha: 0.3),
+                      color: const Color(0xFFF2C233),
+                      width: 0.5,
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(LucideIcons.ticket, size: 20, color: Color(0xFF5A4500)),
+                      const Icon(LucideIcons.ticket, size: 20, color: Color(0xFFF2C233)),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -135,16 +154,18 @@ class _ScheduleTabState extends State<ScheduleTab> {
                             Text(
                               'FAN ZONE',
                               style: GoogleFonts.spaceMono(
-                                fontSize: 8,
+                                fontSize: 9,
                                 fontWeight: FontWeight.bold,
-                                color: FifaColors.gold,
+                                color: const Color(0xFFF2C233),
+                                letterSpacing: 1.5,
                               ),
                             ),
+                            const SizedBox(height: 2),
                             Text(
                               'Ticket Marketplace',
                               style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                                 color: const Color(0xFF5A4500),
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -162,15 +183,16 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   height: 80,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: FifaColors.mint,
+                    color: const Color(0xFFA4E4C1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: FifaColors.accent.withValues(alpha: 0.2),
+                      color: const Color(0xFF4CB572),
+                      width: 0.5,
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(LucideIcons.utensils, size: 20, color: FifaColors.accentDark),
+                      const Icon(LucideIcons.utensils, size: 20, color: Color(0xFF004B3A)),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -180,17 +202,19 @@ class _ScheduleTabState extends State<ScheduleTab> {
                             Text(
                               'LOCAL EATS',
                               style: GoogleFonts.spaceMono(
-                                fontSize: 8,
+                                fontSize: 9,
                                 fontWeight: FontWeight.bold,
-                                color: FifaColors.accentDark,
+                                color: const Color(0xFF004B3A),
+                                letterSpacing: 1.5,
                               ),
                             ),
+                            const SizedBox(height: 2),
                             Text(
                               'Stadium Food Guide',
                               style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: FifaColors.accentDark,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF004B3A),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -353,55 +377,89 @@ class _ScheduleTabState extends State<ScheduleTab> {
                           ),
                           const SizedBox(height: 12),
 
-                          // Teams row
+                          // Teams row with color bars
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               // Team A
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(m['flag_a'] as String,
-                                      style: const TextStyle(fontSize: 40)),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    (m['team_a'] as String).toUpperCase(), // Added uppercase to match both "Space Mono uppercase" and Inter font rule intent, keeping Inter for font
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: Theme.of(context).textTheme.titleLarge?.color,
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 3,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: _getTeamColor(m['team_a'] as String),
+                                        borderRadius: const BorderRadius.horizontal(left: Radius.circular(3)),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(m['flag_a'] as String, style: const TextStyle(fontSize: 32)),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            (m['team_a'] as String).toUpperCase(),
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(context).textTheme.titleLarge?.color,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
 
                               // VS
-                              Text(
-                                'vs',
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: FontStyle.italic,
-                                  color: text.withValues(alpha: 0.3),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text(
+                                  'vs',
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    fontStyle: FontStyle.italic,
+                                    color: text.withValues(alpha: 0.3),
+                                  ),
                                 ),
                               ),
 
                               // Team B
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(m['flag_b'] as String,
-                                      style: const TextStyle(fontSize: 40)),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    (m['team_b'] as String).toUpperCase(),
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: Theme.of(context).textTheme.titleLarge?.color,
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 3,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: _getTeamColor(m['team_b'] as String),
+                                        borderRadius: const BorderRadius.horizontal(left: Radius.circular(3)),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(m['flag_b'] as String, style: const TextStyle(fontSize: 32)),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            (m['team_b'] as String).toUpperCase(),
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(context).textTheme.titleLarge?.color,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),

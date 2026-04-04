@@ -14,8 +14,24 @@ class WorldCupScreen extends StatefulWidget {
   State<WorldCupScreen> createState() => _WorldCupScreenState();
 }
 
-class _WorldCupScreenState extends State<WorldCupScreen> {
+class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStateMixin {
+  late AnimationController _controller;
   int _activeTab = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   static const _tabs = [
     {'label': 'Schedule', 'icon': LucideIcons.calendar},
@@ -58,8 +74,8 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                       Text(
                         'WORLD CUP 2026',
                         style: GoogleFonts.spaceMono(
-                          fontSize: 9,
-                          color: FifaColors.gold,
+                          fontSize: 10,
+                          color: const Color(0xFFF2C233),
                           letterSpacing: 2,
                           fontWeight: FontWeight.bold,
                         ),
@@ -78,32 +94,51 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
                   ),
                 ),
 
-                // Countdown
+                // Countdown Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: FifaColors.champagneGlow,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: FifaColors.gold),
+                    color: const Color(0xFFFFF8E1), // champagne glow
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFF2C233), width: 1.5), // gold
                   ),
                   child: Column(
                     children: [
                       Text(
                         _daysUntilKickoff().replaceAll(' 🔥', ''),
-                        style: GoogleFonts.playfairDisplay(
+                        style: GoogleFonts.spaceMono(
                           fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          color: FifaColors.passionRed,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFC62828), // red urgency
                         ),
                       ),
-                      Text(
-                        'DAYS',
-                        style: GoogleFonts.spaceMono(
-                          fontSize: 8,
-                          color: const Color(0xFF5A4500),
-                          letterSpacing: 1,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          return ShaderMask(
+                            shaderCallback: (bounds) => LinearGradient(
+                              colors: const [
+                                Color(0xFF5A4500),
+                                Color(0xFFF2C233),
+                                Color(0xFF5A4500),
+                              ],
+                              stops: [
+                                _controller.value - 0.2,
+                                _controller.value,
+                                _controller.value + 0.2,
+                              ],
+                            ).createShader(bounds),
+                            child: Text(
+                              'DAYS',
+                              style: GoogleFonts.spaceMono(
+                                fontSize: 9,
+                                color: Colors.white, // color will be masked
+                                letterSpacing: 2.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -123,19 +158,25 @@ class _WorldCupScreenState extends State<WorldCupScreen> {
               borderRadius: BorderRadius.circular(16),
               child: Stack(
                 children: [
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          accentGreen.withValues(alpha: 0.8),
-                          bg,
-                        ],
-                      ),
-                    ),
+                  // Breathing Hero Image with slow gradient shift
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      return Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color.lerp(const Color(0xFF004B3A), const Color(0xFF135E4B), _controller.value)!,
+                              const Color(0xFF4CB572),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   Center(
                     child: Icon(
