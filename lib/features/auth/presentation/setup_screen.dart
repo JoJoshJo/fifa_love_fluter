@@ -27,11 +27,16 @@ class _SetupScreenState extends State<SetupScreen> {
   String get _userId => SupabaseConfig.client.auth.currentUser?.id ?? '';
 
   static const _worldCupTeams = [
-    'USA', 'Mexico', 'Canada', 'Argentina', 'Brazil', 'Uruguay', 'Colombia', 'Ecuador', 'Chile', 'Peru',
-    'France', 'England', 'Germany', 'Spain', 'Portugal', 'Italy', 'Netherlands', 'Belgium', 'Croatia', 'Switzerland',
-    'Denmark', 'Poland', 'Serbia', 'Scotland', 'Wales', 'Morocco', 'Senegal', 'Nigeria', 'Egypt', 'Ivory Coast',
-    'Cameroon', 'Tunisia', 'Algeria', 'Ghana', 'Japan', 'South Korea', 'Australia', 'Saudi Arabia', 'Iran', 'Iraq',
-    'Uzbekistan', 'Costa Rica', 'Panama', 'Jamaica', 'Honduras', 'New Zealand', 'South Africa', 'Mali'
+    'Argentina', 'Australia', 'Belgium', 'Bolivia', 'Brazil',
+    'Cameroon', 'Canada', 'Chile', 'Colombia', 'Costa Rica',
+    'Croatia', 'Czech Republic', 'Denmark', 'Ecuador', 'Egypt',
+    'England', 'France', 'Germany', 'Ghana', 'Indonesia',
+    'Iran', 'Italy', 'Ivory Coast', 'Jamaica', 'Japan',
+    'Mali', 'Mexico', 'Morocco', 'Netherlands', 'New Zealand',
+    'Nigeria', 'Panama', 'Paraguay', 'Peru', 'Poland',
+    'Portugal', 'Qatar', 'Saudi Arabia', 'Senegal', 'Serbia',
+    'South Korea', 'Spain', 'Switzerland', 'Tunisia', 'Turkey',
+    'USA', 'Uruguay', 'Venezuela',
   ];
 
   static const _countriesForNationality = [
@@ -147,13 +152,17 @@ class _SetupScreenState extends State<SetupScreen> {
 
   void _showTeamPicker() {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+    final textColor = theme.textTheme.displayLarge?.color;
+    final mutedText = isLight ? FifaColors.mutedTextLight : FifaColors.textMuted;
+    
     String search = '';
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (_) => StatefulBuilder(
         builder: (ctx, setSheetState) {
@@ -169,47 +178,81 @@ class _SetupScreenState extends State<SetupScreen> {
               children: [
                 const SizedBox(height: 12),
                 Container(
-                  width: 40, height: 4,
+                  width: 36, height: 4,
                   decoration: BoxDecoration(
                     color: theme.dividerColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
+                const SizedBox(height: 20),
+                Text(
+                  'Select Your Team',
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: TextField(
-                    style: theme.textTheme.bodyLarge,
-                    decoration: const InputDecoration(
-                      hintText: 'Search for your team...',
-                      prefixIcon: Icon(Icons.search, color: FifaColors.emeraldSpring),
+                    style: GoogleFonts.inter(color: textColor, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'Search teams...',
+                      hintStyle: GoogleFonts.inter(color: mutedText),
+                      prefixIcon: const Icon(LucideIcons.search, size: 20, color: Color(0xFF4CB572)),
+                      filled: true,
+                      fillColor: isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     ),
                     onChanged: (v) => setSheetState(() => search = v),
                   ),
                 ),
+                const SizedBox(height: 12),
                 Expanded(
                   child: ListView.builder(
                     controller: controller,
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     itemCount: filtered.length,
-                    itemBuilder: (_, i) {
+                    itemBuilder: (context, i) {
                       final t = filtered[i];
                       final sel = t == _team;
-                      return ListTile(
-                        title: Text(
-                          t,
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            color: theme.textTheme.bodyLarge?.color,
-                            fontWeight: sel ? FontWeight.bold : FontWeight.normal,
-                          ),
-                        ),
-                        trailing: sel
-                            ? const Icon(Icons.check_circle,
-                                color: FifaColors.emeraldSpring, size: 20)
-                            : null,
+                      return InkWell(
                         onTap: () {
                           setState(() => _team = t);
                           Navigator.pop(context);
                         },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: theme.dividerColor.withValues(alpha: 0.05),
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                t,
+                                style: GoogleFonts.inter(
+                                  fontSize: 15,
+                                  color: textColor,
+                                  fontWeight: sel ? FontWeight.bold : FontWeight.normal,
+                                ),
+                              ),
+                              const Spacer(),
+                              if (sel)
+                                const Icon(Icons.check_circle, color: FifaColors.emeraldSpring, size: 20),
+                            ],
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -697,7 +740,7 @@ class _SetupScreenState extends State<SetupScreen> {
                     width: 18,
                     child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                   )
-                : const Text('Start Matching 🔥'),
+                : const Text('Start Matching'),
           ),
         ),
       ],

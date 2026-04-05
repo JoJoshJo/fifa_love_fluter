@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 import 'email_confirm_screen.dart';
 import '../../../core/constants/colors.dart';
@@ -459,9 +460,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
           Row(
             children: [
-              Expanded(child: _buildToggleCard(true, "🏠", "I'm a Local", "I live here")),
+              Expanded(child: _buildToggleCard(true, LucideIcons.home, "I'm a Local", "I live here")),
               const SizedBox(width: 16),
-              Expanded(child: _buildToggleCard(false, "✈️", "I'm Visiting", "I'm a tourist")),
+              Expanded(child: _buildToggleCard(false, LucideIcons.plane, "I'm Visiting", "I'm a tourist")),
             ],
           ),
           
@@ -503,7 +504,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
   
-  Widget _buildToggleCard(bool isLocalValue, String icon, String title, String sub) {
+  Widget _buildToggleCard(bool isLocalValue, IconData icon, String title, String sub) {
     final theme = Theme.of(context);
     bool isSelected = _isLocal == isLocalValue;
     return GestureDetector(
@@ -533,7 +534,7 @@ class _SignupScreenState extends State<SignupScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(icon, style: const TextStyle(fontSize: 24)),
+            Icon(icon, size: 24, color: isSelected ? Colors.white : FifaColors.emeraldSpring),
             const SizedBox(height: 8),
             Text(
               title, 
@@ -630,11 +631,11 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           const SizedBox(height: 32),
 
-          _buildMultiSelectCard("Dating & Romance", "Find a connection that lasts", "❤️"),
+          _buildMultiSelectCard("Dating & Romance", "Find a connection that lasts", LucideIcons.heart),
           const SizedBox(height: 12),
-          _buildMultiSelectCard("Fan Friends", "Watch matches together", "⚽"),
+          _buildMultiSelectCard("Fan Friends", "Watch matches together", LucideIcons.trophy),
           const SizedBox(height: 12),
-          _buildMultiSelectCard("Local Guide", "Show me your city", "🗺️"),
+          _buildMultiSelectCard("Local Guide", "Show me your city", LucideIcons.map),
           
           const SizedBox(height: 32),
           _buildLabel(context, "FANS FROM WHICH COUNTRIES?"),
@@ -720,7 +721,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildMultiSelectCard(String title, String subtitle, String icon) {
+  Widget _buildMultiSelectCard(String title, String subtitle, IconData icon) {
     final theme = Theme.of(context);
     bool isSelected = _selectedIntentions.contains(title);
     return GestureDetector(
@@ -748,7 +749,7 @@ class _SignupScreenState extends State<SignupScreen> {
           children: [
             Container(width: 4, height: 80, decoration: BoxDecoration(color: isSelected ? FifaColors.emeraldSpring : Colors.transparent, borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)))),
             const SizedBox(width: 16),
-            Text(icon, style: const TextStyle(fontSize: 28)),
+            Icon(icon, size: 28, color: isSelected ? Colors.white : FifaColors.emeraldSpring),
             const SizedBox(width: 16),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,

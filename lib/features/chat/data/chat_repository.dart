@@ -167,7 +167,7 @@ class ChatRepository {
           List<String>.from(myProfile['countries_to_match'] ?? []);
       final otherNationality = otherUser['nationality'] as String? ?? '';
       if (myCountries.contains(otherNationality)) {
-        reasons.add('🌍 You wanted to meet $otherNationality fans');
+        reasons.add('You wanted to meet $otherNationality fans');
       }
 
       final myInterests =
@@ -177,7 +177,7 @@ class ChatRepository {
       final sharedInterests =
           myInterests.where((i) => otherInterests.contains(i)).toList();
       if (sharedInterests.isNotEmpty) {
-        reasons.add('⚽ You both love ${sharedInterests.first}');
+        reasons.add('You both love ${sharedInterests.first}');
       }
 
       final myLangs =
@@ -187,7 +187,7 @@ class ChatRepository {
       final sharedLangs =
           myLangs.where((l) => otherLangs.contains(l)).toList();
       if (sharedLangs.isNotEmpty) {
-        reasons.add('🗣️ You both speak ${sharedLangs.first}');
+        reasons.add('You both speak ${sharedLangs.first}');
       }
     } catch (_) {}
 

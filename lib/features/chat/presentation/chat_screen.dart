@@ -392,11 +392,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ),
           const SizedBox(height: 32),
-          GradientButton(
-            text: 'Go to Discover',
-            onPressed: () {
-              ref.read(currentTabProvider.notifier).state = 0;
-            },
+          Padding(
+            padding: const EdgeInsets.fromLTRB(40, 0, 40, 20),
+            child: GradientButton(
+              text: 'Go to Discover',
+              onPressed: () {
+                ref.read(currentTabProvider.notifier).state = 0;
+              },
+            ),
           ),
         ],
       ),

@@ -60,7 +60,7 @@ class MatchListItem extends StatelessWidget {
     final showGlow = isVerified || isRecent;
 
     if (lastMsg == null) {
-      previewText = 'Say hello! 👋';
+      previewText = 'Say hello!';
       previewStyle = GoogleFonts.inter(
         fontSize: 13,
         color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.35),

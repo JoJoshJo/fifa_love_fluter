@@ -112,9 +112,8 @@ class _MatchOverlayState extends State<MatchOverlay>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFE8437A),
-              Color(0xFFF8BBD0),
-              Color(0xFFFFF0F5),
+              Color(0xFFC62828), // Deep Red
+              Color(0xFFE8437A), // Pink
             ],
           ),
         ),
@@ -207,23 +206,29 @@ class _MatchOverlayState extends State<MatchOverlay>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
+                            color: FifaColors.gold,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.3)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(LucideIcons.star,
-                                  size: 14, color: FifaColors.gold),
-                              const SizedBox(width: 6),
+                                  size: 14, color: Color(0xFF5A4500)),
+                              const SizedBox(width: 8),
                               Text(
                                 '${widget.matchedProfile['match_score'] ?? 80}% COMPATIBILITY',
                                 style: GoogleFonts.spaceMono(
-                                  fontSize: 10,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: const Color(0xFF5A4500),
+                                  letterSpacing: 1.2,
                                 ),
                               ),
                             ],

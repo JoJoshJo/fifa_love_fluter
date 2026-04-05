@@ -17,15 +17,15 @@ class _ScheduleTabState extends State<ScheduleTab> {
 
   static const _teamColors = {
     'Brazil': Color(0xFF009B3A),
-    'Portugal': Color(0xFFC62828),
+    'Mexico': Color(0xFF006341),
+    'USA': Color(0xFF002868),
+    'Canada': Color(0xFFC62828),
     'Argentina': Color(0xFF6CACE4),
     'France': Color(0xFF002395),
-    'Germany': Color(0xFF000000),
     'England': Color(0xFFC62828),
-    'USA': Color(0xFF002868),
-    'Mexico': Color(0xFF006341),
-    'Japan': Color(0xFFC62828),
-    'Nigeria': Color(0xFF008751),
+    'Portugal': Color(0xFFC62828),
+    'Italy': Color(0xFF008C45),
+    'Japan': Color(0xFF002868),
   };
 
   Color _getTeamColor(String team) {
@@ -135,16 +135,17 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   height: 80,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF8E1),
+                    color: const Color(0xFFFFF7E6),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFFF2C233),
-                      width: 0.5,
+                      color: const Color(0xFFFFD166),
+                      width: 1,
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(LucideIcons.ticket, size: 20, color: Color(0xFFF2C233)),
+                      const Icon(LucideIcons.mapPin,
+                          size: 20, color: Color(0xFFF2C233)),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -162,7 +163,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Ticket Marketplace',
+                              'Watch parties & music',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -183,16 +184,17 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   height: 80,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFA4E4C1),
+                    color: const Color(0xFFF0FFF4),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF4CB572),
-                      width: 0.5,
+                      color: const Color(0xFF9AE6B4),
+                      width: 1,
                     ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(LucideIcons.utensils, size: 20, color: Color(0xFF004B3A)),
+                      const Icon(LucideIcons.utensils,
+                          size: 20, color: Color(0xFF004B3A)),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -210,7 +212,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Stadium Food Guide',
+                              'Best taco spots & BBQ',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -332,7 +334,6 @@ class _ScheduleTabState extends State<ScheduleTab> {
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isLight ? FifaColors.lightCard : FifaColors.darkCard,
                         borderRadius: BorderRadius.circular(16),
@@ -345,185 +346,182 @@ class _ScheduleTabState extends State<ScheduleTab> {
                         ] : null,
                         border: isLight ? Border.all(color: FifaColors.lightBorder) : null,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Stage pill + time
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: accentGreen.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  m['stage'] as String,
-                                  style: GoogleFonts.spaceMono(
-                                    fontSize: 9,
-                                    color: accentGreen,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                m['time'] as String,
-                                style: GoogleFonts.spaceMono(
-                                  fontSize: 12,
-                                  color: FifaColors.gold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Teams row with color bars
-                          Row(
-                            children: [
-                              // Team A
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 3,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        color: _getTeamColor(m['team_a'] as String),
-                                        borderRadius: const BorderRadius.horizontal(left: Radius.circular(3)),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(m['flag_a'] as String, style: const TextStyle(fontSize: 32)),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            (m['team_a'] as String).toUpperCase(),
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: Theme.of(context).textTheme.titleLarge?.color,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // VS
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                child: Text(
-                                  'vs',
-                                  style: GoogleFonts.playfairDisplay(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    fontStyle: FontStyle.italic,
-                                    color: text.withValues(alpha: 0.3),
-                                  ),
-                                ),
-                              ),
-
-                              // Team B
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 3,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        color: _getTeamColor(m['team_b'] as String),
-                                        borderRadius: const BorderRadius.horizontal(left: Radius.circular(3)),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(m['flag_b'] as String, style: const TextStyle(fontSize: 32)),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            (m['team_b'] as String).toUpperCase(),
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: Theme.of(context).textTheme.titleLarge?.color,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 12),
-                          // Thin divider
-                          if (Theme.of(context).brightness == Brightness.light)
-                            Divider(
-                              color: Theme.of(context).dividerColor,
-                              height: 1,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 4px Accent Bar
+                            Container(
+                              height: 4,
+                              width: double.infinity,
+                              color: _getTeamColor(m['team_a'] as String),
                             ),
-                          const SizedBox(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Stage pill + time
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: accentGreen.withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          m['stage'] as String,
+                                          style: GoogleFonts.spaceMono(
+                                            fontSize: 9,
+                                            color: accentGreen,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        m['time'] as String,
+                                        style: GoogleFonts.spaceMono(
+                                          fontSize: 12,
+                                          color: FifaColors.gold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
 
-                          // Venue & Date info
-                          Row(
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(LucideIcons.mapPin,
-                                      size: 12,
-                                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3)),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${m['city']} · ${m['stadium']}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+                                  // Teams row
+                                  Row(
+                                    children: [
+                                      // Team A
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Builder(builder: (context) {
+                                              final flag = m['flag_a'];
+                                              return flag is IconData
+                                                  ? Icon(flag, size: 32, color: const Color(0xFF9BB3AF))
+                                                  : Text(flag as String, style: const TextStyle(fontSize: 32));
+                                            }),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              (m['team_a'] as String).toUpperCase(),
+                                              style: GoogleFonts.inter(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: Theme.of(context).textTheme.titleLarge?.color,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // VS
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        child: Text(
+                                          'vs',
+                                          style: GoogleFonts.playfairDisplay(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            fontStyle: FontStyle.italic,
+                                            color: text.withValues(alpha: 0.3),
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Team B
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Builder(builder: (context) {
+                                              final flag = m['flag_b'];
+                                              return flag is IconData
+                                                  ? Icon(flag, size: 32, color: const Color(0xFF9BB3AF))
+                                                  : Text(flag as String, style: const TextStyle(fontSize: 32));
+                                            }),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              (m['team_b'] as String).toUpperCase(),
+                                              style: GoogleFonts.inter(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: Theme.of(context).textTheme.titleLarge?.color,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 12),
+                                  // Thin divider
+                                  if (Theme.of(context).brightness == Brightness.light)
+                                    Divider(
+                                      color: Theme.of(context).dividerColor,
+                                      height: 1,
                                     ),
+                                  const SizedBox(height: 8),
+
+                                  // Venue & Date info
+                                  Row(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(LucideIcons.mapPin,
+                                              size: 12,
+                                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3)),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '${m['city']} · ${m['stadium']}',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const Spacer(),
+                                      Row(
+                                        children: [
+                                          Icon(LucideIcons.calendar,
+                                              size: 11,
+                                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3)),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            _formatDate(m['date'] as String),
+                                            style: GoogleFonts.spaceMono(
+                                              fontSize: 10,
+                                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        width: 28,
+                                        height: 28,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(14),
+                                        ),
+                                        child: const Icon(
+                                          LucideIcons.bell,
+                                          size: 14,
+                                          color: accentGreen,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                              const Spacer(),
-                              Row(
-                                children: [
-                                  Icon(LucideIcons.calendar,
-                                      size: 11,
-                                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3)),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    _formatDate(m['date'] as String),
-                                    style: GoogleFonts.spaceMono(
-                                      fontSize: 10,
-                                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: const Icon(
-                                  LucideIcons.bell,
-                                  size: 14,
-                                  color: accentGreen,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },

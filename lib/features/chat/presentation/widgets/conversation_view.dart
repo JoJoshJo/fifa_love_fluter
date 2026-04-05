@@ -606,24 +606,44 @@ class _ConversationViewState extends State<ConversationView> {
                 const SizedBox(width: 12),
                 GestureDetector(
                   onTap: _inputHasText ? _sendMessage : null,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
-                    height: _inputHasText ? 36 : 48,
-                    width: _inputHasText ? 36 : 48,
-                    decoration: BoxDecoration(
-                      color: _inputHasText 
-                          ? const Color(0xFFE8437A) 
-                          : (isLight ? Colors.black.withValues(alpha: 0.03) : Colors.white10),
-                      borderRadius: BorderRadius.circular(_inputHasText ? 18 : 24),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        _inputHasText ? LucideIcons.send : LucideIcons.smile,
-                        size: _inputHasText ? 18 : 22,
-                        color: _inputHasText 
-                            ? Colors.white 
-                            : (isLight ? const Color(0xFF9BB3AF) : Colors.white24),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    transitionBuilder: (Widget child, Animation<double> animation) {
+                      return ScaleTransition(scale: animation, child: child);
+                    },
+                    child: Container(
+                      key: ValueKey<bool>(_inputHasText),
+                      height: _inputHasText ? 36 : 48,
+                      width: _inputHasText ? 36 : 48,
+                      decoration: BoxDecoration(
+                        color: _inputHasText
+                            ? const Color(0xFFE8437A)
+                            : (isLight
+                                ? Colors.black.withValues(alpha: 0.03)
+                                : Colors.white10),
+                        borderRadius:
+                            BorderRadius.circular(_inputHasText ? 18 : 24),
+                        boxShadow: _inputHasText
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFFE8437A)
+                                      .withValues(alpha: 0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          _inputHasText ? LucideIcons.send : LucideIcons.smile,
+                          size: _inputHasText ? 18 : 22,
+                          color: _inputHasText
+                              ? Colors.white
+                              : (isLight
+                                  ? const Color(0xFF9BB3AF)
+                                  : Colors.white24),
+                        ),
                       ),
                     ),
                   ),

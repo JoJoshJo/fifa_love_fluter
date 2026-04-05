@@ -1,6 +1,9 @@
 // ─── FIFA World Cup 2026 Static Data ───────────────────────────────────────
+import 'package:lucide_icons/lucide_icons.dart';
 
-const List<Map<String, dynamic>> hostCities = [
+
+
+final List<Map<String, dynamic>> hostCities = [
   {'name': 'Dallas',              'flag': '🇺🇸', 'country': 'USA',    'stadium': 'AT&T Stadium'},
   {'name': 'Los Angeles',         'flag': '🇺🇸', 'country': 'USA',    'stadium': 'SoFi Stadium'},
   {'name': 'New York/New Jersey', 'flag': '🇺🇸', 'country': 'USA',    'stadium': 'MetLife Stadium'},
@@ -19,14 +22,14 @@ const List<Map<String, dynamic>> hostCities = [
   {'name': 'Monterrey',           'flag': '🇲🇽', 'country': 'Mexico', 'stadium': 'Estadio BBVA'},
 ];
 
-const List<Map<String, dynamic>> matchSchedule = [
+final List<Map<String, dynamic>> matchSchedule = [
   {
     'date': '2026-06-11',
     'time': '17:00',
     'team_a': 'Mexico',
     'flag_a': '🇲🇽',
     'team_b': 'TBD',
-    'flag_b': '🏳️',
+    'flag_b': LucideIcons.flag,
     'city': 'Mexico City',
     'stadium': 'Estadio Azteca',
     'stage': 'Opening Match',
@@ -38,7 +41,7 @@ const List<Map<String, dynamic>> matchSchedule = [
     'team_a': 'Canada',
     'flag_a': '🇨🇦',
     'team_b': 'TBD',
-    'flag_b': '🏳️',
+    'flag_b': LucideIcons.flag,
     'city': 'Toronto',
     'stadium': 'BMO Field',
     'stage': 'Group Stage',
@@ -50,7 +53,7 @@ const List<Map<String, dynamic>> matchSchedule = [
     'team_a': 'Mexico',
     'flag_a': '🇲🇽',
     'team_b': 'TBD',
-    'flag_b': '🏳️',
+    'flag_b': LucideIcons.flag,
     'city': 'Guadalajara',
     'stadium': 'Estadio Akron',
     'stage': 'Group Stage',
@@ -62,7 +65,7 @@ const List<Map<String, dynamic>> matchSchedule = [
     'team_a': 'USA',
     'flag_a': '🇺🇸',
     'team_b': 'TBD',
-    'flag_b': '🏳️',
+    'flag_b': LucideIcons.flag,
     'city': 'Los Angeles',
     'stadium': 'SoFi Stadium',
     'stage': 'Opening Match (USA)',
@@ -72,9 +75,9 @@ const List<Map<String, dynamic>> matchSchedule = [
     'date': '2026-06-13',
     'time': '20:00',
     'team_a': 'TBD',
-    'flag_a': '🏳️',
+    'flag_a': LucideIcons.flag,
     'team_b': 'TBD',
-    'flag_b': '🏳️',
+    'flag_b': LucideIcons.flag,
     'city': 'Vancouver',
     'stadium': 'BC Place',
     'stage': 'Group Stage',
@@ -84,9 +87,9 @@ const List<Map<String, dynamic>> matchSchedule = [
     'date': '2026-06-14',
     'time': '14:00',
     'team_a': 'TBD',
-    'flag_a': '🏳️',
+    'flag_a': LucideIcons.flag,
     'team_b': 'TBD',
-    'flag_b': '🏳️',
+    'flag_b': LucideIcons.flag,
     'city': 'Dallas',
     'stadium': 'AT&T Stadium',
     'stage': 'Group Stage',
@@ -96,9 +99,9 @@ const List<Map<String, dynamic>> matchSchedule = [
     'date': '2026-06-14',
     'time': '17:00',
     'team_a': 'TBD',
-    'flag_a': '🏳️',
+    'flag_a': LucideIcons.flag,
     'team_b': 'TBD',
-    'flag_b': '🏳️',
+    'flag_b': LucideIcons.flag,
     'city': 'Houston',
     'stadium': 'NRG Stadium',
     'stage': 'Group Stage',
@@ -108,9 +111,9 @@ const List<Map<String, dynamic>> matchSchedule = [
     'date': '2026-07-19',
     'time': '18:00',
     'team_a': 'TBD',
-    'flag_a': '🏳️',
+    'flag_a': LucideIcons.flag,
     'team_b': 'TBD',
-    'flag_b': '🏳️',
+    'flag_b': LucideIcons.flag,
     'city': 'New York/New Jersey',
     'stadium': 'MetLife Stadium',
     'stage': 'Grand Final',
@@ -118,7 +121,7 @@ const List<Map<String, dynamic>> matchSchedule = [
   },
 ];
 
-const List<Map<String, dynamic>> restaurants = [
+final List<Map<String, dynamic>> restaurants = [
   // Atlanta
   {
     'city': 'Atlanta',
@@ -127,7 +130,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.8,
     'vibe': 'Fan favourite',
-    'icon': '🍖',
+    'icon': LucideIcons.beef,
     'description': 'Famous for signature smoked brisket, pulled pork, and wings.',
   },
   {
@@ -137,7 +140,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.7,
     'vibe': 'Upscale',
-    'icon': '🍲',
+    'icon': LucideIcons.soup,
     'description': 'A contemporary, highly-rated spot for authentic Thai cuisine.',
   },
   {
@@ -147,7 +150,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$',
     'rating': 4.9,
     'vibe': 'Unique fusion',
-    'icon': '🥢',
+    'icon': LucideIcons.glassWater,
     'description': 'Renowned for slow-cooked Southern barbecue with Korean marinades.',
   },
   {
@@ -157,7 +160,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$',
     'rating': 4.6,
     'vibe': 'Local gem',
-    'icon': '🍔',
+    'icon': LucideIcons.sandwich,
     'description': 'Celebrated local institution for high-quality smash burgers.',
   },
 
@@ -169,7 +172,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.5,
     'vibe': 'Historic',
-    'icon': '🦪',
+    'icon': LucideIcons.waves,
     'description': 'The oldest continuously operating restaurant in the U.S.',
   },
   {
@@ -179,7 +182,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.7,
     'vibe': 'Modern',
-    'icon': '🦞',
+    'icon': LucideIcons.fish,
     'description': 'Premier destination for oyster lovers with fresh regional seafood.',
   },
   {
@@ -189,7 +192,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Chic',
-    'icon': '🐟',
+    'icon': LucideIcons.fish,
     'description': 'Inventive seafood dishes and an excellent brunch.',
   },
   {
@@ -199,7 +202,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$',
     'rating': 4.6,
     'vibe': 'Iconic',
-    'icon': '🥐',
+    'icon': LucideIcons.cookie,
     'description': 'Essential North End stop for world-famous cannolis.',
   },
 
@@ -211,7 +214,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.8,
     'vibe': 'Fan favourite',
-    'icon': '🍖',
+    'icon': LucideIcons.beef,
     'description': 'Best BBQ in Dallas — legendary brisket and beef ribs.',
   },
   {
@@ -221,7 +224,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.5,
     'vibe': 'Live Music',
-    'icon': '🎸',
+    'icon': LucideIcons.music,
     'description': 'Great for pre-match drinks and Texan comfort food.',
   },
   {
@@ -231,7 +234,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.9,
     'vibe': 'Pit Smoked',
-    'icon': '🔥',
+    'icon': LucideIcons.flame,
     'description': 'Essential pit-smoked meats in the heart of Deep Ellum.',
   },
   {
@@ -241,7 +244,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.9,
     'vibe': 'Elite BBQ',
-    'icon': '🐄',
+    'icon': LucideIcons.beef,
     'description': 'Consistently ranked among the very best in the state.',
   },
 
@@ -253,7 +256,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.8,
     'vibe': 'Opulent',
-    'icon': '🕌',
+    'icon': LucideIcons.landmark,
     'description': 'Stunningly decorated upscale Indian dining experience.',
   },
   {
@@ -263,7 +266,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.9,
     'vibe': 'Legendary',
-    'icon': '🍖',
+    'icon': LucideIcons.beef,
     'description': 'One of the best barbecue spots in Texas, famous for brisket.',
   },
   {
@@ -273,7 +276,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.7,
     'vibe': 'Casual',
-    'icon': '🥩',
+    'icon': LucideIcons.beef,
     'description': 'Local favorite for excellent central Texas-style barbecue.',
   },
   {
@@ -283,7 +286,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.7,
     'vibe': 'Multicultural',
-    'icon': '🥢',
+    'icon': LucideIcons.glassWater,
     'description': 'Innovative blend of BBQ with Asian and Cajun influences.',
   },
 
@@ -295,7 +298,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.9,
     'vibe': 'Iconic',
-    'icon': '⛽',
+    'icon': LucideIcons.fuel,
     'description': 'Located in a gas station — try the legendary Z-Man sandwich.',
   },
   {
@@ -305,7 +308,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.8,
     'vibe': 'Fusion',
-    'icon': '🐘',
+    'icon': LucideIcons.landmark,
     'description': 'Acclaimed spot mixing KC BBQ with authentic Thai flavors.',
   },
   {
@@ -315,7 +318,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.5,
     'vibe': 'Historic',
-    'icon': '📜',
+    'icon': LucideIcons.scroll,
     'description': 'The historic institution that put KC BBQ on the map.',
   },
   {
@@ -325,7 +328,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Modern BBQ',
-    'icon': '🍖',
+    'icon': LucideIcons.beef,
     'description': 'Elevated wood-fire grill and award-winning BBQ.',
   },
 
@@ -337,7 +340,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Legendary',
-    'icon': '🥪',
+    'icon': LucideIcons.sandwich,
     'description': 'World-famous pastrami sandwiches since 1947.',
   },
   {
@@ -347,7 +350,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$',
     'rating': 4.7,
     'vibe': 'Casual',
-    'icon': '🌮',
+    'icon': LucideIcons.sandwich,
     'description': 'Home-style braised meat tacos on fresh corn tortillas.',
   },
   {
@@ -357,7 +360,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Grand',
-    'icon': '🥐',
+    'icon': LucideIcons.cookie,
     'description': 'Modern French in a stunning historic space.',
   },
   {
@@ -367,7 +370,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.7,
     'vibe': 'Bustling',
-    'icon': '🏙️',
+    'icon': LucideIcons.building,
     'description': "Iconic food hall featuring LA's best local vendors.",
   },
 
@@ -379,7 +382,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.6,
     'vibe': 'Essential',
-    'icon': '☕',
+    'icon': LucideIcons.coffee,
     'description': 'The most famous Cuban restaurant in the world.',
   },
   {
@@ -389,7 +392,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.7,
     'vibe': 'Theatrical',
-    'icon': '🔥',
+    'icon': LucideIcons.flame,
     'description': 'Fire-cooked masterclass by Francis Mallmann.',
   },
   {
@@ -399,7 +402,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.8,
     'vibe': 'Classic',
-    'icon': '🦀',
+    'icon': LucideIcons.waves,
     'description': 'Legendary institution famous for seasonal stone crabs.',
   },
   {
@@ -409,7 +412,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.9,
     'vibe': 'Artisanal',
-    'icon': '🍞',
+    'icon': LucideIcons.cookie,
     'description': 'World-class artisanal breads and pastries in Wynwood.',
   },
 
@@ -421,7 +424,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Iconic',
-    'icon': '🥪',
+    'icon': LucideIcons.sandwich,
     'description': 'Historic Lower East Side landmark for massive pastrami.',
   },
   {
@@ -431,7 +434,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$',
     'rating': 4.8,
     'vibe': 'Authentic',
-    'icon': '🌮',
+    'icon': LucideIcons.sandwich,
     'description': 'Widely considered the best, most authentic tacos in NYC.',
   },
   {
@@ -441,7 +444,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.7,
     'vibe': 'Old School',
-    'icon': '🍕',
+    'icon': LucideIcons.pizza,
     'description': 'Iconic no-nonsense coal-fired New York pizza.',
   },
   {
@@ -451,7 +454,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.9,
     'vibe': 'World Class',
-    'icon': '🥩',
+    'icon': LucideIcons.beef,
     'description': 'Legendary steakhouse institution since 1887.',
   },
 
@@ -463,7 +466,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$',
     'rating': 4.7,
     'vibe': 'Local Pick',
-    'icon': '🥖',
+    'icon': LucideIcons.sandwich,
     'description': 'Often cited as the best authentic Philly cheesesteak.',
   },
   {
@@ -473,7 +476,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.9,
     'vibe': 'Refined',
-    'icon': '🍷',
+    'icon': LucideIcons.wine,
     'description': 'High-end tasting menus in an elegant Rittenhouse setting.',
   },
   {
@@ -483,7 +486,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.7,
     'vibe': 'Modern',
-    'icon': '🇫🇷',
+    'icon': LucideIcons.beef,
     'description': 'Contemporary French cuisine near the Liberty Bell.',
   },
   {
@@ -493,7 +496,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.8,
     'vibe': 'Bustling',
-    'icon': '🥨',
+    'icon': LucideIcons.cookie,
     'description': "One of America's oldest and largest public markets.",
   },
 
@@ -505,7 +508,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.9,
     'vibe': 'Classic',
-    'icon': '🥩',
+    'icon': LucideIcons.beef,
     'description': 'Old-school institution famous for traditional prime rib.',
   },
   {
@@ -515,7 +518,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.7,
     'vibe': 'Vibrant',
-    'icon': '🍗',
+    'icon': LucideIcons.beef,
     'description': 'Iconic roasted chicken and quintessential SF vibe.',
   },
   {
@@ -525,7 +528,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Celebrated',
-    'icon': '🍕',
+    'icon': LucideIcons.pizza,
     'description': 'Award-winning Napoletana pizza in North Beach.',
   },
   {
@@ -535,7 +538,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$',
     'rating': 4.8,
     'vibe': 'Legendary',
-    'icon': '🌯',
+    'icon': LucideIcons.sandwich,
     'description': 'The destination for Mission-style burritos.',
   },
 
@@ -547,7 +550,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.7,
     'vibe': 'Must-visit',
-    'icon': '🥣',
+    'icon': LucideIcons.soup,
     'description': 'Famous for variety of rich, award-winning chowders.',
   },
   {
@@ -557,7 +560,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.9,
     'vibe': 'Sandwich Legend',
-    'icon': '🥪',
+    'icon': LucideIcons.sandwich,
     'description': 'Incredible Caribbean-inspired sandwiches in Ballard.',
   },
   {
@@ -567,7 +570,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.6,
     'vibe': 'Trendy',
-    'icon': '🍣',
+    'icon': LucideIcons.fish,
     'description': 'Popular spot for fresh traditional sushi and omakase.',
   },
   {
@@ -577,7 +580,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Rustic-Chic',
-    'icon': '🦪',
+    'icon': LucideIcons.waves,
     'description': 'Celebrated Pacific Northwest seafood and oysters.',
   },
 
@@ -589,7 +592,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.8,
     'vibe': 'Waterfront',
-    'icon': '🍣',
+    'icon': LucideIcons.fish,
     'description': 'Famous for upscale Aburi flame-seared sushi.',
   },
   {
@@ -599,7 +602,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.9,
     'vibe': 'Intimate',
-    'icon': '⚜️',
+    'icon': LucideIcons.flower,
     'description': 'Acclaimed high-end traditional Quebecois cuisine.',
   },
   {
@@ -609,7 +612,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.7,
     'vibe': 'Creative',
-    'icon': '🥘',
+    'icon': LucideIcons.soup,
     'description': 'Legendary spot for unique, modern Indian cuisine.',
   },
   {
@@ -619,7 +622,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.8,
     'vibe': 'Upscale',
-    'icon': '🍷',
+    'icon': LucideIcons.wine,
     'description': "Vancouver's most celebrated elevated Canadian dining.",
   },
 
@@ -631,7 +634,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.9,
     'vibe': 'World Class',
-    'icon': '⭐',
+    'icon': LucideIcons.star,
     'description': 'Sophisticated multi-course Michelin-starred tasing menu.',
   },
   {
@@ -641,7 +644,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.8,
     'vibe': 'Vibrant',
-    'icon': '🍜',
+    'icon': LucideIcons.soup,
     'description': 'Authentic Northern Thai dishes in a lively atmosphere.',
   },
   {
@@ -651,7 +654,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.7,
     'vibe': 'Chef-Driven',
-    'icon': '🚉',
+    'icon': LucideIcons.train,
     'description': 'Bustling spot focused on seasonal, local ingredients.',
   },
   {
@@ -661,7 +664,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$',
     'rating': 4.8,
     'vibe': 'Historic',
-    'icon': '🥓',
+    'icon': LucideIcons.beef,
     'description': 'Must-try home of the iconic peameal bacon sandwich.',
   },
 
@@ -673,7 +676,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$',
     'rating': 4.7,
     'vibe': 'Record Holder',
-    'icon': '🥣',
+    'icon': LucideIcons.soup,
     'description': 'Famous for carne en su jugo and super fast service.',
   },
   {
@@ -683,7 +686,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Trendy',
-    'icon': '🦪',
+    'icon': LucideIcons.waves,
     'description': 'Top-tier oysters and grilled dishes in a lively space.',
   },
   {
@@ -693,7 +696,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.7,
     'vibe': 'Creative',
-    'icon': '🐉',
+    'icon': LucideIcons.landmark,
     'description': 'Innovative blend of Mexican and Asian culinary traditions.',
   },
   {
@@ -703,7 +706,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.6,
     'vibe': 'Atmospheric',
-    'icon': '🐺',
+    'icon': LucideIcons.landmark,
     'description': 'Visually striking restaurant with elevated regional menu.',
   },
 
@@ -715,7 +718,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.9,
     'vibe': 'Elite',
-    'icon': '🍽️',
+    'icon': LucideIcons.utensils,
     'description': 'World-renowned destination for modern Mexican cuisine.',
   },
   {
@@ -725,7 +728,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.9,
     'vibe': 'Sophisticated',
-    'icon': '🥗',
+    'icon': LucideIcons.leaf,
     'description': 'Celebrating local ingredients with creative techniques.',
   },
   {
@@ -735,7 +738,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Design-Forward',
-    'icon': '🏛️',
+    'icon': LucideIcons.building,
     'description': 'Stylish dining in a beautifully restored Roma mansion.',
   },
   {
@@ -745,7 +748,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Elegant',
-    'icon': '🍝',
+    'icon': LucideIcons.soup,
     'description': 'Refined seasonal dishes in a stunning Roma townhouse.',
   },
 
@@ -757,7 +760,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.7,
     'vibe': 'Legendary',
-    'icon': '🐐',
+    'icon': LucideIcons.beef,
     'description': 'The absolute reference for local goat specialty—cabrito.',
   },
   {
@@ -767,7 +770,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.8,
     'vibe': 'Lively',
-    'icon': '🥩',
+    'icon': LucideIcons.beef,
     'description': 'Traditional Northern flavors and premium steaks.',
   },
   {
@@ -777,7 +780,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$$',
     'rating': 4.9,
     'vibe': 'World Class',
-    'icon': '🌟',
+    'icon': LucideIcons.star,
     'description': 'Pioneering modern Mexican haute cuisine in Monterrey.',
   },
   {
@@ -787,7 +790,7 @@ const List<Map<String, dynamic>> restaurants = [
     'price': r'$$$',
     'rating': 4.6,
     'vibe': 'Authentic',
-    'icon': '🔥',
+    'icon': LucideIcons.flame,
     'description': 'Respected institution for traditional slow-roasted meats.',
   },
 ];
@@ -925,10 +928,10 @@ const List<Map<String, dynamic>> safetyData = [
 
 const List<Map<String, dynamic>> ridesData = [];
 
-const List<Map<String, dynamic>> chauffeurServices = [
+final List<Map<String, dynamic>> chauffeurServices = [
   {
     'name': 'Blacklane',
-    'icon': '🎩',
+    'icon': LucideIcons.user,
     'coverage': 'All 16 Host Cities',
     'description': 'Premium airport transfers and hourly chauffeur. Fixed pricing — no surge.',
     'price': r'From $85/ride',

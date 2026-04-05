@@ -25,8 +25,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   late TextEditingController _nameController;
   late TextEditingController _ageController;
   late TextEditingController _bioController;
-  late TextEditingController _teamController;
-  
+
   // Profile Data
   late Map<String, dynamic> _profile = {};
   late String _gender;
@@ -36,6 +35,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   late String _city;
   late List<String> _matchTypes;
   late List<String> _countriesToMatch;
+  
+  static const _worldCupTeams = [
+    'Argentina', 'Australia', 'Belgium', 'Bolivia', 'Brazil',
+    'Cameroon', 'Canada', 'Chile', 'Colombia', 'Costa Rica',
+    'Croatia', 'Czech Republic', 'Denmark', 'Ecuador', 'Egypt',
+    'England', 'France', 'Germany', 'Ghana', 'Indonesia',
+    'Iran', 'Italy', 'Ivory Coast', 'Jamaica', 'Japan',
+    'Mali', 'Mexico', 'Morocco', 'Netherlands', 'New Zealand',
+    'Nigeria', 'Panama', 'Paraguay', 'Peru', 'Poland',
+    'Portugal', 'Qatar', 'Saudi Arabia', 'Senegal', 'Serbia',
+    'South Korea', 'Spain', 'Switzerland', 'Tunisia', 'Turkey',
+    'USA', 'Uruguay', 'Venezuela'
+  ];
   
   // Media
   String? _avatarUrl;
@@ -63,7 +75,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
       _nameController = TextEditingController(text: _profile['name'] as String? ?? '');
       _bioController = TextEditingController(text: _profile['bio'] as String? ?? '');
       _ageController = TextEditingController(text: (_profile['age'] != null) ? _profile['age'].toString() : '');
-      _teamController = TextEditingController(text: _profile['team_supported'] as String? ?? '');
 
       _gender = _normalizeGender(_profile['gender'] as String?);
       _nationality = _profile['nationality'] as String? ?? '';
@@ -75,15 +86,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
       }
       _countriesToMatch = List<String>.from(_profile['countries_to_match'] ?? []);
       
-      final countries = [
-        'Argentina', 'Australia', 'Belgium', 'Brazil', 'Canada', 
-        'Colombia', 'Croatia', 'Ecuador', 'England', 'France', 
-        'Germany', 'Ghana', 'Italy', 'Japan', 'Mexico', 
-        'Morocco', 'Netherlands', 'Nigeria', 'Peru', 'Poland', 
-        'Portugal', 'Saudi Arabia', 'Senegal', 'South Korea', 'Spain', 'USA'
-      ];
       _teamSupported = _profile['team_supported'] as String? ?? '';
-      if (!countries.contains(_teamSupported)) {
+      if (!_worldCupTeams.contains(_teamSupported)) {
         _teamSupported = '';
       }
       
@@ -92,7 +96,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
       _nameController = TextEditingController();
       _bioController = TextEditingController();
       _ageController = TextEditingController();
-      _teamController = TextEditingController();
       _gender = 'Other';
       _nationality = '';
       _matchTypes = [];
@@ -109,7 +112,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     _nameController.dispose();
     _ageController.dispose();
     _bioController.dispose();
-    _teamController.dispose();
     super.dispose();
   }
 
@@ -151,7 +153,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         'bio': _bioController.text.trim(),
         'gender': _gender,
         'nationality': _nationality,
-        'team_supported': _teamController.text.trim(),
+        'team_supported': _teamSupported.isEmpty ? null : _teamSupported,
         'avatar_url': finalAvatarUrl,
         'interests': _matchTypes,
         'is_local': _isLocal,
@@ -173,6 +175,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   }
 
   void _showNationalityPicker() {
+    final theme = Theme.of(context);
     final countries = [
       'Argentina', 'Australia', 'Belgium', 'Brazil', 'Canada', 
       'Colombia', 'Croatia', 'Ecuador', 'England', 'France', 
@@ -181,17 +184,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
       'Portugal', 'Saudi Arabia', 'Senegal', 'South Korea', 'Spain', 'USA'
     ];
 
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     if (!mounted) return;
     showModalBottomSheet(
       context: context,
-      backgroundColor: isLight ? Colors.white : const Color(0xFF0D1A13),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => _CountryPickerSheet(
         title: 'SELECT NATIONALITY',
         countries: countries,
         onSelect: (c) => setState(() => _nationality = c),
+      ),
+    );
+  }
+
+  void _showTeamPicker() {
+    final theme = Theme.of(context);
+    if (!mounted) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => _TeamPickerSheet(
+        onSelect: (t) => setState(() => _teamSupported = t),
       ),
     );
   }
@@ -330,9 +347,60 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        _buildPickerField('Nationality', _nationality.isEmpty ? 'Select Country' : _nationality, _showNationalityPicker, isLight, textColor, textMuted, icon: LucideIcons.flag),
+        _buildPickerField(
+          'Nationality',
+          _nationality.isEmpty ? 'Select Country' : _nationality,
+          _showNationalityPicker,
+          isLight, textColor, textMuted,
+          icon: LucideIcons.flag,
+        ),
         const SizedBox(height: 20),
-        _buildTextField('Supported Team', _teamController, isLight, textColor, textMuted, hint: 'e.g. Real Madrid, Brazil, etc.'),
+        
+        // Team Supported Picker
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'SUPPORTED TEAM',
+              style: GoogleFonts.spaceMono(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF4CB572),
+                letterSpacing: 1.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _showTeamPicker,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(LucideIcons.trophy, size: 18, color: Color(0xFF4CB572)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _teamSupported.isEmpty ? 'Select your team...' : _teamSupported,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          color: _teamSupported.isNotEmpty ? textColor : textMuted,
+                        ),
+                      ),
+                    ),
+                    Icon(LucideIcons.chevronDown, size: 18, color: textMuted),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 32),
         Container(
           padding: const EdgeInsets.all(16),
@@ -592,7 +660,7 @@ class _CountryPickerSheet extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Search country...',
                 hintStyle: GoogleFonts.inter(color: textMuted.withValues(alpha: 0.5)),
-                prefixIcon: Icon(LucideIcons.search, color: textMuted, size: 20),
+                prefixIcon: const Icon(LucideIcons.search, color: FifaColors.emeraldSpring, size: 20),
                 filled: true,
                 fillColor: inputColor,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -613,6 +681,117 @@ class _CountryPickerSheet extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TeamPickerSheet extends StatefulWidget {
+  final Function(String) onSelect;
+
+  const _TeamPickerSheet({required this.onSelect});
+
+  @override
+  State<_TeamPickerSheet> createState() => _TeamPickerSheetState();
+}
+
+class _TeamPickerSheetState extends State<_TeamPickerSheet> {
+  String _search = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = isLight ? Colors.white : const Color(0xFF0D1C13);
+    final textColor = isLight ? const Color(0xFF0D2B1E) : Colors.white;
+    final textMuted = isLight ? const Color(0xFF9BB3AF) : Colors.white.withValues(alpha: 0.35);
+
+    final filtered = _EditProfileScreenState._worldCupTeams.where((t) {
+      return t.toLowerCase().contains(_search.toLowerCase());
+    }).toList();
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.7,
+      maxChildSize: 0.9,
+      builder: (context, scrollController) => Container(
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: textMuted.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Select Your Team',
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: TextField(
+                style: GoogleFonts.inter(color: textColor, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Search teams...',
+                  hintStyle: GoogleFonts.inter(color: textMuted),
+                  prefixIcon: const Icon(LucideIcons.search, size: 20, color: Color(0xFF4CB572)),
+                  filled: true,
+                  fillColor: isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                ),
+                onChanged: (v) => setState(() => _search = v),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: ListView.builder(
+                controller: scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                itemCount: filtered.length,
+                itemBuilder: (context, i) => InkWell(
+                  onTap: () {
+                    widget.onSelect(filtered[i]);
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: textMuted.withValues(alpha: 0.05),
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      filtered[i],
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

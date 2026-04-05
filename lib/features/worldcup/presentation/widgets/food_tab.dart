@@ -47,7 +47,7 @@ class _FoodTabState extends State<FoodTab> {
               // Find flag for city
               final cityData = hostCities.firstWhere(
                 (c) => c['name'] == city,
-                orElse: () => {'flag': '🌍'},
+                orElse: () => {'flag': LucideIcons.globe},
               );
 
               return GestureDetector(
@@ -68,17 +68,29 @@ class _FoodTabState extends State<FoodTab> {
                           : FifaColors.lightBorder,
                     ) : null,
                   ),
-                  child: Text(
-                    '${cityData['flag']} $city',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: isActive
-                          ? Colors.white
-                          : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.45),
-                      fontWeight: isActive
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Builder(builder: (context) {
+                        final flag = cityData['flag'];
+                        return flag is IconData
+                            ? Icon(flag, size: 14, color: isActive ? Colors.white : accentGreen.withValues(alpha: 0.5))
+                            : Text(flag, style: const TextStyle(fontSize: 14));
+                      }),
+                      const SizedBox(width: 8),
+                      Text(
+                        city,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: isActive
+                              ? Colors.white
+                              : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.45),
+                          fontWeight: isActive
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -93,10 +105,9 @@ class _FoodTabState extends State<FoodTab> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('🍽️',
-                          style: TextStyle(
-                              fontSize: 48,
-                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3))),
+                      Icon(LucideIcons.utensils,
+                          size: 48,
+                          color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3)),
                       const SizedBox(height: 12),
                       Text(
                         'No restaurants listed yet\nfor $_selectedCity',
@@ -141,9 +152,9 @@ class _FoodTabState extends State<FoodTab> {
                               color: accentGreen.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
-                                LucideIcons.utensils,
+                                r['icon'] as IconData,
                                 size: 24,
                                 color: accentGreen,
                               ),

@@ -28,9 +28,20 @@ class MessageBubble extends StatelessWidget {
     return '$h:$m';
   }
 
+  String _formatTimeReadable(String? isoString) {
+    if (isoString == null) return '';
+    final dt = DateTime.tryParse(isoString);
+    if (dt == null) return '';
+    final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+    final amPm = dt.hour >= 12 ? 'PM' : 'AM';
+    final m = dt.minute.toString().padLeft(2, '0');
+    return '$hour:$m $amPm';
+  }
+
   @override
   Widget build(BuildContext context) {
     final timeStr = _formatTime(message['created_at'] as String?);
+    final readableTime = _formatTimeReadable(message['created_at'] as String?);
     final isLight = Theme.of(context).brightness == Brightness.light;
 
     return Padding(
@@ -61,9 +72,9 @@ class MessageBubble extends StatelessWidget {
             builder: (context, value, child) {
               return Opacity(
                 opacity: value,
-                child: FractionalTranslation(
-                  translation: Offset(
-                    isMe ? (1.0 - value) * 0.3 : (value - 1.0) * 0.3,
+                child: Transform.translate(
+                  offset: Offset(
+                    isMe ? (1.0 - value) * 30 : (value - 1.0) * 30,
                     0,
                   ),
                   child: child,
@@ -131,15 +142,24 @@ class MessageBubble extends StatelessWidget {
               ],
             ),
           ),
-          if (isMe && showStatus && status != null)
+          if (isMe && showStatus)
             Padding(
-              padding: const EdgeInsets.only(top: 2, right: 4),
+              padding: const EdgeInsets.only(top: 4, right: 4),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  Text(
+                    readableTime,
+                    style: GoogleFonts.spaceMono(
+                      fontSize: 8,
+                      color: isLight ? const Color(0xFF9BB3AF) : Colors.white24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
                   Icon(
-                    status == 'read' ? LucideIcons.checkCheck : LucideIcons.check,
+                    status == 'read' ? LucideIcons.checkCheck : LucideIcons.checkCheck,
                     size: 12,
                     color: status == 'read'
                         ? const Color(0xFF4CB572)

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/widgets/particle_background.dart';
 import 'signup_screen.dart';
 import 'signin_screen.dart';
@@ -228,12 +229,11 @@ class LandingScreen extends StatelessWidget {
                           width: 1.5,
                         ),
                       ),
-                      child: const Center(
-                        child: Text(
-                          '⚽',
-                          style: TextStyle(fontSize: 16),
+                        child: const Icon(
+                          LucideIcons.trophy,
+                          size: 16,
+                          color: Color(0xFF4CB572),
                         ),
-                      ),
                     ),
                     const SizedBox(width: 8),
                     Text(

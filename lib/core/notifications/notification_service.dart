@@ -49,7 +49,7 @@ class NotificationService {
     );
     await _notifications.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      "It's a Match! 🎉",
+      "It's a Match!",
       "You matched with $matchName",
       details,
       payload: 'match:$matchId',
@@ -91,7 +91,7 @@ class NotificationService {
     );
     await _notifications.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      "Match Day! ⚽",
+      "Match Day!",
       "$teamA vs $teamB in $city today",
       details,
       payload: 'worldcup',

@@ -12,7 +12,6 @@ import 'package:page_transition/page_transition.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_screen.dart';
 import 'verification_screen.dart';
-import '../../../core/constants/colors.dart';
 
 
 class MeScreen extends ConsumerStatefulWidget {
@@ -370,15 +369,27 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                 final nationality = _profile['nationality'] as String? ?? '';
                 final team = _profile['team_supported'] as String? ?? '';
                 if (nationality.isEmpty) return const SizedBox.shrink();
-                return Text(
-                  [
-                    '${_flag(nationality)} $nationality',
-                    if (team.isNotEmpty) team,
-                  ].join('  ·  '),
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: muted,
-                  ));
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Builder(builder: (context) {
+                      final f = _flag(nationality);
+                      return f is IconData
+                          ? Icon(f, size: 14, color: muted)
+                          : Text(f as String, style: const TextStyle(fontSize: 14));
+                    }),
+                    const SizedBox(width: 8),
+                    Text(
+                      [
+                        nationality,
+                        if (team.isNotEmpty) team,
+                      ].join('  ·  '),
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: muted,
+                      )),
+                  ],
+                );
               },
             ),
 
@@ -441,14 +452,8 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                             .playfairDisplay(
                               fontSize: 20,
                               fontWeight:
-                                FontWeight.w700,
-                              color: score < 50
-                                ? const Color(
-                                    0xFFE83535)
-                                : score < 80
-                                  ? const Color(
-                                      0xFFF2C233)
-                                  : accentGreen,
+                                FontWeight.bold,
+                              color: const Color(0xFFF2C233),
                             )),
                       ],
                     ),
@@ -459,8 +464,8 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                       child: LinearProgressIndicator(
                         value: score / 100,
                         minHeight: 5,
-                        backgroundColor: FifaColors.mint.withValues(alpha: 0.3),
-                        valueColor: const AlwaysStoppedAnimation(FifaColors.accent),
+                        backgroundColor: const Color(0xFFF2C233).withValues(alpha: 0.1),
+                        valueColor: const AlwaysStoppedAnimation(Color(0xFFF2C233)),
                       ),
                     ),
                     if (missing.isNotEmpty) ...[
@@ -568,7 +573,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                       await SupabaseConfig.client.auth.resetPasswordForEmail(email);
                       messenger.showSnackBar(
                         SnackBar(
-                          content: const Text('Reset email sent ✅'),
+                          content: const Text('Reset email sent'),
                           backgroundColor: accent,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
@@ -828,17 +833,17 @@ class _MeScreenState extends ConsumerState<MeScreen> {
     );
   }
 
-  String _flag(String? n) {
+  dynamic _flag(String? n) {
     const m = {
       'Brazil': '🇧🇷', 'France': '🇫🇷',
       'Argentina': '🇦🇷',
       'United States': '🇺🇸',
       'England': '🏴',
       'Germany': '🇩🇪', 'Spain': '🇪🇸',
-      'Portugal': '🇵🇹', 'Morocco': '🇲🇦',
+      'Portuguese': '🇵🇹', 'Morocco': '🇲🇦',
       'Japan': '🇯🇵', 'Nigeria': '🇳🇬',
       'Benin': '🇧🇯', 'Ghana': '🇬🇦',
     };
-    return m[n] ?? '🌍';
+    return m[n] ?? LucideIcons.globe;
   }
 }

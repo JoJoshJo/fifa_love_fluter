@@ -44,7 +44,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
     final kickoff = DateTime(2026, 6, 11);
     final now = DateTime.now();
     final diff = kickoff.difference(now).inDays;
-    if (diff <= 0) return 'LIVE 🔥';
+    if (diff <= 0) return 'LIVE';
     return diff.toString();
   }
 
@@ -105,7 +105,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
                   child: Column(
                     children: [
                       Text(
-                        _daysUntilKickoff().replaceAll(' 🔥', ''),
+                        _daysUntilKickoff(),
                         style: GoogleFonts.spaceMono(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -170,8 +170,16 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Color.lerp(const Color(0xFF004B3A), const Color(0xFF135E4B), _controller.value)!,
-                              const Color(0xFF4CB572),
+                              Color.lerp(
+                                const Color(0xFF004B3A),
+                                const Color(0xFF135E4B),
+                                _controller.value,
+                              )!,
+                              Color.lerp(
+                                const Color(0xFF4CB572),
+                                const Color(0xFF3AA562),
+                                _controller.value,
+                              )!,
                             ],
                           ),
                         ),

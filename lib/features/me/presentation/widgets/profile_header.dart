@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class ProfileHeader extends StatelessWidget {
   final Map<String, dynamic> profile;
@@ -12,7 +13,7 @@ class ProfileHeader extends StatelessWidget {
     required this.onEditPhoto,
   });
 
-  String _flagEmoji(String? nationality) {
+  dynamic _flagEmoji(String? nationality) {
     const flags = {
       'Brazil': '🇧🇷', 'France': '🇫🇷', 'Argentina': '🇦🇷',
       'USA': '🇺🇸', 'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'Germany': '🇩🇪',
@@ -21,7 +22,7 @@ class ProfileHeader extends StatelessWidget {
       'Colombia': '🇨🇴', 'Senegal': '🇸🇳', 'Australia': '🇦🇺',
       'South Korea': '🇰🇷', 'Netherlands': '🇳🇱', 'Italy': '🇮🇹',
     };
-    return flags[nationality] ?? '🌍';
+    return flags[nationality] ?? LucideIcons.globe;
   }
 
   @override
@@ -109,10 +110,12 @@ class ProfileHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (nationality != null && nationality.isNotEmpty) ...[
-                      Text(
-                        _flagEmoji(nationality),
-                        style: const TextStyle(fontSize: 14),
-                      ),
+                      Builder(builder: (context) {
+                        final flag = _flagEmoji(nationality);
+                        return flag is IconData
+                            ? Icon(flag, size: 14, color: const Color(0xFF9BB3AF))
+                            : Text(flag, style: const TextStyle(fontSize: 14));
+                      }),
                       const SizedBox(width: 4),
                       Text(
                         nationality,
