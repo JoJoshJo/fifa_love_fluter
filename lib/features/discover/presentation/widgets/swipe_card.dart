@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../core/constants/colors.dart';
+import 'package:fifalove_mobile/core/utils/url_helper.dart';
+
 
 class SwipeCard extends StatefulWidget {
   final Map<String, dynamic> profile;
@@ -83,7 +85,10 @@ class _SwipeCardState extends State<SwipeCard> {
     final interests = List<String>.from(profile['interests'] ?? []);
     final score = (profile['match_score'] as num?)?.toInt() ?? 0;
     final isVerified = profile['is_verified'] as bool? ?? false;
-    final photos = (profile['photo_urls'] as List? ?? [profile['avatar_url']]).whereType<String>().toList();
+    // Use avatar_url directly (photo_urls column doesn't exist in the DB schema)
+    final rawAvatarUrl = profile['avatar_url'] as String?;
+    final photos = rawAvatarUrl != null ? [rawAvatarUrl] : <String>[];
+
     final createdAtStr = profile['created_at'] as String?;
     final createdAt = createdAtStr != null ? DateTime.tryParse(createdAtStr) : null;
     final isNew = createdAt != null && DateTime.now().difference(createdAt).inDays <= 7;
@@ -115,13 +120,32 @@ class _SwipeCardState extends State<SwipeCard> {
                     itemCount: photos.length,
                     onPageChanged: (i) => setState(() => _currentPhotoIndex = i),
                     itemBuilder: (context, index) {
+                      final resolvedUrl = UrlHelper.resolveImageUrl(photos[index]);
+                      if (resolvedUrl.isEmpty) {
+                        return _buildPhotoPlaceholder(name, nationality);
+                      }
                       return CachedNetworkImage(
-                        imageUrl: photos[index],
+                        imageUrl: resolvedUrl,
                         fit: BoxFit.cover,
+                        memCacheWidth: 400,
+                        memCacheHeight: 600,
                         placeholder: (context, url) => Container(
-                          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Color(0xFF1E4A33), Color(0xFF0D1A13)],
+                            ),
+                          ),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFF4CB572),
+                            ),
+                          ),
                         ),
+                        errorWidget: (context, url, error) =>
+                            _buildPhotoPlaceholder(name, nationality),
                       );
                     },
                   ),
@@ -254,7 +278,7 @@ class _SwipeCardState extends State<SwipeCard> {
               flex: 40,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 color: isLight ? const Color(0xFFF5F0E8) : const Color(0xFF0D1A13),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,7 +299,7 @@ class _SwipeCardState extends State<SwipeCard> {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4), // Tighter gap
                     // Age + nationality
                     Row(children: [
                       if (_flag(nationality) != null) ...[
@@ -294,7 +318,7 @@ class _SwipeCardState extends State<SwipeCard> {
                           )),
                     ]),
                     if (city != null && city.isNotEmpty) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 1), // Extremely tight
                       Row(children: [
                         Icon(Icons.location_on_outlined,
                             size: 12,
@@ -307,7 +331,7 @@ class _SwipeCardState extends State<SwipeCard> {
                             )),
                       ]),
                     ],
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10), // Tighter transition to tags
                     // Interests Row
                     if (interests.isNotEmpty)
                       SingleChildScrollView(
@@ -342,25 +366,11 @@ class _SwipeCardState extends State<SwipeCard> {
       ),
     );
 
-    // Apply stack transforms
-    if (widget.stackPosition == 1) {
-      card = Transform.scale(
-        scale: 0.95,
-        child: Transform.translate(
-          offset: const Offset(0, -12),
-          child: Opacity(opacity: 0.8, child: card),
-        ),
-      );
-    } else if (widget.stackPosition == 2) {
-      card = Transform.scale(
-        scale: 0.90,
-        child: Transform.translate(
-          offset: const Offset(0, -24),
-          child: Opacity(opacity: 0.5, child: card),
-        ),
-      );
-    }
 
+    // Stack transforms are handled by the CardSwiper in the parent screen.
+    // We only need to ensure the card has a fixed size if necessary, 
+    // but the Swiper will manage its scale and offset.
+    
     // Apply parallax tilt on drag (only for front card)
     if (widget.isFront && widget.dragOffset != Offset.zero) {
       card = Transform(
@@ -373,6 +383,50 @@ class _SwipeCardState extends State<SwipeCard> {
     }
 
     return RepaintBoundary(child: card);
+  }
+
+  Widget _buildPhotoPlaceholder(String name, String nationality) {
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    final flag = _flag(nationality);
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1E4A33), Color(0xFF0D1A13)],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF4CB572).withValues(alpha: 0.2),
+                border: Border.all(color: const Color(0xFF4CB572), width: 2),
+              ),
+              child: Center(
+                child: Text(
+                  initial,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            if (flag != null) ...[
+              const SizedBox(height: 12),
+              Text(flag, style: const TextStyle(fontSize: 28)),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildMatchGauge(int score) {

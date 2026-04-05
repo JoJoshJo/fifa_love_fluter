@@ -112,33 +112,14 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
                           color: const Color(0xFFC62828), // red urgency
                         ),
                       ),
-                      AnimatedBuilder(
-                        animation: _controller,
-                        builder: (context, child) {
-                          return ShaderMask(
-                            shaderCallback: (bounds) => LinearGradient(
-                              colors: const [
-                                Color(0xFF5A4500),
-                                Color(0xFFF2C233),
-                                Color(0xFF5A4500),
-                              ],
-                              stops: [
-                                _controller.value - 0.2,
-                                _controller.value,
-                                _controller.value + 0.2,
-                              ],
-                            ).createShader(bounds),
-                            child: Text(
-                              'DAYS',
-                              style: GoogleFonts.spaceMono(
-                                fontSize: 9,
-                                color: Colors.white, // color will be masked
-                                letterSpacing: 2.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        },
+                      Text(
+                        'DAYS',
+                        style: GoogleFonts.spaceMono(
+                          fontSize: 9,
+                          color: const Color(0xFF5A4500),
+                          letterSpacing: 2.0,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),

@@ -10,6 +10,7 @@ import '../../../shared/providers/navigation_provider.dart';
 import '../data/chat_repository.dart';
 import 'widgets/match_list_item.dart';
 import 'widgets/conversation_view.dart';
+import '../../../core/utils/url_helper.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -138,13 +139,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          '${_matches.length} Matches.',
-                          style: GoogleFonts.playfairDisplay(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            fontStyle: FontStyle.italic,
-                            color: isLight ? Colors.black : Colors.white,
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '${_matches.length} ',
+                                style: GoogleFonts.inter(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w700,
+                                  color: isLight ? Colors.black : Colors.white,
+                                ),
+                              ),
+                              TextSpan(
+                                text: 'Matches.',
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w700,
+                                  fontStyle: FontStyle.italic,
+                                  color: isLight ? Colors.black : Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -241,9 +256,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                                               width: 1,
                                                             )
                                                           : null,
-                                                      image: avatarUrl != null
+                                                      image: avatarUrl != null && avatarUrl.isNotEmpty
                                                           ? DecorationImage(
-                                                              image: CachedNetworkImageProvider(avatarUrl),
+                                                              image: CachedNetworkImageProvider(
+                                                                UrlHelper.resolveImageUrl(avatarUrl),
+                                                              ),
                                                               fit: BoxFit.cover,
                                                             )
                                                           : null,
@@ -367,8 +384,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           const SizedBox(height: 40),
           Icon(
             LucideIcons.messageSquare,
-            size: 48,
-            color: const Color(0xFF4CB572).withValues(alpha: 0.2),
+            size: 56,
+            color: const Color(0xFF9BB3AF).withValues(alpha: 0.5),
           ),
           const SizedBox(height: 24),
           Text(
@@ -379,6 +396,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               letterSpacing: 1.5,
               fontWeight: FontWeight.bold,
             ),
+          ),
+          const SizedBox(height: 12),
+          // Decorative dots
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFFF48C4))),
+              const SizedBox(width: 8),
+              Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFF2C233))),
+              const SizedBox(width: 8),
+              Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF4CB572))),
+            ],
           ),
           const SizedBox(height: 24),
           Text(
@@ -396,6 +425,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             padding: const EdgeInsets.fromLTRB(40, 0, 40, 20),
             child: GradientButton(
               text: 'Go to Discover',
+              height: 52, // radius 26
+              colors: const [Color(0xFF004B3A), Color(0xFF4CB572)],
               onPressed: () {
                 ref.read(currentTabProvider.notifier).state = 0;
               },

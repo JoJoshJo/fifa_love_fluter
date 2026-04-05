@@ -57,6 +57,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     'Doha', 'Al Khor', 'Al Wakrah', 'Lusail', 'Rayyan', 'Dallas'
   ];
 
+  String? _flag(String nationality) {
+    const flags = {
+      'Argentina': '🇦🇷', 'Australia': '🇦🇺', 'Belgium': '🇧🇪', 'Brazil': '🇧🇷',
+      'Canada': '🇨🇦', 'Colombia': '🇨🇴', 'Croatia': '🇭🇷', 'Ecuador': '🇪🇨',
+      'England': '🏴', 'France': '🇫🇷', 'Germany': '🇩🇪', 'Ghana': '🇬🇭',
+      'Italy': '🇮🇹', 'Japan': '🇯🇵', 'Mexico': '🇲🇽', 'Morocco': '🇲🇦',
+      'Netherlands': '🇳🇱', 'Nigeria': '🇳🇬', 'Peru': '🇵🇪', 'Poland': '🇵🇱',
+      'Portugal': '🇵🇹', 'Saudi Arabia': '🇸🇦', 'Senegal': '🇸🇳',
+      'South Korea': '🇰🇷', 'Spain': '🇪🇸', 'USA': '🇺🇸', 'Uruguay': '🇺🇾',
+    };
+    return flags[nationality];
+  }
+
   String _normalizeGender(String? raw) {
     if (raw == null) return 'Other';
     final lower = raw.toLowerCase();
@@ -347,13 +360,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        _buildPickerField(
-          'Nationality',
-          _nationality.isEmpty ? 'Select Country' : _nationality,
-          _showNationalityPicker,
-          isLight, textColor, textMuted,
-          icon: LucideIcons.flag,
-        ),
+        Builder(builder: (context) {
+          final f = _flag(_nationality);
+          return _buildPickerField(
+            'Nationality',
+            _nationality.isEmpty ? 'Select Country' : _nationality,
+            _showNationalityPicker,
+            isLight, textColor, textMuted,
+            icon: f == null ? LucideIcons.flag : null,
+            flagEmoji: f,
+          );
+        }),
         const SizedBox(height: 20),
         
         // Team Supported Picker
@@ -371,7 +388,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
             ),
             const SizedBox(height: 8),
             GestureDetector(
-              onTap: _showTeamPicker,
+              onTap: () => _showTeamPicker(),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
@@ -387,7 +404,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        _teamSupported.isEmpty ? 'Select your team...' : _teamSupported,
+                        _teamSupported.isNotEmpty ? _teamSupported : 'Select your team...',
                         style: GoogleFonts.inter(
                           fontSize: 15,
                           color: _teamSupported.isNotEmpty ? textColor : textMuted,
@@ -592,7 +609,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     );
   }
 
-  Widget _buildPickerField(String label, String value, VoidCallback onTap, bool isLight, Color textColor, Color textMuted, {IconData? icon}) {
+  Widget _buildPickerField(String label, String value, VoidCallback onTap, bool isLight, Color textColor, Color textMuted, {IconData? icon, String? flagEmoji}) {
     final inputColor = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
 
     return Column(
@@ -603,17 +620,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         GestureDetector(
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               color: inputColor,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33)),
             ),
             child: Row(
               children: [
-                if (icon != null) ...[Icon(icon, size: 20, color: FifaColors.emeraldSpring), const SizedBox(width: 12)],
-                Text(value, style: GoogleFonts.inter(fontSize: 15, color: textColor)),
-                const Spacer(),
-                Icon(LucideIcons.chevronRight, size: 20, color: textMuted.withValues(alpha: 0.5)),
+                if (flagEmoji != null)
+                  Text(flagEmoji, style: const TextStyle(fontSize: 18))
+                else if (icon != null)
+                  Icon(icon, size: 18, color: FifaColors.emeraldSpring),
+                const SizedBox(width: 12),
+                Expanded(child: Text(value, style: GoogleFonts.inter(fontSize: 15, color: value == 'Select Country' ? textMuted : textColor))),
+                Icon(LucideIcons.chevronDown, size: 18, color: textMuted),
               ],
             ),
           ),

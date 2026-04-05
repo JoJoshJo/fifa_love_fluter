@@ -4,7 +4,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fifalove_mobile/core/constants/colors.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:fifalove_mobile/core/utils/url_helper.dart';
 import '../../data/chat_repository.dart';
+
 import '../../../../core/supabase/supabase_config.dart';
 import '../../../../core/notifications/notification_service.dart';
 import 'message_bubble.dart';
@@ -264,7 +266,7 @@ class _ConversationViewState extends State<ConversationView> {
                     shape: BoxShape.circle,
                     image: avatarUrl != null
                         ? DecorationImage(
-                            image: CachedNetworkImageProvider(avatarUrl),
+                            image: CachedNetworkImageProvider(UrlHelper.resolveImageUrl(avatarUrl)),
                             fit: BoxFit.cover,
                           )
                         : null,

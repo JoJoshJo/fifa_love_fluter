@@ -405,61 +405,63 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                               child: SizedBox(
                                 height: MediaQuery.of(context).size.height * 0.68,
                                 width: MediaQuery.of(context).size.width - 32,
-                                  child: AnimatedBuilder(
-                                    animation: _hintAnimation,
-                                    builder: (context, child) {
-                                      return Transform.translate(
-                                        offset: _currentIndex == 0 ? _hintAnimation.value : Offset.zero,
-                                        child: child,
-                                      );
-                                    },
+                                  child: SlideTransition(
+                                    position: _hintAnimation,
                                     child: CardSwiper(
                                       controller: _swiperController,
                                       cardsCount: min(3, remaining),
                                       numberOfCardsDisplayed: 2,
-                                      backCardOffset: const Offset(0, -16),
-                                      scale: 0.95,
+                                      backCardOffset: const Offset(0, -20),
+                                      scale: 0.94,
                                       isLoop: false,
                                       duration: const Duration(milliseconds: 200),
                                       padding: EdgeInsets.zero,
-                                  onSwipe: (prevIndex, currentIndex, direction) {
-                                    String action = 'nope';
-                                    if (direction ==
-                                        CardSwiperDirection.right) {
-                                      action = 'like';
-                                      HapticFeedback.mediumImpact();
-                                    } else if (direction ==
-                                        CardSwiperDirection.left) {
-                                      action = 'nope';
-                                      HapticFeedback.lightImpact();
-                                    } else if (direction ==
-                                        CardSwiperDirection.top) {
-                                      action = 'superlike';
-                                      HapticFeedback.heavyImpact();
-                                    }
-                                    _handleSwipe(
-                                        action, _profiles[_currentIndex + prevIndex]);
-                                    return true;
-                                  },
-                                  cardBuilder: (context, index,
-                                      percentThresholdX, percentThresholdY) {
-                                    final profileIndex = _currentIndex + index;
-                                    if (profileIndex >= _profiles.length) {
-                                      return const SizedBox.shrink();
-                                    }
-                                    final cardWidth = MediaQuery.of(context).size.width - 32;
-                                    return SwipeCard(
-                                      profile: _profiles[profileIndex],
-                                      isFront: index == 0,
-                                      stackPosition: index,
-                                      dragOffset: index == 0
-                                          ? Offset(percentThresholdX / 100 * cardWidth,
-                                              percentThresholdY / 100 * cardWidth)
-                                          : Offset.zero,
-                                    );
-                                  },
-                                ),
-                              ),
+                                      onSwipe: (prevIndex, currentIndex, direction) {
+                                        String action = 'nope';
+                                        if (direction ==
+                                            CardSwiperDirection.right) {
+                                          action = 'like';
+                                          HapticFeedback.mediumImpact();
+                                        } else if (direction ==
+                                            CardSwiperDirection.left) {
+                                          action = 'nope';
+                                          HapticFeedback.lightImpact();
+                                        } else if (direction ==
+                                            CardSwiperDirection.top) {
+                                          action = 'superlike';
+                                          HapticFeedback.heavyImpact();
+                                        }
+                                        
+                                        // Defer heavier logic to let animation run
+                                        final profile = _profiles[_currentIndex + prevIndex];
+                                        Future.delayed(const Duration(milliseconds: 250), () {
+                                          if (mounted) {
+                                            _handleSwipe(action, profile);
+                                          }
+                                        });
+                                        return true;
+                                      },
+                                      cardBuilder: (context, index,
+                                          percentThresholdX, percentThresholdY) {
+                                        final profileIndex = _currentIndex + index;
+                                        if (profileIndex >= _profiles.length) {
+                                          return const SizedBox.shrink();
+                                        }
+                                        final cardWidth = MediaQuery.of(context).size.width - 32;
+                                        return RepaintBoundary(
+                                          child: SwipeCard(
+                                            profile: _profiles[profileIndex],
+                                            isFront: index == 0,
+                                            stackPosition: index,
+                                            dragOffset: index == 0
+                                                ? Offset(percentThresholdX / 100 * cardWidth,
+                                                    percentThresholdY / 100 * cardWidth)
+                                                : Offset.zero,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
                             ),
                           ),
                 ),

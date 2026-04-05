@@ -12,6 +12,9 @@ import 'package:page_transition/page_transition.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_screen.dart';
 import 'verification_screen.dart';
+import 'package:fifalove_mobile/core/utils/url_helper.dart';
+
+
 
 
 class MeScreen extends ConsumerStatefulWidget {
@@ -286,7 +289,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                     child: ClipOval(
                       child: avatarUrl != null
                         ? CachedNetworkImage(
-                            imageUrl: avatarUrl,
+                            imageUrl: UrlHelper.resolveImageUrl(avatarUrl),
                             fit: BoxFit.cover,
                           )
                         : Center(
@@ -443,7 +446,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                           style: GoogleFonts
                             .spaceMono(
                               fontSize: 9,
-                              color: accentGreen,
+                              color: const Color(0xFFF2C233), // Gold label
                               letterSpacing: 1.5,
                             )),
                         const Spacer(),
@@ -464,7 +467,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                       child: LinearProgressIndicator(
                         value: score / 100,
                         minHeight: 5,
-                        backgroundColor: const Color(0xFFF2C233).withValues(alpha: 0.1),
+                        backgroundColor: const Color(0xFFF2C233).withValues(alpha: 0.15), // alpha 0.15
                         valueColor: const AlwaysStoppedAnimation(Color(0xFFF2C233)),
                       ),
                     ),

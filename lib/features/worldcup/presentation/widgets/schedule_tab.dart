@@ -59,53 +59,93 @@ class _ScheduleTabState extends State<ScheduleTab> {
   }
 
   void _showCityPicker() {
+    final cities = matchSchedule.map((m) => m['city'] as String).toSet().toList()..sort();
     showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).cardColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (_) {
-        final cities = matchSchedule.map((m) => m['city'] as String).toSet().toList();
-        return Padding(
-          padding: const EdgeInsets.only(top: 8, bottom: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).dividerColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.85,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              ListTile(
-                title: Text(
-                  'All Cities',
-                  style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyLarge?.color),
-                ),
-                trailing: _cityFilter.isEmpty
-                    ? const Icon(LucideIcons.check, color: Color(0xFF4CB572), size: 18)
-                    : null,
-                onTap: () {
-                  setState(() => _cityFilter = '');
-                  Navigator.pop(context);
-                },
+              child: Column(
+                children: [
+                  // Handle + header
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12, bottom: 4),
+                    child: Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).dividerColor,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text(
+                      'SELECT CITY',
+                      style: GoogleFonts.spaceMono(
+                        fontSize: 10,
+                        letterSpacing: 2,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      children: [
+                        ListTile(
+                          title: Text(
+                            'All Cities',
+                            style: GoogleFonts.inter(
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                            ),
+                          ),
+                          trailing: _cityFilter.isEmpty
+                              ? const Icon(LucideIcons.check, color: Color(0xFF4CB572), size: 18)
+                              : null,
+                          onTap: () {
+                            setState(() => _cityFilter = '');
+                            Navigator.pop(context);
+                          },
+                        ),
+                        ...cities.map((c) => ListTile(
+                              title: Text(
+                                c,
+                                style: GoogleFonts.inter(
+                                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                                ),
+                              ),
+                              trailing: _cityFilter == c
+                                  ? const Icon(LucideIcons.check, color: Color(0xFF4CB572), size: 18)
+                                  : null,
+                              onTap: () {
+                                setState(() => _cityFilter = c);
+                                Navigator.pop(context);
+                              },
+                            )),
+                        SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              ...cities.map((c) => ListTile(
-                    title: Text(c, style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyLarge?.color)),
-                    trailing: _cityFilter == c
-                        ? const Icon(LucideIcons.check, color: Color(0xFF4CB572), size: 18)
-                        : null,
-                    onTap: () {
-                      setState(() => _cityFilter = c);
-                      Navigator.pop(context);
-                    },
-                  )),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -362,24 +402,63 @@ class _ScheduleTabState extends State<ScheduleTab> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Stage pill + time
+                                  // Stage pill or ELITE Badge
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: accentGreen.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          m['stage'] as String,
-                                          style: GoogleFonts.spaceMono(
-                                            fontSize: 9,
-                                            color: accentGreen,
+                                      Builder(builder: (context) {
+                                        final isElite = ['Brazil', 'Argentina', 'France'].contains(m['team_a']) || 
+                                                       ['Brazil', 'Argentina', 'France'].contains(m['team_b']);
+                                        
+                                        if (isElite) {
+                                          return Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                            decoration: BoxDecoration(
+                                              gradient: const LinearGradient(
+                                                colors: [Color(0xFFF2C233), Color(0xFFD4AF37)],
+                                              ),
+                                              borderRadius: BorderRadius.circular(8),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: const Color(0xFFF2C233).withValues(alpha: 0.3),
+                                                  blurRadius: 6,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(LucideIcons.star, size: 10, color: Colors.white),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  'ELITE FIXTURE',
+                                                  style: GoogleFonts.spaceMono(
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+
+                                        return Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: accentGreen.withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(8),
                                           ),
-                                        ),
-                                      ),
+                                          child: Text(
+                                            m['stage'] as String,
+                                            style: GoogleFonts.spaceMono(
+                                              fontSize: 9,
+                                              color: accentGreen,
+                                            ),
+                                          ),
+                                        );
+                                      }),
                                       Text(
                                         m['time'] as String,
                                         style: GoogleFonts.spaceMono(
@@ -389,7 +468,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: 8),
 
                                   // Teams row
                                   Row(

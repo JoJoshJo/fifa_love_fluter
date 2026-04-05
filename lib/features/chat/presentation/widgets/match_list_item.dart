@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:fifalove_mobile/core/constants/colors.dart';
+import '../../../../core/constants/colors.dart';
+import 'package:fifalove_mobile/core/utils/url_helper.dart';
+
+
 
 class MatchListItem extends StatelessWidget {
   final Map<String, dynamic> match;
@@ -121,7 +124,7 @@ class MatchListItem extends StatelessWidget {
                         child: ClipOval(
                           child: avatarUrl != null
                               ? CachedNetworkImage(
-                                  imageUrl: avatarUrl,
+                                  imageUrl: UrlHelper.resolveImageUrl(avatarUrl),
                                   fit: BoxFit.cover,
                                   errorWidget: (_, __, ___) => _fallbackAvatar(
                                       context, other['name'] as String? ?? '?'),

@@ -458,6 +458,8 @@ class _SetupScreenState extends State<SetupScreen> {
             ),
             child: Row(
               children: [
+                const Icon(LucideIcons.trophy, size: 18, color: Color(0xFF4CB572)),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     _team.isEmpty ? 'Select your team...' : _team,
@@ -466,7 +468,6 @@ class _SetupScreenState extends State<SetupScreen> {
                       color: _team.isNotEmpty 
                           ? (isLight ? FifaColors.textPrimaryLight : Colors.white) 
                           : (isLight ? FifaColors.mutedTextLight : FifaColors.textMuted),
-                      fontWeight: _team.isNotEmpty ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
                 ),

@@ -78,6 +78,22 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bgColor = isLight ? Colors.white : const Color(0xFF0D1A13);
+    final handleColor = isLight ? const Color(0xFFE0D6C8) : Colors.white.withValues(alpha: 0.2);
+    final labelColor = const Color(0xFF4CB572);
+    final textColor = isLight ? const Color(0xFF1A1A1A) : Colors.white;
+    final subtextColor = isLight ? const Color(0xFF8B7355) : Colors.white.withValues(alpha: 0.5);
+    final searchFill = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
+    final searchHint = isLight ? const Color(0xFF9BB3AF) : Colors.white.withValues(alpha: 0.4);
+    final searchBorder = isLight ? const Color(0xFFE8DDD0) : Colors.transparent;
+    final chipUnselectedBg = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF152B1E);
+    final chipUnselectedBorder = isLight ? const Color(0xFFE8DDD0) : Colors.white.withValues(alpha: 0.12);
+    final chipSelectedBg = isLight ? const Color(0xFFD4EBE0) : const Color(0xFF135E4B);
+    final chipSelectedBorder = const Color(0xFF4CB572);
+    final chipUnselectedText = isLight ? const Color(0xFF3D3025) : Colors.white.withValues(alpha: 0.7);
+    final chipSelectedText = isLight ? const Color(0xFF004B3A) : Colors.white;
+
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
       minChildSize: 0.5,
@@ -85,9 +101,9 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
       expand: false,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF0D1A13),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             children: [
@@ -98,7 +114,7 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: handleColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -106,15 +122,14 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
 
               // Header
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Text(
                       'MATCH WITH FANS FROM',
                       style: GoogleFonts.spaceMono(
                         fontSize: 11,
-                        color: const Color(0xFF4CB572),
+                        color: labelColor,
                         letterSpacing: 2,
                       ),
                     ),
@@ -144,27 +159,29 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
 
               // Search field
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: TextFormField(
                   onChanged: (v) => setState(() => _search = v),
-                  style: GoogleFonts.inter(
-                      fontSize: 14, color: Colors.white),
+                  style: GoogleFonts.inter(fontSize: 14, color: textColor),
                   decoration: InputDecoration(
                     hintText: 'Search countries…',
-                    hintStyle: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.4)),
-                    prefixIcon: const Icon(Icons.search,
-                        color: Color(0xFF4CB572), size: 18),
+                    hintStyle: GoogleFonts.inter(fontSize: 14, color: searchHint),
+                    prefixIcon: Icon(Icons.search, color: labelColor, size: 18),
                     filled: true,
-                    fillColor: const Color(0xFF152B1E),
+                    fillColor: searchFill,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(color: searchBorder, width: 1),
                     ),
-                    contentPadding:
-                        const EdgeInsets.symmetric(vertical: 12),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: searchBorder, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF4CB572), width: 1.5),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
@@ -197,14 +214,10 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFF135E4B)
-                                  : const Color(0xFF152B1E),
+                              color: isSelected ? chipSelectedBg : chipUnselectedBg,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: isSelected
-                                    ? const Color(0xFF4CB572)
-                                    : Colors.white.withValues(alpha: 0.12),
+                                color: isSelected ? chipSelectedBorder : chipUnselectedBorder,
                               ),
                             ),
                             child: Row(
@@ -217,10 +230,8 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
                                   country,
                                   style: GoogleFonts.inter(
                                     fontSize: 13,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.white
-                                            .withValues(alpha: 0.7),
+                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                    color: isSelected ? chipSelectedText : chipUnselectedText,
                                   ),
                                 ),
                               ],
@@ -238,12 +249,12 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
                             'Load all 195 countries',
                             style: GoogleFonts.inter(
                               fontSize: 14,
-                              color: Colors.white.withValues(alpha: 0.5),
+                              color: subtextColor,
                             ),
                           ),
                         ),
                       ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
                   ],
                 ),
               ),
