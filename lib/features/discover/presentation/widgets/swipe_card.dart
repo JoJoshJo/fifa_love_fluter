@@ -36,7 +36,7 @@ class _SwipeCardState extends State<SwipeCard> {
     if (sportTags.contains(t)) return const Color(0xFFA4E4C1);
     if (cultureTags.contains(t)) return const Color(0xFFFFF0F5);
     if (outdoorTags.contains(t)) return const Color(0xFFFFF8E1);
-    return const Color(0xFFE8F5EE); // Default
+    return const Color(0xFFE8F5EE);
   }
 
   Color _tagText(String tag) {
@@ -48,7 +48,7 @@ class _SwipeCardState extends State<SwipeCard> {
     if (sportTags.contains(t)) return const Color(0xFF004B3A);
     if (cultureTags.contains(t)) return const Color(0xFF8A3058);
     if (outdoorTags.contains(t)) return const Color(0xFF5A4500);
-    return const Color(0xFF135E4B); // Default
+    return const Color(0xFF135E4B);
   }
 
   String? _flag(String nationality) {
@@ -81,11 +81,11 @@ class _SwipeCardState extends State<SwipeCard> {
     final name = profile['name'] as String? ?? '';
     final age = profile['age'] as int? ?? 0;
     final nationality = profile['nationality'] as String? ?? '';
-    final city = profile['city'] as String?;
+    final city = profile['city'] as String? ?? '';
+    final bio = profile['bio'] as String?;
     final interests = List<String>.from(profile['interests'] ?? []);
     final score = (profile['match_score'] as num?)?.toInt() ?? 0;
     final isVerified = profile['is_verified'] as bool? ?? false;
-    // Use avatar_url directly (photo_urls column doesn't exist in the DB schema)
     final rawAvatarUrl = profile['avatar_url'] as String?;
     final photos = rawAvatarUrl != null ? [rawAvatarUrl] : <String>[];
 
@@ -93,15 +93,29 @@ class _SwipeCardState extends State<SwipeCard> {
     final createdAt = createdAtStr != null ? DateTime.tryParse(createdAtStr) : null;
     final isNew = createdAt != null && DateTime.now().difference(createdAt).inDays <= 7;
 
+    // Location string: "Flag · Country · City"
+    final flag = _flag(nationality);
+    final locationParts = <String>[
+      if (flag != null) flag,
+      if (nationality.isNotEmpty) nationality,
+      if (city.isNotEmpty) city,
+    ];
+    final locationLine = locationParts.join(' · ');
+
+    // Muted color
+    final muted = isLight
+        ? const Color(0xFF9BB3AF)
+        : Colors.white.withValues(alpha: 0.35);
+
     Widget card = Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -109,7 +123,7 @@ class _SwipeCardState extends State<SwipeCard> {
         borderRadius: BorderRadius.circular(24),
         child: Column(
           children: [
-            // ── PHOTO SECTION ──────────────────
+            // ── PHOTO SECTION (60%) — name overlaid at bottom  ──────────
             Expanded(
               flex: 60,
               child: Stack(
@@ -117,9 +131,12 @@ class _SwipeCardState extends State<SwipeCard> {
                 children: [
                   // Photo PageView
                   PageView.builder(
-                    itemCount: photos.length,
+                    itemCount: photos.isEmpty ? 1 : photos.length,
                     onPageChanged: (i) => setState(() => _currentPhotoIndex = i),
                     itemBuilder: (context, index) {
+                      if (photos.isEmpty) {
+                        return _buildPhotoPlaceholder(name, nationality);
+                      }
                       final resolvedUrl = UrlHelper.resolveImageUrl(photos[index]);
                       if (resolvedUrl.isEmpty) {
                         return _buildPhotoPlaceholder(name, nationality);
@@ -150,7 +167,7 @@ class _SwipeCardState extends State<SwipeCard> {
                     },
                   ),
 
-                  // PHOTO GRADIENT OVERLAY
+                  // Deep gradient at bottom (for name overlay legibility)
                   Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
@@ -160,18 +177,78 @@ class _SwipeCardState extends State<SwipeCard> {
                           colors: [
                             Colors.transparent,
                             Colors.transparent,
-                            Colors.black.withValues(alpha: 0.4),
+                            Colors.black.withValues(alpha: 0.15),
+                            Colors.black.withValues(alpha: 0.72),
                           ],
-                          stops: const [0.0, 0.5, 1.0],
+                          stops: const [0.0, 0.45, 0.65, 1.0],
                         ),
                       ),
                     ),
                   ),
 
-                  // PHOTO CAROUSEL DOTS
+                  // ── NAME / AGE / LOCATION overlaid on photo ──
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Name + age + verified badge
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                '$name, $age',
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  height: 1.1,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black.withValues(alpha: 0.4),
+                                      offset: const Offset(0, 2),
+                                      blurRadius: 6,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (isVerified) ...[
+                                const SizedBox(width: 7),
+                                const _VerifiedPulse(),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          // Flag · Country · City
+                          Text(
+                            locationLine,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withValues(alpha: 0.88),
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withValues(alpha: 0.4),
+                                  offset: const Offset(0, 1),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Photo carousel dots (above name overlay)
                   if (photos.length > 1)
                     Positioned(
-                      bottom: 12,
+                      bottom: 72,
                       left: 0,
                       right: 0,
                       child: Row(
@@ -216,14 +293,14 @@ class _SwipeCardState extends State<SwipeCard> {
                       ),
                     ),
 
-                  // Match Score Ring Gauge (Top Right)
+                  // Match Score Ring (top right)
                   Positioned(
                     top: 12,
                     right: 12,
                     child: _buildMatchGauge(score),
                   ),
 
-                  // Swipe Labels (LIKE/NOPE) based on drag
+                  // LIKE label on right drag
                   if (widget.isFront && widget.dragOffset.dx > 20)
                     Positioned(
                       top: 24,
@@ -247,6 +324,7 @@ class _SwipeCardState extends State<SwipeCard> {
                       ),
                     ),
 
+                  // NOPE label on left drag
                   if (widget.isFront && widget.dragOffset.dx < -20)
                     Positioned(
                       top: 24,
@@ -273,66 +351,102 @@ class _SwipeCardState extends State<SwipeCard> {
               ),
             ),
 
-            // INFO PANEL — bottom 40%
+            // ── INFO PANEL (40%) — personality-forward  ──────────
             Expanded(
               flex: 40,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 color: isLight ? const Color(0xFFF5F0E8) : const Color(0xFF0D1A13),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Name + verified
-                    Row(
-                      children: [
-                        Text(name,
-                            style: GoogleFonts.playfairDisplay(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w700,
-                              color: isLight ? FifaColors.textPrimaryLight : Colors.white,
-                              height: 1.1,
-                            )),
-                        if (isVerified) ...[
-                          const SizedBox(width: 8),
-                          const _VerifiedPulse(),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 4), // Tighter gap
-                    // Age + nationality
-                    Row(children: [
-                      if (_flag(nationality) != null) ...[
-                        Text(_flag(nationality)!, style: const TextStyle(fontSize: 14)),
-                        const SizedBox(width: 4),
-                      ] else ...[
-                        const Icon(LucideIcons.globe, size: 14, color: FifaColors.accent),
-                        const SizedBox(width: 4),
-                      ],
-                      Text(
-                          '$age  ·  $nationality',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: isLight ? FifaColors.emeraldSpring : FifaColors.accent,
-                          )),
-                    ]),
-                    if (city != null && city.isNotEmpty) ...[
-                      const SizedBox(height: 1), // Extremely tight
-                      Row(children: [
-                        Icon(Icons.location_on_outlined,
-                            size: 12,
-                            color: isLight ? const Color(0xFF9BB3AF) : Colors.white.withValues(alpha: 0.3)),
-                        const SizedBox(width: 3),
-                        Text(city,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: isLight ? const Color(0xFF9BB3AF) : Colors.white.withValues(alpha: 0.35),
-                            )),
-                      ]),
-                    ],
-                    const SizedBox(height: 10), // Tighter transition to tags
-                    // Interests Row
+                    // ── CONVERSATION STARTER / BIO CARD ──
+                    if (bio != null && bio.isNotEmpty)
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                          decoration: BoxDecoration(
+                            color: isLight
+                                ? const Color(0xFFFFF8E1).withValues(alpha: 0.7)
+                                : const Color(0xFF1A1A0F),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isLight
+                                  ? const Color(0xFFF2C233).withValues(alpha: 0.4)
+                                  : const Color(0xFF3A3520),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                    LucideIcons.trophy,
+                                    size: 10,
+                                    color: Color(0xFFF2C233),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    'WORLD CUP DREAM',
+                                    style: GoogleFonts.spaceMono(
+                                      fontSize: 9,
+                                      color: const Color(0xFFF2C233),
+                                      letterSpacing: 1.5,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                bio,
+                                style: GoogleFonts.inter(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w400,
+                                  color: isLight
+                                      ? FifaColors.textPrimaryLight
+                                      : Colors.white.withValues(alpha: 0.88),
+                                  height: 1.45,
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      // Empty bio prompt
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                        decoration: BoxDecoration(
+                          color: isLight ? const Color(0xFFF0EBE3) : const Color(0xFF152B1E),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(LucideIcons.sparkles, size: 14, color: Color(0xFFF2C233)),
+                            const SizedBox(width: 8),
+                            Text(
+                              'New fan — no bio yet',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontStyle: FontStyle.italic,
+                                color: muted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    const SizedBox(height: 10),
+
+                    // ── INTEREST TAGS ──
                     if (interests.isNotEmpty)
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -340,7 +454,7 @@ class _SwipeCardState extends State<SwipeCard> {
                         child: Row(
                           children: interests.map((tag) => Container(
                             margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: _tagBackground(tag),
                               borderRadius: BorderRadius.circular(8),
@@ -366,11 +480,6 @@ class _SwipeCardState extends State<SwipeCard> {
       ),
     );
 
-
-    // Stack transforms are handled by the CardSwiper in the parent screen.
-    // We only need to ensure the card has a fixed size if necessary, 
-    // but the Swiper will manage its scale and offset.
-    
     // Apply parallax tilt on drag (only for front card)
     if (widget.isFront && widget.dragOffset != Offset.zero) {
       card = Transform(
@@ -438,7 +547,6 @@ class _SwipeCardState extends State<SwipeCard> {
         return Stack(
           alignment: Alignment.center,
           children: [
-            // Background ring
             SizedBox(
               width: 44,
               height: 44,
@@ -448,7 +556,6 @@ class _SwipeCardState extends State<SwipeCard> {
                 color: const Color(0xFFF2C233).withValues(alpha: 0.2),
               ),
             ),
-            // Foreground ring
             SizedBox(
               width: 44,
               height: 44,
@@ -463,7 +570,7 @@ class _SwipeCardState extends State<SwipeCard> {
               style: GoogleFonts.spaceMono(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Colors.white, // Changed to white for readability on dark photo gradient
+                color: Colors.white,
                 shadows: [
                   Shadow(
                     color: Colors.black.withValues(alpha: 0.5),
