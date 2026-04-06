@@ -73,12 +73,12 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 20),
                 // ICON
                 Center(
                   child: Container(
@@ -115,8 +115,9 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                 const SizedBox(height: 32),
 
                 // INFO CARD
-                Container(
-                  padding: const EdgeInsets.all(16),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                   decoration: BoxDecoration(
                     color: const Color(0xFF135E4B).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
@@ -130,7 +131,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                         style: GoogleFonts.spaceMono(fontSize: 10, color: const Color(0xFF4CB572), letterSpacing: 2),
                       ),
                       const SizedBox(height: 12),
-                      _buildStepRow(1, "Open the email from FIFA LOVE"),
+                      _buildStepRow(1, "Open the email from Turf&Ardor"),
                       const SizedBox(height: 12),
                       _buildStepRow(2, "Tap Confirm My Account"),
                       const SizedBox(height: 12),

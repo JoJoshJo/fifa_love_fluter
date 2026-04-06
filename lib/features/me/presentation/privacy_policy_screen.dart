@@ -44,7 +44,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 _buildSection('1. Introduction', 
-                  'Welcome to FIFA LOVE. We value your privacy and are committed to protecting your personal data. This policy explains how we handle your information when you use our World Cup 2026 dating platform.'),
+                  'Welcome to Turf&Ardor. We value your privacy and are committed to protecting your personal data. This policy explains how we handle your information when you use our World Cup 2026 dating platform.'),
                 _buildSection('2. Data Collection', 
                   'We collect information you provide directly to us, such as your profile details, World Cup interests, and match preferences. We also collect automated data about your usage of the application to improve our services.'),
                 _buildSection('3. How We Use Data', 

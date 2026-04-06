@@ -22,18 +22,18 @@ void main() async {
     NotificationService().initialize(),
   ]);
   
-  runApp(const ProviderScope(child: FifaLoveApp()));
+  runApp(const ProviderScope(child: TurfAndArdorApp()));
 }
 
-class FifaLoveApp extends ConsumerWidget {
-  const FifaLoveApp({super.key});
+class TurfAndArdorApp extends ConsumerWidget {
+  const TurfAndArdorApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeProvider);
 
     return MaterialApp(
-      title: 'FIFA Love',
+      title: 'Turf&Ardor',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

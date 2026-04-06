@@ -9,8 +9,13 @@ import '../../../core/supabase/supabase_config.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final Map<String, dynamic> initialProfile;
+  final int initialTab;
 
-  const EditProfileScreen({super.key, required this.initialProfile});
+  const EditProfileScreen({
+    super.key,
+    required this.initialProfile,
+    this.initialTab = 0,
+  });
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -81,7 +86,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: (widget.initialTab >= 0 && widget.initialTab < 3)
+          ? widget.initialTab
+          : 0,
+    );
     try {
       _profile = Map<String, dynamic>.from(widget.initialProfile);
 

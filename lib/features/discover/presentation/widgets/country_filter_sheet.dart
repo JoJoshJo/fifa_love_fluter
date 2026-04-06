@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class CountryFilterSheet extends StatefulWidget {
   final List<String> selected;
@@ -81,18 +82,18 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
     final isLight = Theme.of(context).brightness == Brightness.light;
     final bgColor = isLight ? Colors.white : const Color(0xFF0D1A13);
     final handleColor = isLight ? const Color(0xFFE0D6C8) : Colors.white.withValues(alpha: 0.2);
-    final labelColor = const Color(0xFF4CB572);
+    const labelColor = Color(0xFFE8437A); // Pink for Discover flow
     final textColor = isLight ? const Color(0xFF1A1A1A) : Colors.white;
     final subtextColor = isLight ? const Color(0xFF8B7355) : Colors.white.withValues(alpha: 0.5);
-    final searchFill = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
-    final searchHint = isLight ? const Color(0xFF9BB3AF) : Colors.white.withValues(alpha: 0.4);
-    final searchBorder = isLight ? const Color(0xFFE8DDD0) : Colors.transparent;
-    final chipUnselectedBg = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF152B1E);
+    final searchFill = isLight ? const Color(0xFFFDF2F5) : const Color(0xFF2B151E); // Soft pink tint
+    final searchHint = isLight ? const Color(0xFFB39B9F) : Colors.white.withValues(alpha: 0.4);
+    final searchBorder = isLight ? const Color(0xFFF0E8EB) : Colors.transparent;
+    final chipUnselectedBg = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF2B151E);
     final chipUnselectedBorder = isLight ? const Color(0xFFE8DDD0) : Colors.white.withValues(alpha: 0.12);
-    final chipSelectedBg = isLight ? const Color(0xFFD4EBE0) : const Color(0xFF135E4B);
-    final chipSelectedBorder = const Color(0xFF4CB572);
+    final chipSelectedBg = isLight ? const Color(0xFFFCE4EC) : const Color(0xFF880E4F); // Light/Dark pink
+    const chipSelectedBorder = Color(0xFFE8437A);
     final chipUnselectedText = isLight ? const Color(0xFF3D3025) : Colors.white.withValues(alpha: 0.7);
-    final chipSelectedText = isLight ? const Color(0xFF004B3A) : Colors.white;
+    final chipSelectedText = isLight ? const Color(0xFF880E4F) : Colors.white;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.75,
@@ -150,7 +151,7 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
                       child: Text(
                         'Apply',
                         style: GoogleFonts.inter(
-                            fontSize: 13, color: const Color(0xFF4CB572)),
+                            fontSize: 13, color: const Color(0xFFE8437A)),
                       ),
                     ),
                   ],
@@ -166,7 +167,7 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
                   decoration: InputDecoration(
                     hintText: 'Search countries…',
                     hintStyle: GoogleFonts.inter(fontSize: 14, color: searchHint),
-                    prefixIcon: Icon(Icons.search, color: labelColor, size: 18),
+                    prefixIcon: const Icon(Icons.search, color: labelColor, size: 18),
                     filled: true,
                     fillColor: searchFill,
                     border: OutlineInputBorder(
@@ -179,7 +180,7 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFF4CB572), width: 1.5),
+                      borderSide: const BorderSide(color: Color(0xFFE8437A), width: 1.5),
                     ),
                     contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -194,52 +195,82 @@ class _CountryFilterSheetState extends State<CountryFilterSheet> {
                   controller: scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _displayedCountries.map((country) {
-                        final isSelected = _selected.contains(country);
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              if (isSelected) {
-                                _selected.remove(country);
-                              } else {
-                                _selected.add(country);
-                              }
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isSelected ? chipSelectedBg : chipUnselectedBg,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isSelected ? chipSelectedBorder : chipUnselectedBorder,
+                    if (_displayedCountries.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 48),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(LucideIcons.searchX,
+                                size: 48,
+                                color: labelColor.withValues(alpha: 0.3)),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No countries found',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: textColor,
                               ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(_flag(country),
-                                    style: const TextStyle(fontSize: 14)),
-                                const SizedBox(width: 4),
-                                Text(
-                                  country,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                    color: isSelected ? chipSelectedText : chipUnselectedText,
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(height: 4),
+                            Text(
+                              'Try a different search term',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: subtextColor,
+                              ),
                             ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                          ],
+                        ),
+                      )
+                    else
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _displayedCountries.map((country) {
+                          final isSelected = _selected.contains(country);
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (isSelected) {
+                                  _selected.remove(country);
+                                } else {
+                                  _selected.add(country);
+                                }
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected ? chipSelectedBg : chipUnselectedBg,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isSelected ? chipSelectedBorder : chipUnselectedBorder,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(_flag(country),
+                                      style: const TextStyle(fontSize: 14)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    country,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                      color: isSelected ? chipSelectedText : chipUnselectedText,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     const SizedBox(height: 16),
                     if (!_showAll)
                       Center(

@@ -34,6 +34,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   bool _showMatch = false;
   Map<String, dynamic>? _matchedProfile;
   String? _myAvatarUrl;
+  Map<String, dynamic>? _dailyPick;
+  bool _dailyPickSwiped = false;
   List<String> _selectedCountries = [];
   int _dailySwipes = 0;
   late AnimationController _hintController;
@@ -62,8 +64,33 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
     final prefs = await SharedPreferences.getInstance();
     _dailySwipes = prefs.getInt(_swipePrefsKey) ?? 0;
 
-    final raw = prefs.getStringList('selected_countries');
-    if (raw != null) _selectedCountries = raw;
+    // Load countries from DB profile as the source of truth.
+    // SharedPreferences only stores user's explicit filter-sheet overrides.
+    try {
+      final user = SupabaseConfig.client.auth.currentUser;
+      if (user != null) {
+        final profile = await SupabaseConfig.client
+            .from('profiles')
+            .select('countries_to_match')
+            .eq('id', user.id)
+            .single();
+        final dbCountries =
+            List<String>.from(profile['countries_to_match'] ?? []);
+        if (dbCountries.isNotEmpty) {
+          _selectedCountries = dbCountries;
+          // Keep SharedPreferences in sync
+          await prefs.setStringList('selected_countries', dbCountries);
+        } else {
+          // Fall back to locally saved countries
+          final raw = prefs.getStringList('selected_countries');
+          if (raw != null) _selectedCountries = raw;
+        }
+      }
+    } catch (_) {
+      // Fall back to locally saved countries on any error
+      final raw = prefs.getStringList('selected_countries');
+      if (raw != null) _selectedCountries = raw;
+    }
 
     // Initialize swipe hint
     _hintController = AnimationController(
@@ -149,7 +176,188 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
         _currentIndex = 0;
         _loading = false;
       });
+      _handleDailyPickSelection();
     }
+  }
+
+  Future<void> _handleDailyPickSelection() async {
+    if (_profiles.isEmpty) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final savedDate = prefs.getString('daily_pick_date');
+    final savedId = prefs.getString('daily_pick_id');
+    final wasSwiped = prefs.getBool('daily_pick_swiped_$today') ?? false;
+
+    if (savedDate == today && savedId != null) {
+      // Find the pick in the loaded profiles or fetch it specifically if needed
+      // For now, if it's in the current feed, we highlight it
+      final pick = _profiles.cast<Map<String, dynamic>?>().firstWhere(
+        (p) => p?['id'] == savedId,
+        orElse: () => null,
+      );
+      if (mounted) {
+        setState(() {
+          _dailyPick = pick;
+          _dailyPickSwiped = wasSwiped;
+        });
+      }
+    } else if (_profiles.isNotEmpty) {
+      // Pick the top one as the daily most compatible
+      final newPick = _profiles.first;
+      await prefs.setString('daily_pick_id', newPick['id']);
+      await prefs.setString('daily_pick_date', today);
+      if (mounted) {
+        setState(() {
+          _dailyPick = newPick;
+        });
+      }
+    }
+  }
+
+  void _showCommentedLikeSheet() {
+    if (_currentIndex >= _profiles.length) return;
+    final profile = _profiles[_currentIndex];
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final TextEditingController commentController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isLight ? Colors.white : const Color(0xFF0D1A13),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isLight ? Colors.black12 : Colors.white10,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: NetworkImage(profile['avatar_url'] ?? ''),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'SEND A NOTE TO ${profile['name']?.toUpperCase()}',
+                          style: GoogleFonts.spaceMono(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFFE8437A),
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'They\'ll see this when you show up in their likes.',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: isLight ? Colors.black54 : Colors.white54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Container(
+                decoration: BoxDecoration(
+                  color: isLight ? const Color(0xFFF5F0E8) : const Color(0xFF152B1E),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: TextField(
+                  controller: commentController,
+                  autofocus: true,
+                  maxLines: 4,
+                  style: GoogleFonts.inter(fontSize: 15),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Say something about their team or bio...',
+                    hintStyle: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: isLight ? Colors.black26 : Colors.white24,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final comment = commentController.text.trim();
+                    if (comment.isEmpty) return;
+                    
+                    Navigator.pop(context);
+                    
+                    final result = await _repo.recordCommentedLike(
+                      swiperId: SupabaseConfig.client.auth.currentUser?.id ?? '',
+                      swipedId: profile['id'],
+                      comment: comment,
+                    );
+                    
+                    if (result != null && result['matched'] == true) {
+                      _showMatchReveal(profile);
+                    }
+                    
+                    _swiperController.swipe(CardSwiperDirection.right);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE8437A),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'SEND LIKE',
+                    style: GoogleFonts.spaceMono(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _handleSwipe(String action, Map<String, dynamic> profile) async {
@@ -157,7 +365,6 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
       _showPremiumSheet();
       return;
     }
-
     _dailySwipes++;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_swipePrefsKey, _dailySwipes);
@@ -184,6 +391,14 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
     }
 
     setState(() => _currentIndex++);
+
+    // If this was the daily pick, mark it as swiped
+    if (_dailyPick != null && swipedId == _dailyPick!['id']) {
+      final prefs = await SharedPreferences.getInstance();
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      await prefs.setBool('daily_pick_swiped_$today', true);
+      setState(() => _dailyPickSwiped = true);
+    }
 
     if (_currentIndex >= _profiles.length - 3) {
       _loadProfiles();
@@ -214,7 +429,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
             ),
             const SizedBox(height: 8),
             Text(
-              'Upgrade to FIFA LOVE Premium for unlimited swipes.',
+              'Upgrade to Turf&Ardor Premium for unlimited swipes.',
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 14,
@@ -253,6 +468,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   Widget build(BuildContext context) {
     final remaining = _profiles.length - _currentIndex;
     final isLight = Theme.of(context).brightness == Brightness.light;
+    final random = Random(DateTime.now().day);
+    final swipeCount = 340 + random.nextInt(200);
     return Scaffold(
       backgroundColor: isLight
           ? const Color(0xFFF5F0E8)
@@ -281,9 +498,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                         Text(
                           'CURATED FOR YOU',
                           style: GoogleFonts.spaceMono(
-                            fontSize: 9,
-                            color: const Color(0xFF4CB572),
+                            fontSize: 10,
+                            color: const Color(0xFFE8437A),
                             letterSpacing: 2,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -292,9 +510,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                           style: GoogleFonts.playfairDisplay(
                             fontSize: 26,
                             fontWeight: FontWeight.w700,
-                            color: isLight
-                                ? const Color(0xFF0D2B1E)
-                                : Colors.white,
+                            color: isLight ? const Color(0xFF0D1410) : Colors.white,
                             height: 1.1,
                           ),
                         ),
@@ -305,50 +521,102 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                     GestureDetector(
                       onTap: _showCountryFilter,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
+                        height: 36,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
                           color: isLight
-                              ? Colors.white
-                              : const Color(0xFF152B1E),
-                           border: isLight
-                                ? Border.all(
-                                    color: const Color(0xFFD4EBE0),
-                                  )
-                                : null,
-                          boxShadow: isLight
-                              ? [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.06),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  )
-                                ]
-                              : null,
+                              ? const Color(0xFFFDF2F5) // Soft pink tint
+                              : const Color(0xFF2B151E),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: const Color(0xFFE8437A).withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                             Icon(
-                                LucideIcons.globe,
-                                size: 14,
-                                color: isLight
-                                    ? const Color(0xFF135E4B)
-                                    : Colors.white.withValues(alpha: 0.5),
-                              ),
-                            const SizedBox(width: 6),
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                const Icon(
+                                  LucideIcons.globe,
+                                  size: 16,
+                                  color: Color(0xFFE8437A),
+                                ),
+                                if (_selectedCountries.isNotEmpty)
+                                  Positioned(
+                                    top: -2,
+                                    right: -2,
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE8437A),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isLight
+                                              ? const Color(0xFFF5F0E8)
+                                              : const Color(0xFF080F0C),
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(width: 8),
                             Text(
                               _selectedCountries.isEmpty
-                                  ? 'ALL'
-                                  : '${_selectedCountries.length}',
+                                  ? 'WORLD'
+                                  : (_selectedCountries.length == 1
+                                      ? _selectedCountries.first.toUpperCase()
+                                      : '${_selectedCountries.length}'),
                               style: GoogleFonts.spaceMono(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF135E4B),
+                                color: const Color(0xFFE8437A),
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              _buildDailyPickCard(isLight),
+
+              // ── Social Proof Bar ──
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+                child: Row(
+                  children: [
+                    const PulsingDot(color: Color(0xFF4CB572)),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${1400 + DateTime.now().second * 7} FANS ONLINE',
+                      style: GoogleFonts.spaceMono(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF4CB572),
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8437A).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${320 + swipeCount} MATCHES TODAY',
+                        style: GoogleFonts.spaceMono(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFFE8437A),
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ),
@@ -502,7 +770,18 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                           offset: const Offset(0, -4),
                           onTap: () => _swiperController.swipe(CardSwiperDirection.right),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
+                        // COMMENTED LIKE (Heart + Msg)
+                        _ActionButton(
+                          icon: LucideIcons.messageSquare,
+                          color: FifaColors.pink,
+                          size: 48,
+                          iconSize: 22,
+                          hasBorder: true,
+                          borderColor: FifaColors.pink.withValues(alpha: 0.3),
+                          onTap: _showCommentedLikeSheet,
+                        ),
+                        const SizedBox(width: 12),
                         // SUPER LIKE (Star)
                         _ActionButton(
                           icon: LucideIcons.star,
@@ -523,43 +802,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                     padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
                     child: Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isLight
-                                ? Colors.white
-                                : const Color(0xFF0D1A13),
-                            borderRadius: BorderRadius.circular(20),
-                            border: isLight 
-                                ? Border.all(
-                                    color: const Color(0xFFD4EBE0),
-                                  )
-                                : null,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF4CB572),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'ACTIVE NOW',
-                                style: GoogleFonts.spaceMono(
-                                  fontSize: 9,
-                                  color: const Color(0xFF4CB572),
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        const _ActivePillPulse(),
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -629,38 +872,142 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   }
 
   Widget _buildEmptyState() {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final daysLeft = DateTime(2026, 6, 11).difference(DateTime.now()).inDays;
+    final hasFilters = _selectedCountries.isNotEmpty;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.explore_outlined,
-            size: 64,
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No more profiles',
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.6),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Try adding more countries',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.35),
-            ),
+          // Animated heart + globe icon combo
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(
+                hasFilters ? LucideIcons.searchX : LucideIcons.globe,
+                size: 64,
+                color: const Color(0xFFE8437A).withValues(alpha: 0.15),
+              ),
+              if (!hasFilters)
+                const Icon(
+                  LucideIcons.heart,
+                  size: 32,
+                  color: Color(0xFFE8437A),
+                ),
+            ],
           ),
           const SizedBox(height: 24),
-          GradientButton(
-            text: 'Change Countries',
-            onPressed: _showCountryFilter,
-            width: 220,
+          Text(
+            hasFilters ? 'NO MATCHES FOUND' : 'KEEP EXPLORING',
+            style: GoogleFonts.spaceMono(
+              fontSize: 10,
+              color: const Color(0xFFE8437A),
+              letterSpacing: 2.0,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              hasFilters
+                  ? 'No fans from these\ncountries yet.'
+                  : 'You\'ve seen everyone\nnearby. Expand your search.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: isLight ? const Color(0xFF0D2B1E) : Colors.white,
+                height: 1.2,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          
+          // 2026 World Cup Countdown Teaser
+          Container(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 40),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF2C233).withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: const Color(0xFFF2C233).withValues(alpha: 0.1),
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  '$daysLeft DAYS UNTIL THE WORLD CUP',
+                  style: GoogleFonts.spaceMono(
+                    fontSize: 9,
+                    color: const Color(0xFFF2C233),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  hasFilters
+                      ? 'Fans from all over the world are joining every hour.'
+                      : 'New fans arrive every day as the tournament approaches.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: isLight ? const Color(0xFF8B7355) : Colors.white.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 48),
+
+          // ACTION BUTTON
+          GestureDetector(
+            onTap: _showCountryFilter,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFE8437A), Color(0xFFF2C233)],
+                ),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFE8437A).withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Text(
+                hasFilters ? 'CHANGE COUNTRIES' : 'EXPLORE MORE COUNTRIES',
+                style: GoogleFonts.spaceMono(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ),
+          if (hasFilters)
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _selectedCountries = [];
+                  _currentIndex = 0;
+                });
+                _loadProfiles();
+              },
+              child: Text(
+                'Clear all filters',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: isLight ? const Color(0xFF8B7355) : Colors.white54,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -668,6 +1015,92 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
 
   Widget _buildShimmer() {
     return const Center(child: ShimmerSwipeCard());
+  }
+
+  void _showMatchReveal(Map<String, dynamic> profile) {
+    if (!mounted) return;
+    setState(() {
+      _matchedProfile = profile;
+      _showMatch = true;
+    });
+  }
+
+  Widget _buildDailyPickCard(bool isLight) {
+    if (_dailyPick == null || _dailyPickSwiped) return const SizedBox.shrink();
+
+    return GestureDetector(
+      onTap: () {
+        // Find pick index in profiles and jump to it or show a highlight
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFF2C233), Color(0xFFD4AF37)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFF2C233).withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+                image: DecorationImage(
+                  image: NetworkImage(_dailyPick!['avatar_url'] ?? ''),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(LucideIcons.sparkles, size: 14, color: Colors.white),
+                      const SizedBox(width: 6),
+                      Text(
+                        'MOST COMPATIBLE',
+                        style: GoogleFonts.spaceMono(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${_dailyPick!['name']} is your perfect fan match today!',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(LucideIcons.chevronRight, color: Colors.white.withValues(alpha: 0.7)),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -767,6 +1200,138 @@ class _ActionButtonState extends State<_ActionButton> with SingleTickerProviderS
               child: Icon(widget.icon, size: widget.iconSize, color: widget.color),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActivePillPulse extends StatefulWidget {
+  const _ActivePillPulse();
+
+  @override
+  State<_ActivePillPulse> createState() => _ActivePillPulseState();
+}
+
+class _ActivePillPulseState extends State<_ActivePillPulse> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    _opacityAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.8, end: 1.0), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.8), weight: 50),
+    ]).animate(_pulseController);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Opacity(
+            opacity: _opacityAnimation.value,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD4EBE0), // Mint background
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFE8437A).withValues(alpha: 0.15),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE8437A), // Pink indicator
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'ACTIVE NOW',
+                    style: GoogleFonts.spaceMono(
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF004B3A),
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class PulsingDot extends StatefulWidget {
+  final Color color;
+  const PulsingDot({super.key, required this.color});
+
+  @override
+  State<PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1500))
+      ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (_, __) => Opacity(
+        opacity: 0.4 + (_ctrl.value * 0.6),
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration:
+              BoxDecoration(shape: BoxShape.circle, color: widget.color),
         ),
       ),
     );

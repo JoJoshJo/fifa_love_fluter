@@ -64,8 +64,12 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
             child: Container(
               width: 4,
               height: 4,
-              decoration: const BoxDecoration(
-                color: Color(0xFF4CB572),
+              decoration: BoxDecoration(
+                color: widget.currentIndex == 0 || widget.currentIndex == 1
+                    ? const Color(0xFFE8437A) // Pink for Discover/Chat
+                    : widget.currentIndex == 2
+                        ? const Color(0xFFF2C233) // Gold for World Cup
+                        : const Color(0xFF4CB572), // Green for Me
                 shape: BoxShape.circle,
               ),
             ),
@@ -77,6 +81,7 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
                 currentIndex: widget.currentIndex,
                 icon: LucideIcons.home,
                 label: 'DISCOVER',
+                activeColor: const Color(0xFFE8437A),
                 onTap: () => widget.onTap(0),
               ),
               _AnimatedNavItem(
@@ -84,6 +89,7 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
                 currentIndex: widget.currentIndex,
                 icon: LucideIcons.messageCircle,
                 label: 'CHAT',
+                activeColor: const Color(0xFFE8437A),
                 onTap: () => widget.onTap(1),
                 showBadge: true,
                 unreadStream: _unreadCountStream,
@@ -93,6 +99,7 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
                 currentIndex: widget.currentIndex,
                 icon: LucideIcons.trophy,
                 label: 'WORLD CUP',
+                activeColor: const Color(0xFFF2C233),
                 onTap: () => widget.onTap(2),
               ),
               _AnimatedNavItem(
@@ -100,6 +107,7 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
                 currentIndex: widget.currentIndex,
                 icon: LucideIcons.user,
                 label: 'ME',
+                activeColor: const Color(0xFF4CB572),
                 onTap: () => widget.onTap(3),
               ),
             ],
@@ -115,6 +123,7 @@ class _AnimatedNavItem extends StatefulWidget {
   final int currentIndex;
   final IconData icon;
   final String label;
+  final Color activeColor;
   final VoidCallback onTap;
   final bool showBadge;
   final Stream<int>? unreadStream;
@@ -124,6 +133,7 @@ class _AnimatedNavItem extends StatefulWidget {
     required this.currentIndex,
     required this.icon,
     required this.label,
+    required this.activeColor,
     required this.onTap,
     this.showBadge = false,
     this.unreadStream,
@@ -169,7 +179,7 @@ class _AnimatedNavItemState extends State<_AnimatedNavItem> with SingleTickerPro
     final isActive = widget.currentIndex == widget.index;
     final isLight = Theme.of(context).brightness == Brightness.light;
     final color = isActive 
-      ? const Color(0xFF135E4B) 
+      ? widget.activeColor
       : (isLight ? const Color(0xFF9BB3AF) : Colors.white.withValues(alpha: 0.2));
 
     return Expanded(

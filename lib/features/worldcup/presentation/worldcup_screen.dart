@@ -54,7 +54,6 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
     final bg = isLight ? FifaColors.lightBackground : FifaColors.darkBackground;
     final text = isLight ? FifaColors.textPrimaryLight : FifaColors.textPrimaryDark;
     const accentGreen = FifaColors.accent;
-    const accentDark = FifaColors.accentDark;
 
     return Scaffold(
       backgroundColor: bg,
@@ -124,6 +123,19 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
                     ],
                   ),
                 ),
+              ],
+            ),
+          ),
+
+          // ── Venue Statistics (FOMO) ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildStatItem('Fans in Dallas', '28,403', LucideIcons.users),
+                _buildStatItem('Parties', '156', LucideIcons.sparkles),
+                _buildStatItem('Kickoff', '${_daysUntilKickoff()}D', LucideIcons.clock),
               ],
             ),
           ),
@@ -206,7 +218,8 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
                               'LIVE VENUE',
                               style: GoogleFonts.spaceMono(
                                 fontSize: 8,
-                                color: accentGreen,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFFF2C233), // Gold
                               ),
                             ),
                           ),
@@ -247,7 +260,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
                       color: isActive
-                          ? accentDark
+                          ? const Color(0xFFF2C233) // Gold
                           : (isLight ? FifaColors.lightCard : FifaColors.darkCard),
                       borderRadius: BorderRadius.circular(20),
                       border: isActive
@@ -261,7 +274,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
                           tab['icon'] as IconData,
                           size: 14,
                           color: isActive
-                              ? Colors.white
+                              ? const Color(0xFF5A4500) // Dark brown
                               : text.withValues(alpha: 0.4),
                         ),
                         const SizedBox(width: 4),
@@ -272,7 +285,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
                               color: isActive
-                                  ? Colors.white
+                                  ? const Color(0xFF5A4500) // Dark brown
                                   : (isLight ? const Color(0xFF9BB3AF) : Colors.white38),
                             ),
                           ),
@@ -303,6 +316,42 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, IconData icon) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final valueColor = isLight ? FifaColors.textPrimaryLight : FifaColors.textPrimaryDark;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: const Color(0xFFF2C233)),
+            const SizedBox(width: 4),
+            Text(
+              value,
+              style: GoogleFonts.spaceMono(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: valueColor,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label.toUpperCase(),
+          style: GoogleFonts.spaceMono(
+            fontSize: 8,
+            fontWeight: FontWeight.w600,
+            color: isLight ? const Color(0xFF9BB3AF) : Colors.white38,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
     );
   }
 }

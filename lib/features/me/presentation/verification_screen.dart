@@ -197,7 +197,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
   }
 
   Widget _buildIntroPage(bool isLight, Color text, Color muted) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
@@ -223,7 +223,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
           _benefitRow(LucideIcons.badgeCheck, "Verified Badge", "Appears on your profile and cards", text, muted),
           const SizedBox(height: 20),
           _benefitRow(LucideIcons.trash2, "Privacy First", "Your ID is deleted after review", text, muted),
-          const Spacer(),
+          const SizedBox(height: 60),
           _gradientButton(
             text: "Start Verification →",
             onPressed: _nextPage,
@@ -272,11 +272,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
   }) {
     final areaBg = isLight ? const Color(0xFFF2FAF6) : const Color(0xFF152B1E);
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: 20),
           Text("STEP $step OF 2",
             style: GoogleFonts.spaceMono(fontSize: 10, color: const Color(0xFF4CB572), fontWeight: FontWeight.bold, letterSpacing: 2.0)),
           const SizedBox(height: 8),
@@ -337,7 +338,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   ),
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 60),
           _gradientButton(
             text: step == 1 ? "Continue" : (isSubmitting ? "Submitting..." : "Submit for Review"),
             onPressed: (image != null && !_isValidating && !isSubmitting) ? onContinue : null,
@@ -350,11 +351,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
   }
 
   Widget _buildSuccessPage(bool isLight, Color text, Color muted) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const SizedBox(height: 80),
           TweenAnimationBuilder<double>(
             tween: Tween(begin: 0.0, end: 1.0),
             duration: const Duration(milliseconds: 600),
@@ -376,11 +378,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
           const SizedBox(height: 12),
           Text("No images were stored",
             style: GoogleFonts.inter(fontSize: 12, color: muted.withValues(alpha: 0.5))),
-          const SizedBox(height: 48),
+          const SizedBox(height: 60),
           _gradientButton(
             text: "Back to Profile",
             onPressed: () => Navigator.pop(context),
           ),
+          const SizedBox(height: 40),
         ],
       ),
     );

@@ -5,6 +5,7 @@ import '../../../core/supabase/supabase_config.dart';
 import '../../../shared/presentation/main_screen.dart';
 import '../../me/data/me_repository.dart';
 import '../../../core/constants/colors.dart';
+import 'widgets/country_selector_sheet.dart';
 
 class SetupScreen extends StatefulWidget {
   const SetupScreen({super.key});
@@ -601,6 +602,7 @@ class _SetupScreenState extends State<SetupScreen> {
 
   Widget _buildStep1(BuildContext context) {
     final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -630,54 +632,98 @@ class _SetupScreenState extends State<SetupScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 24),
-
-        // Country chips
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _countriesForNationality.map((c) {
-            final name = c['name']!;
-            final flag = c['flag']!;
-            final isSelected = _selectedCountries.contains(name);
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  if (isSelected) {
-                    _selectedCountries.remove(name);
-                  } else {
-                    _selectedCountries.add(name);
-                  }
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? FifaColors.emeraldForest
-                      : theme.cardColor,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected
-                        ? FifaColors.emeraldSpring
-                        : theme.dividerColor.withValues(alpha: 0.1),
-                  ),
-                ),
-                child: Text(
-                  '$flag $name',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
-                  ),
-                ),
+        // Country selection button
+        GestureDetector(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => CountrySelectorSheet(
+                selectedCountries: _selectedCountries,
+                onSelect: (selected) {
+                  setState(() => _selectedCountries
+                    ..clear()
+                    ..addAll(selected));
+                },
               ),
             );
-          }).toList(),
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isLight ? const Color(0xFFF2F2F2) : theme.cardColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: theme.dividerColor.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(LucideIcons.globe, 
+                  size: 20, 
+                  color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _selectedCountries.isEmpty 
+                        ? "Select countries to match with..." 
+                        : "${_selectedCountries.length} countries selected",
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      color: _selectedCountries.isEmpty 
+                          ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5)
+                          : theme.textTheme.bodyLarge?.color,
+                      fontWeight: _selectedCountries.isEmpty ? FontWeight.normal : FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Icon(LucideIcons.chevronRight, 
+                  size: 18, 
+                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3)
+                ),
+              ],
+            ),
+          ),
         ),
 
         const SizedBox(height: 16),
+
+        // Selected country chips (smaller Wrap)
+        if (_selectedCountries.isNotEmpty)
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: _selectedCountries.map((c) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: FifaColors.emeraldSpring.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    c,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: FifaColors.emeraldSpring,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  GestureDetector(
+                    onTap: () => setState(() => _selectedCountries.remove(c)),
+                    child: const Icon(LucideIcons.x, size: 12, color: FifaColors.emeraldSpring),
+                  ),
+                ],
+              ),
+            )).toList(),
+          ),
+
+        const SizedBox(height: 24),
         Text(
           'Tip: More countries = more matches in your feed',
           style: GoogleFonts.inter(
@@ -778,7 +824,7 @@ class _SetupScreenState extends State<SetupScreen> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
         decoration: BoxDecoration(
           gradient: isSelected
               ? const LinearGradient(
@@ -807,29 +853,30 @@ class _SetupScreenState extends State<SetupScreen> {
               : [],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 28, color: isSelected ? Colors.white : iconColor),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               title,
               softWrap: true,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: isSelected
                     ? Colors.white
                     : (isLight ? FifaColors.textPrimaryLight : Colors.white),
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               subtitle,
               softWrap: true,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
-                fontSize: 12,
+                fontSize: 11,
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.8)
                     : muted,

@@ -15,22 +15,11 @@ class _ScheduleTabState extends State<ScheduleTab> {
   String _cityFilter = '';
   String _teamFilter = '';
 
-  static const _teamColors = {
-    'Brazil': Color(0xFF009B3A),
-    'Mexico': Color(0xFF006341),
-    'USA': Color(0xFF002868),
-    'Canada': Color(0xFFC62828),
-    'Argentina': Color(0xFF6CACE4),
-    'France': Color(0xFF002395),
-    'England': Color(0xFFC62828),
-    'Portugal': Color(0xFFC62828),
-    'Italy': Color(0xFF008C45),
-    'Japan': Color(0xFF002868),
-  };
-
-  Color _getTeamColor(String team) {
-    if (team.contains('TBD')) return const Color(0xFF9BB3AF);
-    return _teamColors[team] ?? const Color(0xFF9BB3AF);
+  Color _getCategoryColor(Map<String, dynamic> item) {
+    final stage = (item['stage'] as String).toLowerCase();
+    if (stage.contains('ceremony') || stage.contains('opening')) return const Color(0xFFF2C233); // Gold
+    if (stage.contains('fan zone')) return const Color(0xFF4CB572); // Mint
+    return const Color(0xFFE8437A); // Pink for Matches
   }
 
   List<Map<String, dynamic>> get _filtered {
@@ -133,10 +122,10 @@ class _ScheduleTabState extends State<ScheduleTab> {
                               trailing: _cityFilter == c
                                   ? const Icon(LucideIcons.check, color: Color(0xFF4CB572), size: 18)
                                   : null,
-                              onTap: () {
-                                setState(() => _cityFilter = c);
-                                Navigator.pop(context);
-                              },
+                                onTap: () {
+                                  setState(() => _cityFilter = c);
+                                  Navigator.pop(context);
+                                },
                             )),
                         SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
                       ],
@@ -391,11 +380,11 @@ class _ScheduleTabState extends State<ScheduleTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 4px Accent Bar
+                            // 4px Category Accent Bar
                             Container(
                               height: 4,
                               width: double.infinity,
-                              color: _getTeamColor(m['team_a'] as String),
+                              color: _getCategoryColor(m),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(16),
@@ -407,6 +396,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Builder(builder: (context) {
+                                        final categoryColor = _getCategoryColor(m);
                                         final isElite = ['Brazil', 'Argentina', 'France'].contains(m['team_a']) || 
                                                        ['Brazil', 'Argentina', 'France'].contains(m['team_b']);
                                         
@@ -447,14 +437,15 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                         return Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: accentGreen.withValues(alpha: 0.1),
+                                            color: categoryColor.withValues(alpha: 0.1),
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           child: Text(
-                                            m['stage'] as String,
+                                            (m['stage'] as String).toUpperCase(),
                                             style: GoogleFonts.spaceMono(
                                               fontSize: 9,
-                                              color: accentGreen,
+                                              fontWeight: FontWeight.bold,
+                                              color: categoryColor,
                                             ),
                                           ),
                                         );
@@ -464,6 +455,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                         style: GoogleFonts.spaceMono(
                                           fontSize: 12,
                                           color: FifaColors.gold,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ],

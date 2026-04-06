@@ -186,7 +186,9 @@ class MatchListItem extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: FifaColors.champagneGlow,
+                                  color: (match['match_score'] as num? ?? 0) >= 85 
+                                    ? const Color(0xFFF2C233) 
+                                    : FifaColors.champagneGlow,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
@@ -194,7 +196,9 @@ class MatchListItem extends StatelessWidget {
                                   style: GoogleFonts.spaceMono(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF5A4500),
+                                    color: (match['match_score'] as num? ?? 0) >= 85
+                                      ? const Color(0xFF5A4500)
+                                      : const Color(0xFF5A4500).withValues(alpha: 0.6),
                                   ),
                                 ),
                               ),

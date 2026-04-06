@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────
--- FIFA LOVE — 5 Dummy Profiles with Avatar URLs
+-- Turf&Ardor — 5 Dummy Profiles with Avatar URLs
 -- Real photos from Unsplash (free, no auth needed)
 -- ─────────────────────────────────────────────────────────────────
 

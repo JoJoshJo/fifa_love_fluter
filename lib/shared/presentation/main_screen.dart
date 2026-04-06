@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/discover/presentation/discover_screen.dart';
 import '../../features/chat/presentation/chat_screen.dart';
 import '../../features/worldcup/presentation/worldcup_screen.dart';
@@ -20,12 +21,26 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   void initState() {
     super.initState();
+    _updateLastActive();
     // Listen for tab changes from other screens (e.g. Discover → Chat)
     ref.listenManual(currentTabProvider, (prev, next) {
       if (mounted && next != _currentIndex) {
         setState(() => _currentIndex = next);
       }
     });
+  }
+
+  Future<void> _updateLastActive() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      try {
+        await Supabase.instance.client.rpc('update_last_active', params: {
+          'p_user_id': user.id,
+        });
+      } catch (e) {
+        debugPrint('Error updating last active: $e');
+      }
+    }
   }
 
   @override

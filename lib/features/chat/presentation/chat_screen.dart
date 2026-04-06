@@ -134,7 +134,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           'YOUR CONNECTIONS',
                           style: GoogleFonts.spaceMono(
                             fontSize: 9,
-                            color: const Color(0xFF4CB572),
+                            color: const Color(0xFFE8437A),
                             letterSpacing: 2,
                           ),
                         ),
@@ -165,6 +165,53 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ],
                     ),
                   ),
+
+                  // ── Kickoff Urgency Banner (FOMO) ── 
+                  if (_matches.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8437A).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFE8437A).withValues(alpha: 0.15),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(LucideIcons.alarmClock, 
+                              size: 18, color: Color(0xFFE8437A)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'KICKOFF IS COMING',
+                                    style: GoogleFonts.spaceMono(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFFE8437A),
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                  Text(
+                                    'The games begin in 14 days. Start a conversation!',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: isLight ? Colors.black87 : Colors.white70,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
                   // Content
                   Expanded(
                     child: _loading
@@ -228,7 +275,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                                     style: GoogleFonts.spaceMono(
                                                       fontSize: 10,
                                                       fontWeight: FontWeight.bold,
-                                                      color: const Color(0xFF4CB572))),
+                                                      color: const Color(0xFFE8437A))),
                                                 ],
                                               ),
                                             );
@@ -304,7 +351,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                           Text('FILTER',
                                             style: GoogleFonts.spaceMono(
                                               fontSize: 9,
-                                              color: const Color(0xFF4CB572),
+                                              color: const Color(0xFFE8437A),
                                               fontWeight: FontWeight.bold)),
                                         ],
                                       ),
@@ -376,57 +423,82 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Widget _buildEmptyState(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : Colors.white;
+    final muted = isLight ? const Color(0xFF9BB3AF) : Colors.white.withValues(alpha: 0.5);
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 40),
-          Icon(
-            LucideIcons.messageSquare,
-            size: 56,
-            color: const Color(0xFF9BB3AF).withValues(alpha: 0.5),
+          // Users + Heart icon combo
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(
+                LucideIcons.users,
+                size: 64,
+                color: const Color(0xFFE8437A).withValues(alpha: 0.15),
+              ),
+              const Icon(
+                LucideIcons.heart,
+                size: 32,
+                color: Color(0xFFE8437A),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
           Text(
-            'YOU HAVEN\'T CONNECTED YET',
+            'NO MESSAGES YET',
             style: GoogleFonts.spaceMono(
               fontSize: 10,
-              color: const Color(0xFF4CB572),
-              letterSpacing: 1.5,
+              color: const Color(0xFFE8437A),
+              letterSpacing: 2.0,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
+          Text(
+            'Start a conversation',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: text,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Matches will appear here once you both swipe right.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: muted,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          
           // Decorative dots
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFFF48C4))),
+              Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFE8437A))),
               const SizedBox(width: 8),
               Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFF2C233))),
               const SizedBox(width: 8),
               Container(width: 4, height: 4, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF4CB572))),
             ],
           ),
-          const SizedBox(height: 24),
-          Text(
-            'Find your match\nthis World Cup.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.playfairDisplay(
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
-              color: isLight ? const Color(0xFF0D2B1E) : Colors.white,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 48),
+
           Padding(
-            padding: const EdgeInsets.fromLTRB(40, 0, 40, 20),
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: GradientButton(
-              text: 'Go to Discover',
-              height: 52, // radius 26
-              colors: const [Color(0xFF004B3A), Color(0xFF4CB572)],
+              text: 'START DISCOVERING',
+              height: 52,
+              colors: const [Color(0xFFE8437A), Color(0xFF8A3058)],
               onPressed: () {
                 ref.read(currentTabProvider.notifier).state = 0;
               },

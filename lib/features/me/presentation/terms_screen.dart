@@ -44,7 +44,7 @@ class TermsScreen extends StatelessWidget {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 _buildSection('1. Engagement Rules', 
-                  'FIFA LOVE is a community for passionate football fans. We reserve the right to remove any user found engaging in harassment, discrimination, or abusive behavior.'),
+                  'Turf&Ardor is a community for passionate football fans. We reserve the right to remove any user found engaging in harassment, discrimination, or abusive behavior.'),
                 _buildSection('2. Intellectual Property', 
                   'All FIFA trademarks, logos, and World Cup assets are the property of their respective owners. This application is an independent community project and is not officially affiliated with FIFA.'),
                 _buildSection('3. Account Eligibility', 

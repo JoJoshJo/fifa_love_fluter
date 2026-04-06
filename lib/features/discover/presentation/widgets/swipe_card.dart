@@ -51,29 +51,6 @@ class _SwipeCardState extends State<SwipeCard> {
     return const Color(0xFF135E4B);
   }
 
-  String? _flag(String nationality) {
-    const flags = {
-      'Brazil': '🇧🇷',
-      'France': '🇫🇷',
-      'Argentina': '🇦🇷',
-      'United States': '🇺🇸',
-      'England': '🏴',
-      'Germany': '🇩🇪',
-      'Spain': '🇪🇸',
-      'Portugal': '🇵🇹',
-      'Morocco': '🇲🇦',
-      'Japan': '🇯🇵',
-      'Nigeria': '🇳🇬',
-      'Mexico': '🇲🇽',
-      'Benin': '🇧🇯',
-      'Ghana': '🇬🇭',
-      'Senegal': '🇸🇳',
-      'Australia': '🇦🇺',
-      'South Korea': '🇰🇷',
-    };
-    return flags[nationality];
-  }
-
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
@@ -93,10 +70,8 @@ class _SwipeCardState extends State<SwipeCard> {
     final createdAt = createdAtStr != null ? DateTime.tryParse(createdAtStr) : null;
     final isNew = createdAt != null && DateTime.now().difference(createdAt).inDays <= 7;
 
-    // Location string: "Flag · Country · City"
-    final flag = _flag(nationality);
+    // Location string: "Country · City"
     final locationParts = <String>[
-      if (flag != null) flag,
       if (nationality.isNotEmpty) nationality,
       if (city.isNotEmpty) city,
     ];
@@ -300,6 +275,70 @@ class _SwipeCardState extends State<SwipeCard> {
                     child: _buildMatchGauge(score),
                   ),
 
+                  // ── SOCIAL PROOF: RECENTLY ACTIVE ──
+                  Positioned(
+                    top: isNew ? 44 : 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          width: 0.5,
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _ActivePillPulse(),
+                          SizedBox(width: 4),
+                          Text(
+                            'RECENTLY ACTIVE',
+                            style: TextStyle(
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ── SOCIAL PROOF: HIGH MATCH PROBABILITY ──
+                  if (score >= 88)
+                    Positioned(
+                      bottom: 84, // slightly above photo indicator dots
+                      left: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF2C233),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(LucideIcons.sparkles,
+                                size: 10, color: Colors.black),
+                            const SizedBox(width: 4),
+                            Text(
+                              'HIGH MATCH PROBABILITY',
+                              style: GoogleFonts.spaceMono(
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
                   // LIKE label on right drag
                   if (widget.isFront && widget.dragOffset.dx > 20)
                     Positioned(
@@ -362,6 +401,27 @@ class _SwipeCardState extends State<SwipeCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // ── HOT MATCH INDICATOR ──
+                    if (score >= 90)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          children: [
+                            const Icon(LucideIcons.flame, size: 14, color: Color(0xFFF2C233)),
+                            const SizedBox(width: 6),
+                            Text(
+                              'HOT MATCH',
+                              style: GoogleFonts.spaceMono(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFFF2C233),
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                     // ── CONVERSATION STARTER / BIO CARD ──
                     if (bio != null && bio.isNotEmpty)
                       Flexible(
@@ -471,6 +531,27 @@ class _SwipeCardState extends State<SwipeCard> {
                           )).toList(),
                         ),
                       ),
+
+                    // ── SOCIAL PROOF (FOMO) — for higher scores ──
+                    if (score >= 75) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(LucideIcons.flame,
+                              size: 14, color: Color(0xFFC62828)),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Popular — ${3 + (score ~/ 20)} fans liked this profile',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color:
+                                  const Color(0xFFC62828).withValues(alpha: 0.7),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -496,7 +577,6 @@ class _SwipeCardState extends State<SwipeCard> {
 
   Widget _buildPhotoPlaceholder(String name, String nationality) {
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
-    final flag = _flag(nationality);
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -528,10 +608,6 @@ class _SwipeCardState extends State<SwipeCard> {
                 ),
               ),
             ),
-            if (flag != null) ...[
-              const SizedBox(height: 12),
-              Text(flag, style: const TextStyle(fontSize: 28)),
-            ],
           ],
         ),
       ),
@@ -539,6 +615,9 @@ class _SwipeCardState extends State<SwipeCard> {
   }
 
   Widget _buildMatchGauge(int score) {
+    final isHighMatch = score >= 80;
+    final gaugeColor = isHighMatch ? const Color(0xFFF2C233) : const Color(0xFFD1E8E2);
+    
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: score / 100),
       duration: const Duration(milliseconds: 600),
@@ -553,7 +632,7 @@ class _SwipeCardState extends State<SwipeCard> {
               child: CircularProgressIndicator(
                 value: 1.0,
                 strokeWidth: 3,
-                color: const Color(0xFFF2C233).withValues(alpha: 0.2),
+                color: gaugeColor.withValues(alpha: 0.2),
               ),
             ),
             SizedBox(
@@ -562,7 +641,7 @@ class _SwipeCardState extends State<SwipeCard> {
               child: CircularProgressIndicator(
                 value: value,
                 strokeWidth: 3,
-                color: const Color(0xFFF2C233),
+                color: gaugeColor,
               ),
             ),
             Text(
@@ -622,6 +701,50 @@ class _VerifiedPulseState extends State<_VerifiedPulse> with SingleTickerProvide
     return FadeTransition(
       opacity: _animation,
       child: const Icon(LucideIcons.badgeCheck, size: 20, color: Color(0xFF4CB572)),
+    );
+  }
+}
+
+class _ActivePillPulse extends StatefulWidget {
+  const _ActivePillPulse();
+
+  @override
+  State<_ActivePillPulse> createState() => _ActivePillPulseState();
+}
+
+class _ActivePillPulseState extends State<_ActivePillPulse>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1500))
+      ..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (_, __) => Opacity(
+        opacity: 0.4 + (_ctrl.value * 0.6),
+        child: Container(
+          width: 6,
+          height: 6,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF4CB572),
+          ),
+        ),
+      ),
     );
   }
 }

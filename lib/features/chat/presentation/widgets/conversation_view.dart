@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fifalove_mobile/core/constants/colors.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fifalove_mobile/core/utils/url_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/chat_repository.dart';
 
 import '../../../../core/supabase/supabase_config.dart';
@@ -40,12 +41,14 @@ class _ConversationViewState extends State<ConversationView> {
   final bool _otherTyping = false;
   bool _showMatchReasons = true;
   bool _inputHasText = false;
+  bool _feedbackDismissed = false;
   Timer? _typingTimer;
 
   @override
   void initState() {
     super.initState();
     _repo.markAsRead(widget.match['id'] as String, widget.currentUserId);
+    _checkFeedbackDismissed();
     _messageController.addListener(() {
       final hasText = _messageController.text.trim().isNotEmpty;
       if (hasText != _inputHasText) {
@@ -111,6 +114,25 @@ class _ConversationViewState extends State<ConversationView> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _checkFeedbackDismissed() async {
+    final prefs = await SharedPreferences.getInstance();
+    final matchId = widget.match['id'];
+    if (mounted) {
+      setState(() {
+        _feedbackDismissed = prefs.getBool('wemet_dismissed_$matchId') ?? false;
+      });
+    }
+  }
+
+  Future<void> _dismissFeedback() async {
+    final prefs = await SharedPreferences.getInstance();
+    final matchId = widget.match['id'];
+    await prefs.setBool('wemet_dismissed_$matchId', true);
+    if (mounted) {
+      setState(() => _feedbackDismissed = true);
     }
   }
 
@@ -487,16 +509,29 @@ class _ConversationViewState extends State<ConversationView> {
                 return ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.only(top: 8, bottom: 20),
-                  itemCount: messages.length + (_otherTyping ? 1 : 0),
+                  itemCount: messages.length + (_otherTyping ? 1 : 0) + 1,
                   itemBuilder: (context, index) {
-                    if (_otherTyping && index == messages.length) {
+                    // Logic for "We Met" banner at the top
+                    if (index == 0) {
+                      final matchCreatedAt = DateTime.tryParse(widget.match['created_at'] as String? ?? '');
+                      final matchAge = matchCreatedAt != null ? DateTime.now().difference(matchCreatedAt) : Duration.zero;
+                      
+                      if (!_feedbackDismissed && messages.length > 20 && matchAge.inDays >= 3) {
+                        return _buildWeMetBanner();
+                      }
+                      return const SizedBox.shrink();
+                    }
+
+                    final messageIndex = index - 1;
+
+                    if (_otherTyping && messageIndex == messages.length) {
                       return const Align(
                         alignment: Alignment.centerLeft,
                         child: TypingIndicator(),
                       );
                     }
                     
-                    final msg = messages[index];
+                    final msg = messages[messageIndex];
                     final isMe = msg['sender_id'] == widget.currentUserId;
                     
                     // Logic for Date Header
@@ -520,10 +555,10 @@ class _ConversationViewState extends State<ConversationView> {
                     // Logic for Read Status (only show on LAST sent message in a block)
                     bool showStatus = false;
                     if (isMe) {
-                      if (index == messages.length - 1) {
+                      if (messageIndex == messages.length - 1) {
                         showStatus = true;
                       } else {
-                        final nextMsg = messages[index + 1];
+                        final nextMsg = messages[messageIndex + 1];
                         if (nextMsg['sender_id'] != widget.currentUserId) {
                           showStatus = true;
                         }
@@ -696,5 +731,116 @@ class _ConversationViewState extends State<ConversationView> {
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return days[time.weekday - 1];
+  }
+
+  Widget _buildWeMetBanner() {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final otherName = widget.match['profiles']['name']?.split(' ')?.first ?? 'Match';
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: isLight ? Colors.white : const Color(0xFF152B1E),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF4CB572).withValues(alpha: 0.2),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'WE MET?',
+                style: GoogleFonts.spaceMono(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF4CB572),
+                  letterSpacing: 2.0,
+                ),
+              ),
+              GestureDetector(
+                onTap: _dismissFeedback,
+                child: Icon(LucideIcons.x, size: 14, color: isLight ? Colors.black26 : Colors.white24),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Did you and $otherName meet in person?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: isLight ? const Color(0xFF0D2B1E) : Colors.white,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Your feedback helps us find better fans for you.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: isLight ? const Color(0xFF9BB3AF) : Colors.white54,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _feedbackButton('YES', const Color(0xFF4CB572)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _feedbackButton('NO', isLight ? Colors.black.withValues(alpha: 0.05) : Colors.white10, textColor: isLight ? Colors.black54 : Colors.white54),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _feedbackButton(String label, Color color, {Color textColor = Colors.white}) {
+    return GestureDetector(
+      onTap: () {
+        _dismissFeedback();
+        // In a real app, record this response to Supabase
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Thanks! Feedback for ${widget.match['profiles']['name']} saved.'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: const Color(0xFF4CB572),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: GoogleFonts.spaceMono(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

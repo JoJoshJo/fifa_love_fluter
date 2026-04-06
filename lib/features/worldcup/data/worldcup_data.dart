@@ -119,6 +119,18 @@ final List<Map<String, dynamic>> matchSchedule = [
     'stage': 'Grand Final',
     'group': 'WC Final',
   },
+  {
+    'date': '2026-06-14',
+    'time': '12:00',
+    'team_a': 'Fan Zone',
+    'flag_a': LucideIcons.music,
+    'team_b': 'Dallas',
+    'flag_b': LucideIcons.mapPin,
+    'city': 'Dallas',
+    'stadium': 'Victory Park',
+    'stage': 'Fan Zone',
+    'group': 'Festival',
+  },
 ];
 
 final List<Map<String, dynamic>> restaurants = [

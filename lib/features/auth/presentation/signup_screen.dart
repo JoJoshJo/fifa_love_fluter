@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import 'email_confirm_screen.dart';
+import 'widgets/country_selector_sheet.dart';
 import '../../../core/constants/colors.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -213,7 +214,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 'Skip',
                 style: GoogleFonts.spaceMono(
                   fontSize: 11, 
-                  color: FifaColors.emeraldSpring,
+                  color: const Color(0xFFE8437A),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -229,7 +230,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return LinearProgressIndicator(
       value: (_currentPage + 1) / 3,
       backgroundColor: Theme.of(context).dividerColor.withValues(alpha: 0.05),
-      valueColor: const AlwaysStoppedAnimation<Color>(FifaColors.emeraldSpring),
+      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFE8437A)),
       minHeight: 2,
     );
   }
@@ -258,7 +259,8 @@ class _SignupScreenState extends State<SignupScreen> {
             "You can always change this later", 
             style: GoogleFonts.inter(
               fontSize: 14, 
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 32),
@@ -272,10 +274,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: Container(
                     width: 120, height: 120,
                     decoration: BoxDecoration(
-                      color: FifaColors.emeraldForest.withValues(alpha: 0.1),
+                      color: const Color(0xFFE8437A).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: FifaColors.emeraldSpring.withValues(alpha: 0.3), 
+                        color: const Color(0xFFE8437A).withValues(alpha: 0.3), 
                         width: 2,
                       ),
                       image: _profileImageBytes != null 
@@ -283,7 +285,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         : null,
                     ),
                     child: _profileImageBytes == null 
-                      ? const Icon(Icons.camera_alt, color: FifaColors.emeraldSpring, size: 32) 
+                      ? const Icon(Icons.camera_alt, color: Color(0xFFE8437A), size: 32) 
                       : null,
                   ),
                 ),
@@ -291,8 +293,8 @@ class _SignupScreenState extends State<SignupScreen> {
                 Text(
                   "Add Photo (optional)", 
                   style: GoogleFonts.spaceMono(
-                    fontSize: 10, 
-                    color: theme.textTheme.bodySmall?.color,
+                    fontSize: 11, 
+                    color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.8),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -340,14 +342,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isSelected ? FifaColors.emeraldForest : theme.cardColor,
+                    color: isSelected ? const Color(0xFFE8437A) : theme.cardColor,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.2),
+                      color: isSelected ? const Color(0xFFE8437A) : theme.dividerColor.withValues(alpha: 0.2),
                     ),
                     boxShadow: isSelected ? [
                       BoxShadow(
-                        color: FifaColors.emeraldSpring.withValues(alpha: 0.2),
+                        color: const Color(0xFFE8437A).withValues(alpha: 0.2),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       )
@@ -631,11 +633,11 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           const SizedBox(height: 32),
 
-          _buildMultiSelectCard("Dating & Romance", "Find a connection that lasts", LucideIcons.heart),
+          _buildMultiSelectCard("Dating & Romance", "Find a connection that lasts", LucideIcons.heart, const Color(0xFFE8437A)),
           const SizedBox(height: 12),
-          _buildMultiSelectCard("Fan Friends", "Watch matches together", LucideIcons.trophy),
+          _buildMultiSelectCard("Fan Friends", "Watch matches together", LucideIcons.trophy, const Color(0xFFF2C233)),
           const SizedBox(height: 12),
-          _buildMultiSelectCard("Local Guide", "Show me your city", LucideIcons.map),
+          _buildMultiSelectCard("Local Guide", "Show me your city", LucideIcons.map, const Color(0xFF4CB572)),
           
           const SizedBox(height: 32),
           _buildLabel(context, "FANS FROM WHICH COUNTRIES?"),
@@ -648,44 +650,93 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           const SizedBox(height: 16),
           
-          Wrap(
-            spacing: 8, runSpacing: 8,
-            children: _topCountries.map((c) {
-               bool isSelected = _countriesToMatch.contains(c);
-               return GestureDetector(
-                 onTap: () {
-                   setState(() {
-                     if (isSelected) {
-                       _countriesToMatch.remove(c);
-                     } else {
-                       _countriesToMatch.add(c);
-                     }
-                   });
-                 },
-                 child: AnimatedContainer(
-                   duration: const Duration(milliseconds: 200),
-                   height: 36,
-                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                   decoration: BoxDecoration(
-                     color: isSelected ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.05),
-                     borderRadius: BorderRadius.circular(18),
-                     border: Border.all(
-                       color: isSelected ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.1),
-                     ),
-                   ),
-                   alignment: Alignment.center,
-                   child: Text(
-                    c, 
-                    style: GoogleFonts.inter(
-                      fontSize: 12, 
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
+          // Country selection button
+          GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => CountrySelectorSheet(
+                  selectedCountries: _countriesToMatch,
+                  onSelect: (selected) {
+                    setState(() => _countriesToMatch
+                      ..clear()
+                      ..addAll(selected));
+                  },
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: theme.dividerColor.withValues(alpha: 0.1),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(LucideIcons.globe, size: 20, color: Color(0xFFE8437A)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _countriesToMatch.isEmpty 
+                          ? "Select nations..." 
+                          : "${_countriesToMatch.length} nations selected",
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        color: _countriesToMatch.isEmpty 
+                            ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5)
+                            : theme.textTheme.bodyLarge?.color,
+                        fontWeight: _countriesToMatch.isEmpty ? FontWeight.normal : FontWeight.bold,
+                      ),
                     ),
                   ),
-                 )
-               );
-            }).toList(),
+                  Icon(LucideIcons.chevronRight, 
+                    size: 18, 
+                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3)
+                  ),
+                ],
+              ),
+            ),
           ),
+
+          const SizedBox(height: 12),
+
+          // Selected country chips (smaller Wrap)
+          if (_countriesToMatch.isNotEmpty)
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: _countriesToMatch.map((c) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8437A).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE8437A).withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      c,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFFE8437A),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () => setState(() => _countriesToMatch.remove(c)),
+                      child: const Icon(LucideIcons.x, size: 12, color: Color(0xFFE8437A)),
+                    ),
+                  ],
+                ),
+              )).toList(),
+            ),
           const SizedBox(height: 32),
 
           _buildLabel(context, "YOUR EMAIL"),
@@ -721,7 +772,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildMultiSelectCard(String title, String subtitle, IconData icon) {
+  Widget _buildMultiSelectCard(String title, String subtitle, IconData icon, Color activeColor) {
     final theme = Theme.of(context);
     bool isSelected = _selectedIntentions.contains(title);
     return GestureDetector(
@@ -736,20 +787,20 @@ class _SignupScreenState extends State<SignupScreen> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        height: 80,
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         decoration: BoxDecoration(
-          color: isSelected ? FifaColors.emeraldForest : theme.cardColor,
+          color: isSelected ? activeColor.withValues(alpha: 0.1) : theme.cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.1), 
+            color: isSelected ? activeColor : theme.dividerColor.withValues(alpha: 0.1), 
             width: isSelected ? 1.5 : 1,
           ),
         ),
         child: Row(
           children: [
-            Container(width: 4, height: 80, decoration: BoxDecoration(color: isSelected ? FifaColors.emeraldSpring : Colors.transparent, borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)))),
+            Container(width: 4, height: 80, decoration: BoxDecoration(color: isSelected ? activeColor : Colors.transparent, borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)))),
             const SizedBox(width: 16),
-            Icon(icon, size: 28, color: isSelected ? Colors.white : FifaColors.emeraldSpring),
+            Icon(icon, size: 28, color: isSelected ? activeColor : activeColor.withValues(alpha: 0.5)),
             const SizedBox(width: 16),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -760,14 +811,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 16, 
                     fontWeight: FontWeight.bold, 
-                    color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
+                    color: isSelected ? activeColor : theme.textTheme.bodyLarge?.color,
                   ),
                 ),
                 Text(
                   subtitle, 
                   style: GoogleFonts.inter(
                     fontSize: 13, 
-                    color: isSelected ? Colors.white.withValues(alpha: 0.7) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                    color: isSelected ? activeColor.withValues(alpha: 0.8) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -812,7 +863,7 @@ class _SignupScreenState extends State<SignupScreen> {
         text, 
         style: GoogleFonts.spaceMono(
           fontSize: 10, 
-          color: FifaColors.emeraldSpring, 
+          color: const Color(0xFFE8437A), 
           letterSpacing: 2,
           fontWeight: FontWeight.bold,
         ),
@@ -826,8 +877,11 @@ class _SignupScreenState extends State<SignupScreen> {
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(double.infinity, 60),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: FifaColors.emeraldForest,
-        disabledBackgroundColor: FifaColors.emeraldForest.withValues(alpha: 0.1),
+        backgroundColor: const Color(0xFFE8437A),
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: const Color(0xFFE8437A).withValues(alpha: 0.1),
+        disabledForegroundColor: Colors.white.withValues(alpha: 0.3),
+        elevation: enabled ? 4 : 0,
       ),
       child: Text(
         "Continue →", 
@@ -842,11 +896,13 @@ class _SignupScreenState extends State<SignupScreen> {
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(double.infinity, 60),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: FifaColors.emeraldForest,
+        backgroundColor: const Color(0xFFE8437A),
+        disabledBackgroundColor: const Color(0xFFE8437A).withValues(alpha: 0.1),
       ),
       child: _isLoading 
         ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-        : const Text("Create My Profile 🎉"),
+        : Text("Create My Profile 🎉", 
+             style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold)),
     );
   }
 }

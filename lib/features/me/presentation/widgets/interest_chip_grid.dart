@@ -67,13 +67,13 @@ class InterestChipGrid extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xFF135E4B)
-                  : const Color(0xFF152B1E),
+                  ? (Theme.of(context).brightness == Brightness.light ? const Color(0xFFFCE4EC) : const Color(0xFF880E4F))
+                  : (Theme.of(context).brightness == Brightness.light ? const Color(0xFFF5F0E8) : const Color(0xFF152B1E)),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isSelected
-                    ? const Color(0xFF4CB572)
-                    : const Color(0xFF1E4A33),
+                    ? const Color(0xFFE8437A)
+                    : (Theme.of(context).brightness == Brightness.light ? const Color(0xFFE8DDD0) : Colors.white.withValues(alpha: 0.12)),
               ),
             ),
             child: Row(
@@ -83,18 +83,18 @@ class InterestChipGrid extends StatelessWidget {
                   _getInterestIcon(interest),
                   size: 16,
                   color: isSelected
-                      ? const Color(0xFFEBF2EE)
-                      : const Color(0xFFEBF2EE).withValues(alpha: 0.4),
+                      ? (Theme.of(context).brightness == Brightness.light ? const Color(0xFF880E4F) : Colors.white)
+                      : (Theme.of(context).brightness == Brightness.light ? const Color(0xFF3D3025) : Colors.white.withValues(alpha: 0.4)),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   interest.toUpperCase(),
-                  style: GoogleFonts.spaceMono( // Per-prompt styles sometimes use Mono for tags
+                  style: GoogleFonts.spaceMono(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     color: isSelected
-                        ? const Color(0xFFEBF2EE)
-                        : const Color(0xFFEBF2EE).withValues(alpha: 0.4),
+                        ? (Theme.of(context).brightness == Brightness.light ? const Color(0xFF880E4F) : Colors.white)
+                        : (Theme.of(context).brightness == Brightness.light ? const Color(0xFF3D3025) : Colors.white.withValues(alpha: 0.4)),
                     letterSpacing: 0.5,
                   ),
                 ),

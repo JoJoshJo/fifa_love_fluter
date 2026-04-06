@@ -396,6 +396,33 @@ class _MeScreenState extends ConsumerState<MeScreen> {
               },
             ),
 
+            const SizedBox(height: 24),
+
+            // ── Profile Activity (Positive Feedback) ──
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: card,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isLight
+                        ? const Color(0xFFE8E1D5)
+                        : Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildActivityStat('Views', '84', LucideIcons.eye),
+                    _buildActivityStat('Likes', '12', LucideIcons.heart),
+                    _buildActivityStat('Match Rate', '14%', LucideIcons.activity),
+                  ],
+                ),
+              ),
+            ),
+
             const SizedBox(height: 20),
 
             // ── VERIFICATION ───────────────────
@@ -446,7 +473,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                           style: GoogleFonts
                             .spaceMono(
                               fontSize: 9,
-                              color: const Color(0xFFF2C233), // Gold label
+                              color: score < 50 ? const Color(0xFFE8437A) : (score < 85 ? const Color(0xFFF2C233) : const Color(0xFF4CB572)),
                               letterSpacing: 1.5,
                             )),
                         const Spacer(),
@@ -456,7 +483,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                               fontSize: 20,
                               fontWeight:
                                 FontWeight.bold,
-                              color: const Color(0xFFF2C233),
+                              color: score < 50 ? const Color(0xFFE8437A) : (score < 85 ? const Color(0xFFF2C233) : const Color(0xFF4CB572)),
                             )),
                       ],
                     ),
@@ -467,32 +494,67 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                       child: LinearProgressIndicator(
                         value: score / 100,
                         minHeight: 5,
-                        backgroundColor: const Color(0xFFF2C233).withValues(alpha: 0.15), // alpha 0.15
-                        valueColor: const AlwaysStoppedAnimation(Color(0xFFF2C233)),
+                        backgroundColor: (score < 50 ? const Color(0xFFE8437A) : (score < 85 ? const Color(0xFFF2C233) : const Color(0xFF4CB572))).withValues(alpha: 0.15),
+                        valueColor: AlwaysStoppedAnimation(score < 50 ? const Color(0xFFE8437A) : (score < 85 ? const Color(0xFFF2C233) : const Color(0xFF4CB572))),
                       ),
                     ),
                     if (missing.isNotEmpty) ...[
                       const SizedBox(height: 12),
-                      ...missing.take(2).map((tip) =>
-                        Padding(
-                          padding: const EdgeInsets
-                            .only(top: 5),
-                          child: Row(children: [
-                            Icon(
-                              LucideIcons.plusCircle,
-                              size: 13,
-                              color: const Color(
-                                0xFFE83535)
-                                .withValues(
-                                  alpha: 0.6)),
-                            const SizedBox(width: 6),
-                            Text(tip as String,
-                              style: GoogleFonts
-                                .inter(
-                                  fontSize: 12,
-                                  color: muted)),
-                          ]),
-                        )),
+                      ...missing.take(2).map((tip) {
+                        final String tipText = tip as String;
+                        int initialTab = 0;
+                        final String lowerTip = tipText.toLowerCase();
+                        
+                        if (lowerTip.contains('interests') || lowerTip.contains('match')) {
+                          initialTab = 2; // MATCHING tab
+                        } else if (lowerTip.contains('team')) {
+                          initialTab = 1; // FOOTBALL tab
+                        } else {
+                          initialTab = 0; // ABOUT tab
+                        }
+                        
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditProfileScreen(
+                                  initialProfile: _profile,
+                                  initialTab: initialTab,
+                                ),
+                              ),
+                            ).then((updated) {
+                              if (updated == true) _loadProfile();
+                            }),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  LucideIcons.plusCircle,
+                                  size: 14,
+                                  color: Color(0xFFE8437A),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    tipText,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFFE8437A),
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  LucideIcons.chevronRight,
+                                  size: 14,
+                                  color: const Color(0xFFE8437A).withValues(alpha: 0.5),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
                     ],
                   ],
                 ),
@@ -671,7 +733,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
               ],
             ),
             Text(
-              'FIFA LOVE · World Cup 2026',
+              'TURF&ARDOR · World Cup 2026',
               style: GoogleFonts.spaceMono(
                 fontSize: 9,
                 color: muted
@@ -848,5 +910,39 @@ class _MeScreenState extends ConsumerState<MeScreen> {
       'Benin': '🇧🇯', 'Ghana': '🇬🇦',
     };
     return m[n] ?? LucideIcons.globe;
+  }
+
+  Widget _buildActivityStat(String label, String value, IconData icon) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    return Column(
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 14, color: const Color(0xFFE8437A).withValues(alpha: 0.6)),
+            const SizedBox(width: 6),
+            Text(
+              value,
+              style: GoogleFonts.spaceMono(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isLight ? const Color(0xFF0D2B1E) : Colors.white,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 1),
+        Text(
+          label.toUpperCase(),
+          style: GoogleFonts.inter(
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF9BB3AF),
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
   }
 }
