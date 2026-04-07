@@ -111,225 +111,227 @@ class _LandingScreenState extends State<LandingScreen>
           const ParticleBackground(),
 
           // 3. FOREGROUND CONTENT — Responsive Layout
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // --- TOP SECTION ---
-                  Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      _animatedElement(
-                        startPercent: 0.0,
-                        endPercent: 0.3,
-                        slideOffset: -0.3,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                                color: const Color(0xFFF2C233).withValues(alpha: 0.3)),
+          Positioned.fill(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // --- TOP SECTION ---
+                    Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        _animatedElement(
+                          startPercent: 0.0,
+                          endPercent: 0.3,
+                          slideOffset: -0.3,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                  color: const Color(0xFFF2C233).withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(LucideIcons.trophy,
+                                    size: 12, color: Color(0xFFF2C233)),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'World Cup 2026 · $_daysLeft days',
+                                  style: GoogleFonts.spaceMono(
+                                    fontSize: 10,
+                                    color: const Color(0xFFF2C233),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                        ),
+                        const SizedBox(height: 16),
+                        _animatedElement(
+                          startPercent: 0.15,
+                          endPercent: 0.4,
+                          isScale: true,
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(LucideIcons.trophy,
-                                  size: 12, color: Color(0xFFF2C233)),
-                              const SizedBox(width: 6),
+                              const Icon(LucideIcons.heart,
+                                  size: 28, color: Color(0xFFE8437A)),
+                              Transform.translate(
+                                offset: const Offset(-6, 0),
+                                child: const Icon(LucideIcons.trophy,
+                                    size: 24, color: Color(0xFFF2C233)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // --- CENTER SECTION ---
+                    Column(
+                      children: [
+                        _animatedElement(
+                          startPercent: 0.25,
+                          endPercent: 0.55,
+                          slideOffset: 0.2,
+                          child: Text(
+                            'Turf&Ardor',
+                            style: GoogleFonts.playfairDisplay(
+                              fontSize: 44,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                              letterSpacing: -1,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withValues(alpha: 0.5),
+                                  blurRadius: 30,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        _animatedElement(
+                          startPercent: 0.35,
+                          endPercent: 0.65,
+                          slideOffset: 0.2,
+                          child: Text(
+                            'Find your match\nthis World Cup.',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white.withValues(alpha: 0.8),
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        _animatedElement(
+                          startPercent: 0.45,
+                          endPercent: 0.7,
+                          slideOffset: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _statDot(const Color(0xFF4CB572)),
                               Text(
-                                'World Cup 2026 · $_daysLeft days',
+                                '  16 cities  ·  48 nations  ·  1 summer',
                                 style: GoogleFonts.spaceMono(
-                                  fontSize: 10,
-                                  color: const Color(0xFFF2C233),
-                                  letterSpacing: 0.5,
+                                  fontSize: 9,
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                  letterSpacing: 0.8,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      _animatedElement(
-                        startPercent: 0.15,
-                        endPercent: 0.4,
-                        isScale: true,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(LucideIcons.heart,
-                                size: 28, color: Color(0xFFE8437A)),
-                            Transform.translate(
-                              offset: const Offset(-6, 0),
-                              child: const Icon(LucideIcons.trophy,
-                                  size: 24, color: Color(0xFFF2C233)),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  // --- CENTER SECTION ---
-                  Column(
-                    children: [
-                      _animatedElement(
-                        startPercent: 0.25,
-                        endPercent: 0.55,
-                        slideOffset: 0.2,
-                        child: Text(
-                          'Turf&Ardor',
-                          style: GoogleFonts.playfairDisplay(
-                            fontSize: 44,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            letterSpacing: -1,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black.withValues(alpha: 0.5),
-                                blurRadius: 30,
-                                offset: const Offset(0, 8),
+                    // --- BOTTOM SECTION ---
+                    Column(
+                      children: [
+                        _animatedElement(
+                          startPercent: 0.55,
+                          endPercent: 0.8,
+                          slideOffset: 0.5,
+                          child: _actionButton(
+                            onTap: () => Navigator.push(
+                              context,
+                              PageTransition(
+                                type: PageTransitionType.rightToLeft,
+                                child: const SignupScreen(),
+                              ),
+                            ),
+                            child: Text(
+                              'Create Account',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFE8437A), Color(0xFFF8BBD0)],
+                            ),
+                            showShadow: true,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        _animatedElement(
+                          startPercent: 0.6,
+                          endPercent: 0.8,
+                          slideOffset: 0.5,
+                          child: _actionButton(
+                            onTap: () => Navigator.push(
+                              context,
+                              PageTransition(
+                                type: PageTransitionType.rightToLeft,
+                                child: const SignInScreen(),
+                              ),
+                            ),
+                            child: Text(
+                              'Sign In',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                            ),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.2)),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _animatedElement(
+                          startPercent: 0.65,
+                          endPercent: 0.85,
+                          slideOffset: 0.5,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(LucideIcons.users,
+                                  size: 12, color: Color(0xFF4CB572)),
+                              const SizedBox(width: 8),
+                              Text(
+                                'JOIN 1,248 FANS TODAY',
+                                style: GoogleFonts.spaceMono(
+                                  fontSize: 8,
+                                  color: const Color(0xFF4CB572),
+                                  letterSpacing: 1.2,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      _animatedElement(
-                        startPercent: 0.35,
-                        endPercent: 0.65,
-                        slideOffset: 0.2,
-                        child: Text(
-                          'Find your match\nthis World Cup.',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white.withValues(alpha: 0.8),
-                            height: 1.3,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      _animatedElement(
-                        startPercent: 0.45,
-                        endPercent: 0.7,
-                        slideOffset: 0,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _statDot(const Color(0xFF4CB572)),
-                            Text(
-                              '  16 cities  ·  48 nations  ·  1 summer',
-                              style: GoogleFonts.spaceMono(
-                                fontSize: 9,
-                                color: Colors.white.withValues(alpha: 0.5),
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // --- BOTTOM SECTION ---
-                  Column(
-                    children: [
-                      _animatedElement(
-                        startPercent: 0.55,
-                        endPercent: 0.8,
-                        slideOffset: 0.5,
-                        child: _actionButton(
-                          onTap: () => Navigator.push(
-                            context,
-                            PageTransition(
-                              type: PageTransitionType.rightToLeft,
-                              child: const SignupScreen(),
-                            ),
-                          ),
+                        const SizedBox(height: 14),
+                        _animatedElement(
+                          startPercent: 0.7,
+                          endPercent: 0.9,
+                          slideOffset: 0,
                           child: Text(
-                            'Create Account',
+                            'Terms & Privacy Policy',
                             style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              fontSize: 10,
+                              color: Colors.white.withValues(alpha: 0.25),
                             ),
                           ),
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFE8437A), Color(0xFFF8BBD0)],
-                          ),
-                          showShadow: true,
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      _animatedElement(
-                        startPercent: 0.6,
-                        endPercent: 0.8,
-                        slideOffset: 0.5,
-                        child: _actionButton(
-                          onTap: () => Navigator.push(
-                            context,
-                            PageTransition(
-                              type: PageTransitionType.rightToLeft,
-                              child: const SignInScreen(),
-                            ),
-                          ),
-                          child: Text(
-                            'Sign In',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white.withValues(alpha: 0.9),
-                            ),
-                          ),
-                          border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.2)),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _animatedElement(
-                        startPercent: 0.65,
-                        endPercent: 0.85,
-                        slideOffset: 0.5,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(LucideIcons.users,
-                                size: 12, color: Color(0xFF4CB572)),
-                            const SizedBox(width: 8),
-                            Text(
-                              'JOIN 1,248 FANS TODAY',
-                              style: GoogleFonts.spaceMono(
-                                fontSize: 8,
-                                color: const Color(0xFF4CB572),
-                                letterSpacing: 1.2,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      _animatedElement(
-                        startPercent: 0.7,
-                        endPercent: 0.9,
-                        slideOffset: 0,
-                        child: Text(
-                          'Terms & Privacy Policy',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            color: Colors.white.withValues(alpha: 0.25),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ],
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
