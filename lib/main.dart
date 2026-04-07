@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/theme/app_theme.dart';
 import 'core/supabase/supabase_config.dart';
 import 'core/router/auth_gate.dart';
+import 'features/auth/presentation/splash_screen.dart';
 import 'core/notifications/notification_service.dart';
 
 import 'core/theme/theme_provider.dart';
@@ -38,7 +39,7 @@ class TurfAndArdorApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      home: const AuthGate(),
+      home: const SplashScreen(),
     );
   }
 }
