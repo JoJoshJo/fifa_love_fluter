@@ -21,14 +21,17 @@
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Turf&Ardor">
+  <meta name="apple-mobile-web-app-title" content="Turf&amp;Ardor">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png?v=4">
 
-  <title>Turf&Ardor</title>
+  <title>Turf&amp;Ardor</title>
   <link rel="manifest" href="manifest.json">
+  
+  
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
   <style id="splash-screen-style">
     body {
       margin: 0;
@@ -74,14 +77,14 @@
   <script id="splash-screen-script">
     function removeSplashFromWeb() {
       document.getElementById("loading")?.remove();
+      document.getElementById("splash")?.remove();
       document.body.style.background = "transparent";
     }
   </script>
-  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
 </head>
 <body>
   <div class="loading" id="loading">
-    <div class="brand">TURF&ARDOR</div>
+    <div class="brand">TURF&amp;ARDOR</div>
     <div class="sub">World Cup 2026</div>
     <div class="spinner"></div>
   </div>
