@@ -167,45 +167,55 @@ class _LandingScreenState extends State<LandingScreen>
                     startPercent: 0.2,
                     endPercent: 0.5,
                     isScale: true,
-                    child: Container(
-                      height: 220,
+                    child: SizedBox(
+                      height: 340,
                       width: double.infinity,
-                      margin: const EdgeInsets.symmetric(horizontal: 24),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFE8437A).withValues(alpha: 0.15),
-                            blurRadius: 30,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(32),
-                        child: Stack(
-                          children: [
-                            Image.asset(
+                      child: Stack(
+                        children: [
+                          // Image — full bleed, no border radius
+                          Positioned.fill(
+                            child: Image.asset(
                               'assets/images/hero_couple.png',
-                              height: 220,
-                              width: double.infinity,
                               fit: BoxFit.cover,
                             ),
-                            // Subtle overlay to blend
-                            Container(
+                          ),
+                          // Gradient overlay — dissolves ALL edges into background
+                          Positioned.fill(
+                            child: DecoratedBox(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    Colors.transparent,
-                                    const Color(0xFF061A0E).withValues(alpha: 0.4),
+                                    const Color(0xFF080F0C),           // solid top
+                                    const Color(0xFF080F0C).withValues(alpha: 0.0), // clear
+                                    const Color(0xFF080F0C).withValues(alpha: 0.0), // clear
+                                    const Color(0xFF080F0C),           // solid bottom
                                   ],
+                                  stops: const [0.0, 0.15, 0.75, 1.0],
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          // Left/right edge fade
+                          Positioned.fill(
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                  colors: [
+                                    const Color(0xFF080F0C).withValues(alpha: 0.6),
+                                    const Color(0xFF080F0C).withValues(alpha: 0.0),
+                                    const Color(0xFF080F0C).withValues(alpha: 0.0),
+                                    const Color(0xFF080F0C).withValues(alpha: 0.6),
+                                  ],
+                                  stops: const [0.0, 0.12, 0.88, 1.0],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
