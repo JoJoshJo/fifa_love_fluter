@@ -8,6 +8,7 @@ import 'email_confirm_screen.dart';
 import 'widgets/country_selector_sheet.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/supabase/supabase_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -152,7 +153,7 @@ class _SignupScreenState extends State<SignupScreen> {
     } on AuthException catch (e) {
       if (mounted) {
         String msg = e.message;
-        if (e.code == 'user_already_exists') {
+        if (msg.contains('already registered') || msg.contains('already_exists')) {
           msg = "This email is already registered. Please login instead.";
         }
         ScaffoldMessenger.of(context).showSnackBar(
