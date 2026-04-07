@@ -172,16 +172,16 @@ class _LandingScreenState extends State<LandingScreen>
                     const Spacer(flex: 2),
 
                     // --- CENTER SECTION ---
-                    Column(
-                      children: [
-                        _animatedElement(
-                          startPercent: 0.25,
-                          endPercent: 0.55,
-                          slideOffset: 0.2,
-                          child: Text(
+                    _animatedElement(
+                      startPercent: 0.25,
+                      endPercent: 0.55,
+                      slideOffset: 0.2,
+                      child: Column(
+                        children: [
+                          Text(
                             'Turf&Ardor',
                             style: GoogleFonts.playfairDisplay(
-                              fontSize: 40,
+                              fontSize: 38,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
                               letterSpacing: -1,
@@ -194,29 +194,19 @@ class _LandingScreenState extends State<LandingScreen>
                               ],
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        _animatedElement(
-                          startPercent: 0.35,
-                          endPercent: 0.65,
-                          slideOffset: 0.2,
-                          child: Text(
+                          const SizedBox(height: 2),
+                          Text(
                             'Find your match\nthis World Cup.',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.inter(
-                              fontSize: 16,
+                              fontSize: 15,
                               fontWeight: FontWeight.w400,
                               color: Colors.white.withValues(alpha: 0.8),
-                              height: 1.3,
+                              height: 1.2,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        _animatedElement(
-                          startPercent: 0.45,
-                          endPercent: 0.7,
-                          slideOffset: 0,
-                          child: Row(
+                          const SizedBox(height: 12),
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               _statDot(const Color(0xFF4CB572)),
@@ -230,20 +220,21 @@ class _LandingScreenState extends State<LandingScreen>
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
 
                     const Spacer(flex: 3),
 
                     // --- BOTTOM SECTION ---
-                    Column(
-                      children: [
-                        _animatedElement(
-                          startPercent: 0.55,
-                          endPercent: 0.8,
-                          slideOffset: 0.5,
-                          child: _actionButton(
+                    _animatedElement(
+                      startPercent: 0.55,
+                      endPercent: 0.9,
+                      slideOffset: 0.5,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _actionButton(
                             onTap: () => Navigator.push(
                               context,
                               PageTransition(
@@ -251,7 +242,7 @@ class _LandingScreenState extends State<LandingScreen>
                                 child: const SignupScreen(),
                               ),
                             ),
-                            margin: EdgeInsets.zero,
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
                               'Create Account',
                               style: GoogleFonts.inter(
@@ -265,13 +256,8 @@ class _LandingScreenState extends State<LandingScreen>
                             ),
                             showShadow: true,
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        _animatedElement(
-                          startPercent: 0.6,
-                          endPercent: 0.8,
-                          slideOffset: 0.5,
-                          child: _actionButton(
+                          const SizedBox(height: 8),
+                          _actionButton(
                             onTap: () => Navigator.push(
                               context,
                               PageTransition(
@@ -279,7 +265,7 @@ class _LandingScreenState extends State<LandingScreen>
                                 child: const SignInScreen(),
                               ),
                             ),
-                            margin: EdgeInsets.zero,
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
                               'Sign In',
                               style: GoogleFonts.inter(
@@ -290,48 +276,39 @@ class _LandingScreenState extends State<LandingScreen>
                             ),
                             border: Border.all(
                                 color: Colors.white.withValues(alpha: 0.2)),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _animatedElement(
-                        startPercent: 0.65,
-                        endPercent: 0.85,
-                        slideOffset: 0.5,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(LucideIcons.users,
-                                size: 10, color: Color(0xFF4CB572)),
-                            const SizedBox(width: 8),
-                            Text(
-                              'JOIN 1,248 FANS TODAY',
-                              style: GoogleFonts.spaceMono(
-                                fontSize: 8,
-                                color: const Color(0xFF4CB572),
-                                letterSpacing: 1.2,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _animatedElement(
-                        startPercent: 0.7,
-                        endPercent: 0.9,
-                        slideOffset: 0,
-                        child: Text(
-                          'Terms & Privacy Policy',
-                          style: GoogleFonts.inter(
-                            fontSize: 9,
-                            color: Colors.white.withValues(alpha: 0.25),
                           ),
-                        ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(LucideIcons.users,
+                                  size: 10, color: Color(0xFF4CB572)),
+                              const SizedBox(width: 8),
+                              Text(
+                                'JOIN 1,248 FANS TODAY',
+                                style: GoogleFonts.spaceMono(
+                                  fontSize: 8,
+                                  color: const Color(0xFF4CB572),
+                                  letterSpacing: 1.2,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Terms & Privacy Policy',
+                            style: GoogleFonts.inter(
+                              fontSize: 9,
+                              color: Colors.white.withValues(alpha: 0.25),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -347,15 +324,16 @@ class _LandingScreenState extends State<LandingScreen>
     Gradient? gradient,
     BoxBorder? border,
     bool showShadow = false,
+    EdgeInsetsGeometry? margin,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 58,
-        margin: const EdgeInsets.symmetric(horizontal: 24),
+        height: 52, // Slightly more compact
+        margin: margin ?? const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(29),
+          borderRadius: BorderRadius.circular(26),
           gradient: gradient,
           border: border,
           boxShadow: showShadow
