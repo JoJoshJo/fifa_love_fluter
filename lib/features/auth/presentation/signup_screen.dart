@@ -149,11 +149,26 @@ class _SignupScreenState extends State<SignupScreen> {
           );
         }
       }
+    } on AuthException catch (e) {
+      if (mounted) {
+        String msg = e.message;
+        if (e.code == 'user_already_exists') {
+          msg = "This email is already registered. Please login instead.";
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            backgroundColor: const Color(0xFFE8437A),
+            behavior: SnackBarBehavior.floating,
+          )
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: const Text('An unexpected error occurred. Please try again.'),
+            backgroundColor: const Color(0xFFE8437A),
             behavior: SnackBarBehavior.floating,
           )
         );

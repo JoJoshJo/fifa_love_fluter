@@ -78,7 +78,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('This action is permanent. Type DELETE to confirm.', style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color)),
+            Text('This action will permanently delete your account, profile data, photos, matches, and messages. This cannot be undone. Type DELETE to confirm.', style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color)),
             const SizedBox(height: 16),
             TextField(
               controller: controller,

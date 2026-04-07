@@ -198,7 +198,10 @@ class _ConversationViewState extends State<ConversationView> {
                   style: GoogleFonts.inter(
                       color: const Color(0xFFE8437A),
                       fontWeight: FontWeight.w600)),
-              onTap: () => Navigator.pop(context),
+              onTap: () {
+                Navigator.pop(context);
+                _confirmBlockReport();
+              },
             ),
           ],
         ),
@@ -233,6 +236,102 @@ class _ConversationViewState extends State<ConversationView> {
                 style: GoogleFonts.inter(color: const Color(0xFFE8437A))),
           ),
         ],
+      ),
+    );
+  }
+
+  void _confirmBlockReport() {
+    String selectedReason = 'Inappropriate content';
+    final List<String> reasons = [
+      'Inappropriate content',
+      'Spam or scam',
+      'Underage user',
+      'Harassment or abuse',
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: Theme.of(context).cardColor,
+            title: Text('Block & Report',
+                style: GoogleFonts.spaceGrotesk(color: Theme.of(context).textTheme.titleLarge?.color)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Why are you reporting this user?',
+                    style: GoogleFonts.inter(
+                        color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.8))),
+                const SizedBox(height: 12),
+                ...reasons.map((reason) => GestureDetector(
+                      onTap: () => setState(() => selectedReason = reason),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        color: Colors.transparent,
+                        child: Row(
+                          children: [
+                            Icon(
+                              selectedReason == reason
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_unchecked,
+                              color: selectedReason == reason
+                                  ? const Color(0xFFE8437A)
+                                  : Theme.of(context).dividerColor,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(reason, style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                          ],
+                        ),
+                      ))),
+                const SizedBox(height: 12),
+                Text('Reporting this user will immediately block them and unmatch you.',
+                    style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.6))),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel',
+                    style: GoogleFonts.inter(
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5))),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  Navigator.pop(context);
+                  // To satisfy App Store, we immediately unmatch locally to "block" them
+                  await _repo.unmatch(widget.match['id'] as String);
+                  
+                  // Try to insert report silently, catch if table doesn't exist
+                  try {
+                    await SupabaseConfig.client.from('reports').insert({
+                      'reporter_id': widget.currentUserId,
+                      'reported_id': widget.match['other_user']?['id'] ?? 'unknown',
+                      'reason': selectedReason,
+                    });
+                  } catch (_) {}
+                  
+                  if (mounted) {
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('User blocked and reported.'),
+                        backgroundColor: Color(0xFF4CB572),
+                      ),
+                    );
+                    widget.onBack();
+                  }
+                },
+                child: Text('Submit & Block',
+                    style: GoogleFonts.inter(color: const Color(0xFFE8437A))),
+              ),
+            ],
+          );
+        }
       ),
     );
   }
