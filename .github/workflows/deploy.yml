@@ -29,7 +29,9 @@ jobs:
         run: flutter pub get
 
       - name: Build Web
-        run: flutter build web --base-href /fifa_love_fluter/
+        run: |
+          flutter build web --base-href /fifa_love_fluter/ --release
+          cp .nojekyll build/web/
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
