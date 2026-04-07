@@ -8,6 +8,7 @@ import 'email_confirm_screen.dart';
 import 'widgets/country_selector_sheet.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/supabase/supabase_config.dart';
+import '../../../shared/presentation/main_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -133,12 +134,17 @@ class _SignupScreenState extends State<SignupScreen> {
         });
 
         if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => EmailConfirmScreen(email: email)
-            )
-          );
+          if (response.session != null) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const MainScreen())
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => EmailConfirmScreen(email: email))
+            );
+          }
         }
       } else {
         if (mounted) {
