@@ -81,100 +81,76 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
+    // Matching the cream background of the new logo
     final bg = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF080F0C);
 
     return Scaffold(
       backgroundColor: bg,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // === BACKGROUND: Logo image, blended ===
-          // This makes the logo PART of the background, not sitting on it
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: _pulse,
-              builder: (_, child) => Transform.scale(
-                scale: _pulse.value,
-                child: child,
-              ),
-              child: FadeTransition(
-                opacity: _logoFade,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // === CENTERED LOGO ===
+            FadeTransition(
+              opacity: _logoFade,
+              child: AnimatedBuilder(
+                animation: _pulse,
+                builder: (_, child) => Transform.scale(
+                  scale: _pulse.value,
+                  child: child,
+                ),
                 child: Container(
+                  width: 280,
+                  height: 280,
                   decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: const AssetImage('assets/splash/splash_logo.png'), // Using the correct transparent logo
+                    borderRadius: BorderRadius.circular(40),
+                    boxShadow: [
+                      if (!isLight)
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 30,
+                          offset: const Offset(0, 10),
+                        ),
+                    ],
+                    image: const DecorationImage(
+                      image: AssetImage('assets/splash/splash_logo.png'),
                       fit: BoxFit.contain,
-                      // KEY: This blends the image into the background
-                      colorFilter: ColorFilter.mode(
-                        bg.withValues(alpha: 0.15),
-                        BlendMode.dstATop,
-                      ),
-                    ),
-                  ),
-                  // Radial fade so edges dissolve into background
-                  foregroundDecoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      colors: [
-                        bg.withValues(alpha: 0.0),  // clear center
-                        bg.withValues(alpha: 0.4),  // soft mid
-                        bg.withValues(alpha: 0.95), // near-solid edges
-                      ],
-                      stops: const [0.2, 0.55, 1.0],
-                      radius: 0.75,
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-
-          // === FOREGROUND: Text ===
-          SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FadeTransition(
-                  opacity: _textFade,
-                  child: Column(
-                    children: [
-                      Text(
-                        'TURF&ARDOR',
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w700,
-                          color: isLight
-                              ? const Color(0xFF0D2B1E)
-                              : const Color(0xFFEBF2EE),
-                          letterSpacing: 3.0,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'WORLD CUP 2026',
-                        style: GoogleFonts.spaceMono(
-                          fontSize: 10,
-                          color: const Color(0xFFF2C233),
-                          letterSpacing: 2.0,
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      // Subtle loading indicator
-                      SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: const Color(0xFF4CB572).withValues(alpha: 0.6),
-                        ),
-                      ),
-                    ],
+            const SizedBox(height: 40),
+            // === SUBTITLE & LOADING ===
+            FadeTransition(
+              opacity: _textFade,
+              child: Column(
+                children: [
+                  Text(
+                    'WORLD CUP 2026',
+                    style: GoogleFonts.spaceMono(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: isLight 
+                          ? const Color(0xFF0D2B1E).withValues(alpha: 0.5)
+                          : const Color(0xFFF2C233),
+                      letterSpacing: 4.0,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 60),
-              ],
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: const Color(0xFF4CB572).withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
