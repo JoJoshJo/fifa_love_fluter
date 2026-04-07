@@ -52,12 +52,12 @@ class MeRepository {
     // 1. Upload ID Photo
     final idPath = '$userId/verification/id_$timestamp.jpg';
     await _client.storage.from('verification-docs').upload(idPath, idPhoto);
-    final idUrl = _client.storage.from('verification-docs').getPublicUrl(idPath);
+    final idUrl = await _client.storage.from('verification-docs').createSignedUrl(idPath, 604800); // 7 days expiry
 
     // 2. Upload Selfie
     final selfiePath = '$userId/verification/selfie_$timestamp.jpg';
     await _client.storage.from('verification-docs').upload(selfiePath, selfie);
-    final selfieUrl = _client.storage.from('verification-docs').getPublicUrl(selfiePath);
+    final selfieUrl = await _client.storage.from('verification-docs').createSignedUrl(selfiePath, 604800); // 7 days expiry
 
     // 3. Insert into verification_requests
     await _client.from('verification_requests').insert({

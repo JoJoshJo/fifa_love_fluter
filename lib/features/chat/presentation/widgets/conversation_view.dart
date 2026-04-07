@@ -265,7 +265,7 @@ class _ConversationViewState extends State<ConversationView> {
               color: backgroundColor,
               border: isLight ? const Border(
                 bottom: BorderSide(
-                  color: FifaColors.lightBorder,
+                  color: TurfArdorColors.lightBorder,
                   width: 1,
                 ),
               ) : null,
@@ -630,7 +630,7 @@ class _ConversationViewState extends State<ConversationView> {
                           hintText: 'Type a message...',
                           hintStyle: GoogleFonts.inter(
                             fontSize: 14,
-                            color: isLight ? FifaColors.mutedTextLight : Colors.white24,
+                            color: isLight ? TurfArdorColors.mutedTextLight : Colors.white24,
                           ),
                           border: InputBorder.none,
                           isDense: true,

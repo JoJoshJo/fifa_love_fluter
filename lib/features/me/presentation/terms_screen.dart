@@ -9,8 +9,8 @@ class TermsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final bg = isLight ? FifaColors.backgroundLight : FifaColors.backgroundDark;
-    final text = isLight ? FifaColors.textPrimaryLight : FifaColors.textPrimaryDark;
+    final bg = isLight ? TurfArdorColors.backgroundLight : TurfArdorColors.backgroundDark;
+    final text = isLight ? TurfArdorColors.textPrimaryLight : TurfArdorColors.textPrimaryDark;
 
     return Scaffold(
       backgroundColor: bg,
@@ -33,7 +33,7 @@ class TermsScreen extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
-                  color: FifaColors.accent,
+                  color: TurfArdorColors.accent,
                 ),
               ),
               centerTitle: true,
@@ -57,7 +57,7 @@ class TermsScreen extends StatelessWidget {
                     'Last Updated: June 2026',
                     style: GoogleFonts.spaceMono(
                       fontSize: 10,
-                      color: FifaColors.mutedTextLight.withValues(alpha: 0.5),
+                      color: TurfArdorColors.mutedTextLight.withValues(alpha: 0.5),
                     ),
                   ),
                 ),

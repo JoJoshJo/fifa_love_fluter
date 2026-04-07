@@ -60,7 +60,7 @@ class MessageBubble extends StatelessWidget {
                     fontSize: 10,
                     letterSpacing: 2,
                     fontWeight: FontWeight.bold,
-                    color: isLight ? FifaColors.mutedTextLight : Colors.white10,
+                    color: isLight ? TurfArdorColors.mutedTextLight : Colors.white10,
                   ),
                 ),
               ),
@@ -91,8 +91,8 @@ class MessageBubble extends StatelessWidget {
                         const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                     decoration: BoxDecoration(
                       color: isMe
-                          ? FifaColors.accent
-                          : (isLight ? FifaColors.white : FifaColors.darkCard),
+                          ? TurfArdorColors.accent
+                          : (isLight ? TurfArdorColors.white : TurfArdorColors.darkCard),
                       borderRadius: isMe
                           ? const BorderRadius.only(
                               topLeft: Radius.circular(20),
@@ -109,7 +109,7 @@ class MessageBubble extends StatelessWidget {
                       border: isMe
                           ? null
                           : (isLight ? Border.all(
-                              color: FifaColors.lightBorder,
+                              color: TurfArdorColors.lightBorder,
                               width: 1,
                             ) : null),
                       boxShadow: isLight && !isMe
@@ -134,7 +134,7 @@ class MessageBubble extends StatelessWidget {
                         height: 1.5,
                         color: isMe
                             ? Colors.white
-                            : (isLight ? FifaColors.textPrimaryLight : Colors.white70),
+                            : (isLight ? TurfArdorColors.textPrimaryLight : Colors.white70),
                       ),
                     ),
                   ),

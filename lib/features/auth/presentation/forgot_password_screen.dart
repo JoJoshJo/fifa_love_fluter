@@ -76,7 +76,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             center: Alignment.bottomCenter,
             radius: 1.5,
             colors: [
-              FifaColors.emeraldForest.withValues(alpha: isLight ? 0.08 : 0.4),
+              TurfArdorColors.emeraldForest.withValues(alpha: isLight ? 0.08 : 0.4),
               theme.scaffoldBackgroundColor,
             ],
           ),
@@ -111,13 +111,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: FifaColors.emeraldForest.withValues(alpha: isLight ? 0.1 : 1.0),
+                      color: TurfArdorColors.emeraldForest.withValues(alpha: isLight ? 0.1 : 1.0),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.lock_reset_outlined,
                       size: 36, 
-                      color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                      color: isLight ? TurfArdorColors.emeraldForest : TurfArdorColors.emeraldSpring,
                     ),
                   ),
                 ),
@@ -154,7 +154,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   'EMAIL ADDRESS',
                   style: GoogleFonts.spaceMono(
                     fontSize: 9,
-                    color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                    color: isLight ? TurfArdorColors.emeraldForest : TurfArdorColors.emeraldSpring,
                     letterSpacing: 2,
                     fontWeight: FontWeight.bold,
                   ),
@@ -177,10 +177,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: FifaColors.emeraldForest.withValues(alpha: 0.1),
+                      color: TurfArdorColors.emeraldForest.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: FifaColors.emeraldForest.withValues(alpha: 0.2),
+                        color: TurfArdorColors.emeraldForest.withValues(alpha: 0.2),
                       ),
                     ),
                     child: Row(
@@ -188,7 +188,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         const Icon(
                           Icons.check_circle_outline,
                           size: 24, 
-                          color: FifaColors.emeraldSpring,
+                          color: TurfArdorColors.emeraldSpring,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -243,7 +243,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         const Icon(
                           Icons.arrow_back,
                           size: 14, 
-                          color: FifaColors.emeraldSpring,
+                          color: TurfArdorColors.emeraldSpring,
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -251,7 +251,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: FifaColors.emeraldSpring,
+                            color: TurfArdorColors.emeraldSpring,
                           ),
                         ),
                       ],

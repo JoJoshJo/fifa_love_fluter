@@ -469,7 +469,7 @@ class _SwipeCardState extends State<SwipeCard> {
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w400,
                                   color: isLight
-                                      ? FifaColors.textPrimaryLight
+                                      ? TurfArdorColors.textPrimaryLight
                                       : Colors.white.withValues(alpha: 0.88),
                                   height: 1.45,
                                 ),

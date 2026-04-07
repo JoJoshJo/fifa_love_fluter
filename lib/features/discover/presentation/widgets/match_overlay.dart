@@ -71,7 +71,7 @@ class _MatchOverlayState extends State<MatchOverlay>
     final rand = Random();
     _dots = List.generate(40, (i) {
       final colors = [
-        FifaColors.gold,
+        TurfArdorColors.gold,
         Colors.white,
         const Color(0xFFF8BBD0), // faint pink
       ];
@@ -206,7 +206,7 @@ class _MatchOverlayState extends State<MatchOverlay>
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: FifaColors.gold,
+                            color: TurfArdorColors.gold,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
@@ -324,13 +324,13 @@ class _MatchOverlayState extends State<MatchOverlay>
                 errorWidget: (_, __, ___) => const Icon(
                   LucideIcons.user,
                   size: 36,
-                  color: FifaColors.gold,
+                  color: TurfArdorColors.gold,
                 ),
               )
             : const Icon(
                 LucideIcons.user,
                 size: 36,
-                color: FifaColors.gold,
+                color: TurfArdorColors.gold,
               ),
       ),
     );

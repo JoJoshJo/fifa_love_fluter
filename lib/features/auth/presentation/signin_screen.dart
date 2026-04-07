@@ -87,7 +87,7 @@ class _SignInScreenState extends State<SignInScreen> {
         text,
         style: GoogleFonts.spaceMono(
           fontSize: 10,
-          color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+          color: isLight ? TurfArdorColors.emeraldForest : TurfArdorColors.emeraldSpring,
           letterSpacing: 2,
           fontWeight: FontWeight.bold,
         ),
@@ -108,7 +108,7 @@ class _SignInScreenState extends State<SignInScreen> {
             center: Alignment.bottomCenter,
             radius: 1.5,
             colors: [
-              FifaColors.emeraldForest.withValues(alpha: isLight ? 0.08 : 0.4),
+              TurfArdorColors.emeraldForest.withValues(alpha: isLight ? 0.08 : 0.4),
               theme.scaffoldBackgroundColor,
             ],
           ),
@@ -159,7 +159,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     hintText: "your@email.com",
                     prefixIcon: Icon(
                       Icons.mail_outline,
-                      color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                      color: isLight ? TurfArdorColors.emeraldForest : TurfArdorColors.emeraldSpring,
                     ),
                   ),
                 ),
@@ -175,7 +175,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     hintText: "••••••••",
                     prefixIcon: Icon(
                       Icons.lock_outline,
-                      color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                      color: isLight ? TurfArdorColors.emeraldForest : TurfArdorColors.emeraldSpring,
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -202,7 +202,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                        color: isLight ? TurfArdorColors.emeraldForest : TurfArdorColors.emeraldSpring,
                       ),
                     ),
                   ),
@@ -262,7 +262,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring,
+                          color: isLight ? TurfArdorColors.emeraldForest : TurfArdorColors.emeraldSpring,
                         ),
                       ),
                     ),

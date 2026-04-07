@@ -267,7 +267,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
                 width: 20, height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: FifaColors.emeraldSpring)))
+                  color: TurfArdorColors.emeraldSpring)))
           else
             Padding(
               padding: const EdgeInsets.only(right: 12),
@@ -301,8 +301,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: FifaColors.emeraldSpring,
-          labelColor: FifaColors.emeraldSpring,
+          indicatorColor: TurfArdorColors.emeraldSpring,
+          labelColor: TurfArdorColors.emeraldSpring,
           unselectedLabelColor: textMuted,
           indicatorSize: TabBarIndicatorSize.label,
           labelStyle: GoogleFonts.spaceMono(fontSize: 11, fontWeight: FontWeight.bold),
@@ -343,7 +343,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
                   bottom: 0, right: 0,
                   child: Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(color: FifaColors.emeraldSpring, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: TurfArdorColors.emeraldSpring, shape: BoxShape.circle),
                     child: const Icon(LucideIcons.camera, size: 16, color: Colors.white),
                   ),
                 ),
@@ -433,13 +433,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: FifaColors.emeraldSpring.withValues(alpha: 0.05),
+            color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
-            border: isLight ? Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.1)) : null,
+            border: isLight ? Border.all(color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.1)) : null,
           ),
           child: Row(
             children: [
-              const Icon(LucideIcons.info, size: 20, color: FifaColors.emeraldSpring),
+              const Icon(LucideIcons.info, size: 20, color: TurfArdorColors.emeraldSpring),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -597,7 +597,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: GoogleFonts.spaceMono(fontSize: 10, fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring, letterSpacing: 1.5)),
+        Text(label.toUpperCase(), style: GoogleFonts.spaceMono(fontSize: 10, fontWeight: FontWeight.bold, color: TurfArdorColors.emeraldSpring, letterSpacing: 1.5)),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -626,7 +626,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: GoogleFonts.spaceMono(fontSize: 10, fontWeight: FontWeight.bold, color: FifaColors.emeraldSpring, letterSpacing: 1.5)),
+        Text(label.toUpperCase(), style: GoogleFonts.spaceMono(fontSize: 10, fontWeight: FontWeight.bold, color: TurfArdorColors.emeraldSpring, letterSpacing: 1.5)),
         const SizedBox(height: 8),
         GestureDetector(
           onTap: onTap,
@@ -642,7 +642,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
                 if (flagEmoji != null)
                   Text(flagEmoji, style: const TextStyle(fontSize: 18))
                 else if (icon != null)
-                  Icon(icon, size: 18, color: FifaColors.emeraldSpring),
+                  Icon(icon, size: 18, color: TurfArdorColors.emeraldSpring),
                 const SizedBox(width: 12),
                 Expanded(child: Text(value, style: GoogleFonts.inter(fontSize: 15, color: value == 'Select Country' ? textMuted : textColor))),
                 Icon(LucideIcons.chevronDown, size: 18, color: textMuted),
@@ -683,7 +683,7 @@ class _CountryPickerSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(title, style: GoogleFonts.spaceMono(fontSize: 12, color: FifaColors.emeraldSpring, fontWeight: FontWeight.bold, letterSpacing: 2)),
+          Text(title, style: GoogleFonts.spaceMono(fontSize: 12, color: TurfArdorColors.emeraldSpring, fontWeight: FontWeight.bold, letterSpacing: 2)),
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -692,7 +692,7 @@ class _CountryPickerSheet extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Search country...',
                 hintStyle: GoogleFonts.inter(color: textMuted.withValues(alpha: 0.5)),
-                prefixIcon: const Icon(LucideIcons.search, color: FifaColors.emeraldSpring, size: 20),
+                prefixIcon: const Icon(LucideIcons.search, color: TurfArdorColors.emeraldSpring, size: 20),
                 filled: true,
                 fillColor: inputColor,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),

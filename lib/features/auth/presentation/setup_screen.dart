@@ -105,7 +105,7 @@ class _SetupScreenState extends State<SetupScreen> {
                     style: theme.textTheme.bodyLarge,
                     decoration: const InputDecoration(
                       hintText: 'Search country...',
-                      prefixIcon: Icon(Icons.search, color: FifaColors.emeraldSpring),
+                      prefixIcon: Icon(Icons.search, color: TurfArdorColors.emeraldSpring),
                     ),
                     onChanged: (v) => setSheetState(() => search = v),
                   ),
@@ -130,7 +130,7 @@ class _SetupScreenState extends State<SetupScreen> {
                         ),
                         trailing: sel
                             ? const Icon(Icons.check_circle,
-                                color: FifaColors.emeraldSpring, size: 20)
+                                color: TurfArdorColors.emeraldSpring, size: 20)
                             : null,
                         onTap: () {
                           setState(() {
@@ -155,7 +155,7 @@ class _SetupScreenState extends State<SetupScreen> {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
     final textColor = theme.textTheme.displayLarge?.color;
-    final mutedText = isLight ? FifaColors.mutedTextLight : FifaColors.textMuted;
+    final mutedText = isLight ? TurfArdorColors.mutedTextLight : TurfArdorColors.textMuted;
     
     String search = '';
     showModalBottomSheet(
@@ -250,7 +250,7 @@ class _SetupScreenState extends State<SetupScreen> {
                               ),
                               const Spacer(),
                               if (sel)
-                                const Icon(Icons.check_circle, color: FifaColors.emeraldSpring, size: 20),
+                                const Icon(Icons.check_circle, color: TurfArdorColors.emeraldSpring, size: 20),
                             ],
                           ),
                         ),
@@ -311,7 +311,7 @@ class _SetupScreenState extends State<SetupScreen> {
             center: Alignment.bottomCenter,
             radius: 1.5,
             colors: [
-              FifaColors.emeraldForest.withValues(alpha: isLight ? 0.08 : 0.3),
+              TurfArdorColors.emeraldForest.withValues(alpha: isLight ? 0.08 : 0.3),
               theme.scaffoldBackgroundColor,
             ],
           ),
@@ -330,7 +330,7 @@ class _SetupScreenState extends State<SetupScreen> {
                           'STEP ${_step + 1} OF 2',
                           style: GoogleFonts.spaceMono(
                             fontSize: 9,
-                            color: FifaColors.emeraldSpring,
+                            color: TurfArdorColors.emeraldSpring,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2,
                           ),
@@ -344,7 +344,7 @@ class _SetupScreenState extends State<SetupScreen> {
                       child: LinearProgressIndicator(
                         value: (_step + 1) / 2,
                         backgroundColor: theme.dividerColor.withValues(alpha: 0.05),
-                        valueColor: const AlwaysStoppedAnimation<Color>(FifaColors.emeraldSpring),
+                        valueColor: const AlwaysStoppedAnimation<Color>(TurfArdorColors.emeraldSpring),
                         minHeight: 4,
                       ),
                     ),
@@ -409,7 +409,7 @@ class _SetupScreenState extends State<SetupScreen> {
               color: theme.inputDecorationTheme.fillColor,
               borderRadius: BorderRadius.circular(12),
               border: _nationality.isNotEmpty
-                  ? Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.4))
+                  ? Border.all(color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.4))
                   : null,
             ),
             child: Row(
@@ -467,12 +467,12 @@ class _SetupScreenState extends State<SetupScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       color: _team.isNotEmpty 
-                          ? (isLight ? FifaColors.textPrimaryLight : Colors.white) 
-                          : (isLight ? FifaColors.mutedTextLight : FifaColors.textMuted),
+                          ? (isLight ? TurfArdorColors.textPrimaryLight : Colors.white) 
+                          : (isLight ? TurfArdorColors.mutedTextLight : TurfArdorColors.textMuted),
                     ),
                   ),
                 ),
-                const Icon(LucideIcons.chevronDown, size: 18, color: FifaColors.textMuted),
+                const Icon(LucideIcons.chevronDown, size: 18, color: TurfArdorColors.textMuted),
               ],
             ),
           ),
@@ -534,17 +534,17 @@ class _SetupScreenState extends State<SetupScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? FifaColors.emeraldForest
+                    ? TurfArdorColors.emeraldForest
                     : theme.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected
-                      ? FifaColors.emeraldSpring
+                      ? TurfArdorColors.emeraldSpring
                       : theme.dividerColor.withValues(alpha: 0.1),
                 ),
                 boxShadow: isSelected ? [
                   BoxShadow(
-                    color: FifaColors.emeraldSpring.withValues(alpha: 0.1),
+                    color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   )
@@ -555,7 +555,7 @@ class _SetupScreenState extends State<SetupScreen> {
                   Icon(
                     opt['icon'] as IconData,
                     size: 22,
-                    color: isSelected ? Colors.white : FifaColors.accent,
+                    color: isSelected ? Colors.white : TurfArdorColors.accent,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -628,7 +628,7 @@ class _SetupScreenState extends State<SetupScreen> {
           'Leave empty to meet fans from everywhere',
           style: GoogleFonts.inter(
             fontSize: 13, 
-            color: FifaColors.emeraldSpring,
+            color: TurfArdorColors.emeraldSpring,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -662,7 +662,7 @@ class _SetupScreenState extends State<SetupScreen> {
               children: [
                 Icon(LucideIcons.globe, 
                   size: 20, 
-                  color: isLight ? FifaColors.emeraldForest : FifaColors.emeraldSpring
+                  color: isLight ? TurfArdorColors.emeraldForest : TurfArdorColors.emeraldSpring
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -698,9 +698,9 @@ class _SetupScreenState extends State<SetupScreen> {
             children: _selectedCountries.map((c) => Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: FifaColors.emeraldSpring.withValues(alpha: 0.1),
+                color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.2)),
+                border: Border.all(color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.2)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -710,13 +710,13 @@ class _SetupScreenState extends State<SetupScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: FifaColors.emeraldSpring,
+                      color: TurfArdorColors.emeraldSpring,
                     ),
                   ),
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: () => setState(() => _selectedCountries.remove(c)),
-                    child: const Icon(LucideIcons.x, size: 12, color: FifaColors.emeraldSpring),
+                    child: const Icon(LucideIcons.x, size: 12, color: TurfArdorColors.emeraldSpring),
                   ),
                 ],
               ),
@@ -753,7 +753,7 @@ class _SetupScreenState extends State<SetupScreen> {
         setState(() => _step = 1);
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: canContinue ? FifaColors.emeraldForest : Theme.of(context).dividerColor.withValues(alpha: 0.05),
+        backgroundColor: canContinue ? TurfArdorColors.emeraldForest : Theme.of(context).dividerColor.withValues(alpha: 0.05),
         foregroundColor: canContinue ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
         elevation: canContinue ? 2 : 0,
       ),
@@ -801,7 +801,7 @@ class _SetupScreenState extends State<SetupScreen> {
         text.toUpperCase(),
         style: GoogleFonts.spaceMono(
           fontSize: 11,
-          color: FifaColors.accent,
+          color: TurfArdorColors.accent,
           fontWeight: FontWeight.bold,
           letterSpacing: 2.0,
         ),
@@ -818,7 +818,7 @@ class _SetupScreenState extends State<SetupScreen> {
     required VoidCallback onTap,
   }) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final muted = isLight ? FifaColors.mutedTextLight : FifaColors.textMuted;
+    final muted = isLight ? TurfArdorColors.mutedTextLight : TurfArdorColors.textMuted;
 
     return GestureDetector(
       onTap: onTap,
@@ -845,7 +845,7 @@ class _SetupScreenState extends State<SetupScreen> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: FifaColors.accent.withValues(alpha: 0.3),
+                    color: TurfArdorColors.accent.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   )
@@ -867,7 +867,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 fontWeight: FontWeight.w600,
                 color: isSelected
                     ? Colors.white
-                    : (isLight ? FifaColors.textPrimaryLight : Colors.white),
+                    : (isLight ? TurfArdorColors.textPrimaryLight : Colors.white),
               ),
             ),
             const SizedBox(height: 2),

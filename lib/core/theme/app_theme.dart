@@ -5,50 +5,50 @@ import '../constants/colors.dart';
 class AppTheme {
   static ThemeData get dark => ThemeData(
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: FifaColors.deepBackground,
+    scaffoldBackgroundColor: TurfArdorColors.deepBackground,
     colorScheme: const ColorScheme.dark(
-      primary:   FifaColors.emeraldSpring,
-      secondary: FifaColors.gold,
-      surface:   FifaColors.cardSurface,
-      error:     FifaColors.error,
+      primary:   TurfArdorColors.emeraldSpring,
+      secondary: TurfArdorColors.gold,
+      surface:   TurfArdorColors.cardSurface,
+      error:     TurfArdorColors.error,
     ),
     textTheme: TextTheme(
       displayLarge: GoogleFonts.spaceGrotesk(
         fontSize: 48,
         fontWeight: FontWeight.w700,
-        color: FifaColors.textPrimary,
+        color: TurfArdorColors.textPrimary,
         letterSpacing: 1.5,
       ),
       displayMedium: GoogleFonts.spaceGrotesk(
         fontSize: 32,
         fontWeight: FontWeight.w700,
-        color: FifaColors.textPrimary,
+        color: TurfArdorColors.textPrimary,
       ),
       titleLarge: GoogleFonts.spaceGrotesk(
         fontSize: 22,
         fontWeight: FontWeight.w700,
-        color: FifaColors.textPrimary,
+        color: TurfArdorColors.textPrimary,
       ),
       bodyLarge: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w400,
-        color: FifaColors.textPrimary,
+        color: TurfArdorColors.textPrimary,
       ),
       bodyMedium: GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: FifaColors.textMuted,
+        color: TurfArdorColors.textMuted,
       ),
       labelSmall: GoogleFonts.spaceMono(
         fontSize: 10,
         fontWeight: FontWeight.w400,
         letterSpacing: 2,
-        color: FifaColors.textMuted,
+        color: TurfArdorColors.textMuted,
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: FifaColors.emeraldForest,
+        backgroundColor: TurfArdorColors.emeraldForest,
         foregroundColor: Colors.white,
         minimumSize: const Size(double.infinity, 56),
         shape: RoundedRectangleBorder(
@@ -62,7 +62,7 @@ class AppTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: FifaColors.inputSurface,
+      fillColor: TurfArdorColors.inputSurface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
@@ -70,17 +70,17 @@ class AppTheme {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(
-          color: FifaColors.emeraldSpring,
+          color: TurfArdorColors.emeraldSpring,
           width: 1.5,
         ),
       ),
       hintStyle: GoogleFonts.inter(
-        color: FifaColors.textMuted,
+        color: TurfArdorColors.textMuted,
         fontSize: 14,
       ),
     ),
     cardTheme: CardThemeData(
-      color: FifaColors.cardSurface,
+      color: TurfArdorColors.cardSurface,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -91,12 +91,12 @@ class AppTheme {
       ),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: FifaColors.deepBackground,
+      backgroundColor: TurfArdorColors.deepBackground,
       elevation: 0,
       titleTextStyle: GoogleFonts.spaceGrotesk(
         fontSize: 20,
         fontWeight: FontWeight.w700,
-        color: FifaColors.textPrimary,
+        color: TurfArdorColors.textPrimary,
       ),
     ),
   );
@@ -105,10 +105,10 @@ class AppTheme {
     brightness: Brightness.light,
     scaffoldBackgroundColor: const Color(0xFFF5F0E8),
     colorScheme: const ColorScheme.light(
-      primary: FifaColors.emeraldForest,
-      secondary: FifaColors.emeraldSpring,
+      primary: TurfArdorColors.emeraldForest,
+      secondary: TurfArdorColors.emeraldSpring,
       surface: Colors.white,
-      error: FifaColors.error,
+      error: TurfArdorColors.error,
     ),
     textTheme: TextTheme(
       displayLarge: GoogleFonts.playfairDisplay(
@@ -146,7 +146,7 @@ class AppTheme {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: FifaColors.emeraldForest,
+        backgroundColor: TurfArdorColors.emeraldForest,
         foregroundColor: Colors.white,
         minimumSize: const Size(double.infinity, 56),
         shape: RoundedRectangleBorder(
@@ -168,7 +168,7 @@ class AppTheme {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(
-          color: FifaColors.emeraldSpring,
+          color: TurfArdorColors.emeraldSpring,
           width: 1.5,
         ),
       ),

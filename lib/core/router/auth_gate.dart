@@ -23,22 +23,26 @@ class AuthGate extends StatelessWidget {
             child = FutureBuilder(
               future: SupabaseConfig.client
                   .from('profiles')
-                  .select('nationality')
+                  .select('id, nationality')
                   .eq('id', session.user.id)
-                  .single(),
+                  .maybeSingle(),
               builder: (context, profileSnapshot) {
-                if (profileSnapshot.hasError) {
+                if (profileSnapshot.connectionState == ConnectionState.waiting) {
+                  return _loadingScreen();
+                }
+
+                if (profileSnapshot.hasError || !profileSnapshot.hasData || profileSnapshot.data == null) {
                   return const SetupScreen(key: ValueKey('setup'));
                 }
                 
-                if (profileSnapshot.hasData) {
-                  final nationality = profileSnapshot.data?['nationality'];
-                  if (nationality == null) {
-                    return const SetupScreen(key: ValueKey('setup'));
-                  }
-                  return const MainScreen(key: ValueKey('main'));
+                final profile = profileSnapshot.data as Map<String, dynamic>;
+                final nationality = profile['nationality'];
+                
+                if (nationality == null) {
+                  return const SetupScreen(key: ValueKey('setup'));
                 }
-                return _loadingScreen();
+                
+                return const MainScreen(key: ValueKey('main'));
               },
             );
           } else {

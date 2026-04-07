@@ -266,8 +266,8 @@ class _ScheduleTabState extends State<ScheduleTab> {
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final text = isLight ? FifaColors.textPrimaryLight : FifaColors.textPrimaryDark;
-    const accentGreen = FifaColors.accent;
+    final text = isLight ? TurfArdorColors.textPrimaryLight : TurfArdorColors.textPrimaryDark;
+    const accentGreen = TurfArdorColors.accent;
     final filtered = _filtered;
 
     return Column(
@@ -294,7 +294,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                     child: Row(
                       children: [
                         const Icon(LucideIcons.mapPin,
-                            size: 14, color: FifaColors.accent),
+                            size: 14, color: TurfArdorColors.accent),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
@@ -321,7 +321,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                   child: Text(
                     'Clear',
                     style: GoogleFonts.inter(
-                        fontSize: 12, color: FifaColors.error),
+                        fontSize: 12, color: TurfArdorColors.error),
                   ),
                 ),
             ],
@@ -364,7 +364,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: isLight ? FifaColors.lightCard : FifaColors.darkCard,
+                        color: isLight ? TurfArdorColors.lightCard : TurfArdorColors.darkCard,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: isLight ? [
                           BoxShadow(
@@ -373,7 +373,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                             offset: const Offset(0, 4),
                           )
                         ] : null,
-                        border: isLight ? Border.all(color: FifaColors.lightBorder) : null,
+                        border: isLight ? Border.all(color: TurfArdorColors.lightBorder) : null,
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
@@ -454,7 +454,7 @@ class _ScheduleTabState extends State<ScheduleTab> {
                                         m['time'] as String,
                                         style: GoogleFonts.spaceMono(
                                           fontSize: 12,
-                                          color: FifaColors.gold,
+                                          color: TurfArdorColors.gold,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),

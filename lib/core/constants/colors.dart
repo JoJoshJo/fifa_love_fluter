@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class FifaColors {
+class TurfArdorColors {
   // BRAND GREENS (updated — deeper forest)
   static const Color accent = Color(0xFF4CB572);        // spring green — keep as-is
   static const Color accentDark = Color(0xFF004B3A);     // UPDATE from 0xFF135E4B to 0xFF004B3A (deeper forest)

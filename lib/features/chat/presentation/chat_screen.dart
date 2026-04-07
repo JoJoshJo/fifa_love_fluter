@@ -323,7 +323,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                                       fontSize: 12,
                                                       fontWeight: FontWeight.w500,
                                                       fontStyle: FontStyle.italic,
-                                                      color: isLight ? FifaColors.textPrimaryLight : Colors.white70,
+                                                      color: isLight ? TurfArdorColors.textPrimaryLight : Colors.white70,
                                                     ),
                                                     overflow: TextOverflow.ellipsis,
                                                   ),

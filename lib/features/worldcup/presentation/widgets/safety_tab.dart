@@ -20,9 +20,9 @@ class _SafetyTabState extends State<SafetyTab> {
   ];
 
   Color _scoreColor(double score) {
-    if (score >= 8.0) return FifaColors.accent;
-    if (score >= 7.0) return FifaColors.gold;
-    return FifaColors.error;
+    if (score >= 8.0) return TurfArdorColors.accent;
+    if (score >= 7.0) return TurfArdorColors.gold;
+    return TurfArdorColors.error;
   }
 
   Widget _card({required Widget child, Color? borderColor}) {
@@ -31,9 +31,9 @@ class _SafetyTabState extends State<SafetyTab> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isLight ? FifaColors.lightCard : FifaColors.darkCard,
+        color: isLight ? TurfArdorColors.lightCard : TurfArdorColors.darkCard,
         borderRadius: BorderRadius.circular(14),
-        border: isLight ? Border.all(color: borderColor ?? FifaColors.lightBorder) : null,
+        border: isLight ? Border.all(color: borderColor ?? TurfArdorColors.lightBorder) : null,
       ),
       child: child,
     );
@@ -50,7 +50,7 @@ class _SafetyTabState extends State<SafetyTab> {
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    const accentGreen = FifaColors.accent;
+    const accentGreen = TurfArdorColors.accent;
     final data = safetyData.firstWhere(
       (d) => d['city'] == _selectedCity,
       orElse: () => safetyData.first,
@@ -77,9 +77,9 @@ class _SafetyTabState extends State<SafetyTab> {
                   margin: const EdgeInsets.only(right: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isActive ? accentGreen : (isLight ? FifaColors.lightCard : FifaColors.darkCard),
+                    color: isActive ? accentGreen : (isLight ? TurfArdorColors.lightCard : TurfArdorColors.darkCard),
                     borderRadius: BorderRadius.circular(16),
-                    border: isLight ? Border.all(color: isActive ? accentGreen : FifaColors.lightBorder) : null,
+                    border: isLight ? Border.all(color: isActive ? accentGreen : TurfArdorColors.lightBorder) : null,
                   ),
                   child: Text(
                     city,
@@ -181,11 +181,11 @@ class _SafetyTabState extends State<SafetyTab> {
                     Row(
                       children: [
                         const Icon(LucideIcons.alertTriangle,
-                            size: 14, color: FifaColors.error),
+                            size: 14, color: TurfArdorColors.error),
                         const SizedBox(width: 4),
                         Text('CAUTION AT NIGHT',
                             style: GoogleFonts.spaceMono(
-                                fontSize: 9, color: FifaColors.error, letterSpacing: 1.5)),
+                                fontSize: 9, color: TurfArdorColors.error, letterSpacing: 1.5)),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -194,8 +194,8 @@ class _SafetyTabState extends State<SafetyTab> {
                       children: (data['avoid_at_night'] as List)
                           .map((area) => _chip(
                                 label: area as String,
-                                bg: FifaColors.error.withValues(alpha: 0.12),
-                                textColor: FifaColors.error.withValues(alpha: 0.80),
+                                bg: TurfArdorColors.error.withValues(alpha: 0.12),
+                                textColor: TurfArdorColors.error.withValues(alpha: 0.80),
                               ))
                           .toList(),
                     ),
@@ -231,15 +231,15 @@ class _SafetyTabState extends State<SafetyTab> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: FifaColors.gold.withValues(alpha: 0.08),
+                  color: TurfArdorColors.gold.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
                   border:
-                      Border.all(color: FifaColors.gold.withValues(alpha: 0.25)),
+                      Border.all(color: TurfArdorColors.gold.withValues(alpha: 0.25)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(LucideIcons.lightbulb, size: 18, color: FifaColors.gold),
+                    const Icon(LucideIcons.lightbulb, size: 18, color: TurfArdorColors.gold),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(

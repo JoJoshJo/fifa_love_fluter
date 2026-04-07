@@ -27,8 +27,8 @@ class _FoodTabState extends State<FoodTab> {
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final text = isLight ? FifaColors.textPrimaryLight : FifaColors.textPrimaryDark;
-    const accentGreen = FifaColors.accent;
+    final text = isLight ? TurfArdorColors.textPrimaryLight : TurfArdorColors.textPrimaryDark;
+    const accentGreen = TurfArdorColors.accent;
     final filtered = _filtered;
 
     return Column(
@@ -60,12 +60,12 @@ class _FoodTabState extends State<FoodTab> {
                   decoration: BoxDecoration(
                     color: isActive
                         ? accentGreen
-                        : (isLight ? FifaColors.lightCard : FifaColors.darkCard),
+                        : (isLight ? TurfArdorColors.lightCard : TurfArdorColors.darkCard),
                     borderRadius: BorderRadius.circular(16),
                     border: isLight ? Border.all(
                       color: isActive
                           ? accentGreen
-                          : FifaColors.lightBorder,
+                          : TurfArdorColors.lightBorder,
                     ) : null,
                   ),
                   child: Row(
@@ -130,7 +130,7 @@ class _FoodTabState extends State<FoodTab> {
                           horizontal: 12, vertical: 6),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: isLight ? FifaColors.lightCard : FifaColors.darkCard,
+                        color: isLight ? TurfArdorColors.lightCard : TurfArdorColors.darkCard,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: isLight ? [
                           BoxShadow(
@@ -139,7 +139,7 @@ class _FoodTabState extends State<FoodTab> {
                             offset: const Offset(0, 4),
                           )
                         ] : null,
-                        border: isLight ? Border.all(color: FifaColors.lightBorder) : null,
+                        border: isLight ? Border.all(color: TurfArdorColors.lightBorder) : null,
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,14 +222,14 @@ class _FoodTabState extends State<FoodTab> {
                                       r['price'] as String,
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
-                                        color: FifaColors.gold,
+                                        color: TurfArdorColors.gold,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                     const Spacer(),
                                     const Icon(LucideIcons.star,
                                         size: 12,
-                                        color: FifaColors.gold),
+                                        color: TurfArdorColors.gold),
                                     const SizedBox(width: 2),
                                     Text(
                                       (r['rating'] as double).toString(),

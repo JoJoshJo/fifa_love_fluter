@@ -23,8 +23,8 @@ class GradientButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gradientColors = colors ?? [
-      FifaColors.emeraldForest,
-      FifaColors.emeraldSpring,
+      TurfArdorColors.emeraldForest,
+      TurfArdorColors.emeraldSpring,
     ];
 
     return Opacity(

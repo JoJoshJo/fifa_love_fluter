@@ -104,14 +104,14 @@ class MatchListItem extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: showGlow ? [
                           BoxShadow(
-                            color: FifaColors.pink.withValues(alpha: 0.3),
+                            color: TurfArdorColors.pink.withValues(alpha: 0.3),
                             blurRadius: 8,
                             spreadRadius: 1,
                           )
                         ] : null,
                         border: showGlow 
                           ? Border.all(
-                              color: FifaColors.pink.withValues(alpha: 0.6),
+                              color: TurfArdorColors.pink.withValues(alpha: 0.6),
                               width: 2,
                             )
                           : isLight ? Border.all(
@@ -172,7 +172,7 @@ class MatchListItem extends StatelessWidget {
                                   fontSize: 17,
                                   fontWeight: unread > 0 ? FontWeight.w700 : FontWeight.w600,
                                   fontStyle: FontStyle.italic,
-                                  color: isLight ? FifaColors.textPrimaryLight : Colors.white,
+                                  color: isLight ? TurfArdorColors.textPrimaryLight : Colors.white,
                                   letterSpacing: -0.2,
                                 ),
                               ),
@@ -188,7 +188,7 @@ class MatchListItem extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: (match['match_score'] as num? ?? 0) >= 85 
                                     ? const Color(0xFFF2C233) 
-                                    : FifaColors.champagneGlow,
+                                    : TurfArdorColors.champagneGlow,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
@@ -210,8 +210,8 @@ class MatchListItem extends StatelessWidget {
                               fontSize: 9,
                               fontWeight: unread > 0 ? FontWeight.bold : FontWeight.normal,
                               color: unread > 0
-                                  ? FifaColors.accent
-                                  : (isLight ? FifaColors.mutedTextLight : Colors.white24),
+                                  ? TurfArdorColors.accent
+                                  : (isLight ? TurfArdorColors.mutedTextLight : Colors.white24),
                             ),
                           ),
                         ],
@@ -224,8 +224,8 @@ class MatchListItem extends StatelessWidget {
                         style: previewStyle.copyWith(
                           fontSize: 13,
                           color: unread > 0
-                              ? (isLight ? FifaColors.textPrimaryLight.withValues(alpha: 0.8) : Colors.white70)
-                              : (isLight ? FifaColors.mutedTextLight : Colors.white38),
+                              ? (isLight ? TurfArdorColors.textPrimaryLight.withValues(alpha: 0.8) : Colors.white70)
+                              : (isLight ? TurfArdorColors.mutedTextLight : Colors.white38),
                         ),
                       ),
                     ],
@@ -239,7 +239,7 @@ class MatchListItem extends StatelessWidget {
                     width: 7,
                     height: 7,
                     decoration: const BoxDecoration(
-                      color: FifaColors.gold,
+                      color: TurfArdorColors.gold,
                       shape: BoxShape.circle,
                     ),
                   ),

@@ -629,16 +629,16 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                     margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: FifaColors.gold.withValues(alpha: 0.1),
+                      color: TurfArdorColors.gold.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: FifaColors.gold.withValues(alpha: 0.3),
+                        color: TurfArdorColors.gold.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Row(
                       children: [
                         const Icon(Icons.star,
-                            size: 16, color: FifaColors.gold),
+                            size: 16, color: TurfArdorColors.gold),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -656,7 +656,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                             style: GoogleFonts.inter(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: FifaColors.gold,
+                              color: TurfArdorColors.gold,
                             ),
                           ),
                         ),
@@ -744,7 +744,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                         // SKIP (X)
                         _ActionButton(
                           icon: LucideIcons.x,
-                          color: isLight ? FifaColors.textPrimaryLight : Colors.white,
+                          color: isLight ? TurfArdorColors.textPrimaryLight : Colors.white,
                           size: 48,
                           iconSize: 22,
                           hasBorder: true,
@@ -759,10 +759,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                           size: 60,
                           iconSize: 26,
                           isHero: true,
-                          backgroundColor: FifaColors.pink,
+                          backgroundColor: TurfArdorColors.pink,
                           boxShadow: [
                             BoxShadow(
-                              color: FifaColors.pink.withValues(alpha: 0.35),
+                              color: TurfArdorColors.pink.withValues(alpha: 0.35),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -774,22 +774,22 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                         // COMMENTED LIKE (Heart + Msg)
                         _ActionButton(
                           icon: LucideIcons.messageSquare,
-                          color: FifaColors.pink,
+                          color: TurfArdorColors.pink,
                           size: 48,
                           iconSize: 22,
                           hasBorder: true,
-                          borderColor: FifaColors.pink.withValues(alpha: 0.3),
+                          borderColor: TurfArdorColors.pink.withValues(alpha: 0.3),
                           onTap: _showCommentedLikeSheet,
                         ),
                         const SizedBox(width: 12),
                         // SUPER LIKE (Star)
                         _ActionButton(
                           icon: LucideIcons.star,
-                          color: FifaColors.gold,
+                          color: TurfArdorColors.gold,
                           size: 48,
                           iconSize: 22,
                           hasBorder: true,
-                          borderColor: FifaColors.gold,
+                          borderColor: TurfArdorColors.gold,
                           backgroundColor: Colors.transparent,
                           onTap: () => _swiperController.swipe(CardSwiperDirection.top),
                         ),

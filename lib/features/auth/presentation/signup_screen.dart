@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import 'email_confirm_screen.dart';
 import 'widgets/country_selector_sheet.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/supabase/supabase_config.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -80,7 +80,10 @@ class _SignupScreenState extends State<SignupScreen> {
   }
   
   void _submitProfile() async {
-    if (_emailController.text.isEmpty || _passwordController.text.length < 6) {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please provide a valid email and password (min 6 chars)'),
@@ -93,9 +96,10 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
     
     try {
-      final response = await Supabase.instance.client.auth.signUp(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+      // 1. Authenticate with Supabase
+      final response = await SupabaseConfig.client.auth.signUp(
+        email: email,
+        password: password,
         data: {
           'name': _nameController.text.trim(),
           'age': int.tryParse(_ageController.text) ?? 18,
@@ -109,19 +113,34 @@ class _SignupScreenState extends State<SignupScreen> {
         },
       );
       
-      setState(() => _isLoading = false);
+      final user = response.user;
       
-      if (mounted) {
-        if (response.user != null) {
+      if (user != null) {
+        // 2. Immediately create the database profile record
+        // This prevents the user from being stuck in the "Setup" screen later.
+        await SupabaseConfig.client.from('profiles').upsert({
+          'id': user.id,
+          'name': _nameController.text.trim(),
+          'age': int.tryParse(_ageController.text) ?? 18,
+          'gender': _selectedGender,
+          'nationality': _nationality,
+          'team_supported': _teamSupported,
+          'is_local': _isLocal,
+          'city': _isLocal ? _city : null,
+          'match_type_preference': _selectedIntentions,
+          'countries_to_match': _countriesToMatch,
+        });
+
+        if (mounted) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => EmailConfirmScreen(
-                email: _emailController.text.trim()
-              )
+              builder: (_) => EmailConfirmScreen(email: email)
             )
           );
-        } else {
+        }
+      } else {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Sign up failed. Please try again.'),
@@ -131,7 +150,6 @@ class _SignupScreenState extends State<SignupScreen> {
         }
       }
     } catch (e) {
-      setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -140,6 +158,8 @@ class _SignupScreenState extends State<SignupScreen> {
           )
         );
       }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -201,7 +221,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 height: 8,
                 width: active ? 24 : 8,
                 decoration: BoxDecoration(
-                  color: active ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.2),
+                  color: active ? TurfArdorColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(4),
                 ),
               );
@@ -411,7 +431,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 color: theme.inputDecorationTheme.fillColor, 
                 borderRadius: BorderRadius.circular(12),
                 border: _nationality != null 
-                  ? Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.5))
+                  ? Border.all(color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.5))
                   : null,
               ),
               child: Row(
@@ -440,7 +460,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 color: theme.inputDecorationTheme.fillColor, 
                 borderRadius: BorderRadius.circular(12),
                 border: _teamSupported != null 
-                  ? Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.5))
+                  ? Border.all(color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.5))
                   : null,
               ),
               child: Row(
@@ -479,7 +499,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   color: theme.inputDecorationTheme.fillColor, 
                   borderRadius: BorderRadius.circular(12),
                   border: _city != null 
-                    ? Border.all(color: FifaColors.emeraldSpring.withValues(alpha: 0.5))
+                    ? Border.all(color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.5))
                     : null,
                 ),
                 child: Row(
@@ -519,15 +539,15 @@ class _SignupScreenState extends State<SignupScreen> {
         height: 100,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? FifaColors.emeraldForest : theme.cardColor,
+          color: isSelected ? TurfArdorColors.emeraldForest : theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? FifaColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.1), 
+            color: isSelected ? TurfArdorColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.1), 
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected ? [
             BoxShadow(
-              color: FifaColors.emeraldSpring.withValues(alpha: 0.1),
+              color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             )
@@ -536,7 +556,7 @@ class _SignupScreenState extends State<SignupScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 24, color: isSelected ? Colors.white : FifaColors.emeraldSpring),
+            Icon(icon, size: 24, color: isSelected ? Colors.white : TurfArdorColors.emeraldSpring),
             const SizedBox(height: 8),
             Text(
               title, 

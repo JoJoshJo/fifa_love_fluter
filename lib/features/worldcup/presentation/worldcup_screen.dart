@@ -51,9 +51,9 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final bg = isLight ? FifaColors.lightBackground : FifaColors.darkBackground;
-    final text = isLight ? FifaColors.textPrimaryLight : FifaColors.textPrimaryDark;
-    const accentGreen = FifaColors.accent;
+    final bg = isLight ? TurfArdorColors.lightBackground : TurfArdorColors.darkBackground;
+    final text = isLight ? TurfArdorColors.textPrimaryLight : TurfArdorColors.textPrimaryDark;
+    const accentGreen = TurfArdorColors.accent;
 
     return Scaffold(
       backgroundColor: bg,
@@ -261,11 +261,11 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
                     decoration: BoxDecoration(
                       color: isActive
                           ? const Color(0xFFF2C233) // Gold
-                          : (isLight ? FifaColors.lightCard : FifaColors.darkCard),
+                          : (isLight ? TurfArdorColors.lightCard : TurfArdorColors.darkCard),
                       borderRadius: BorderRadius.circular(20),
                       border: isActive
                           ? null
-                          : (isLight ? Border.all(color: FifaColors.lightBorder) : null),
+                          : (isLight ? Border.all(color: TurfArdorColors.lightBorder) : null),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -300,7 +300,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
           const SizedBox(height: 8),
 
           // Divider
-          Divider(height: 1, color: isLight ? FifaColors.lightBorder : Colors.white.withValues(alpha: 0.1)),
+          Divider(height: 1, color: isLight ? TurfArdorColors.lightBorder : Colors.white.withValues(alpha: 0.1)),
 
           // ─── Tab content ───
           Expanded(
@@ -321,7 +321,7 @@ class _WorldCupScreenState extends State<WorldCupScreen> with TickerProviderStat
 
   Widget _buildStatItem(String label, String value, IconData icon) {
     final isLight = Theme.of(context).brightness == Brightness.light;
-    final valueColor = isLight ? FifaColors.textPrimaryLight : FifaColors.textPrimaryDark;
+    final valueColor = isLight ? TurfArdorColors.textPrimaryLight : TurfArdorColors.textPrimaryDark;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,

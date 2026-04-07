@@ -69,7 +69,7 @@ class _CountrySelectorSheetState extends State<CountrySelectorSheet> {
                   style: GoogleFonts.spaceMono(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: FifaColors.accent,
+                    color: TurfArdorColors.accent,
                     letterSpacing: 1.5,
                   ),
                 ),
@@ -128,10 +128,10 @@ class _CountrySelectorSheetState extends State<CountrySelectorSheet> {
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? FifaColors.emeraldSpring : theme.textTheme.bodyLarge?.color,
+                      color: isSelected ? TurfArdorColors.emeraldSpring : theme.textTheme.bodyLarge?.color,
                     ),
                   ),
-                  activeColor: FifaColors.emeraldSpring,
+                  activeColor: TurfArdorColors.emeraldSpring,
                   checkColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                   checkboxShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
