@@ -22,8 +22,8 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
-          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+          echo "SUPABASE_URL=https://xzzsursuurcsrlmjwrwh.supabase.co" >> .env
+          echo "SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6enN1cnN1dXJjc3JsbWp3cndoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzEwOTUsImV4cCI6MjA4NzU0NzA5NX0.6b8XMyLRaukKu0xO4cNokrwXNw_qGaDwdhLg9ej08DY" >> .env
 
       - name: Install Dependencies
         run: flutter pub get
