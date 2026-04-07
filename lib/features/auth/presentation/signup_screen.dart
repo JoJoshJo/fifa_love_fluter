@@ -35,7 +35,7 @@ class _SignupScreenState extends State<SignupScreen> {
   String? _teamSupported;
   bool _isLocal = true;
   String? _city;
-  final List<String> _topCountries = ["Brazil", "France", "Argentina", "USA", "England", "Germany", "Spain", "Portugal", "Morocco", "Japan", "Nigeria", "Mexico", "Colombia", "Senegal", "Australia", "South Korea", "Netherlands", "Italy", "Belgium", "Canada"];
+  final List<String> _topCountries = ["Argentina", "Australia", "Austria", "Belgium", "Brazil", "Cameroon", "Canada", "Chile", "Colombia", "Costa Rica", "Croatia", "Denmark", "Ecuador", "Egypt", "England", "France", "Germany", "Ghana", "Greece", "Iran", "Italy", "Ivory Coast", "Jamaica", "Japan", "Mexico", "Morocco", "Netherlands", "New Zealand", "Nigeria", "Norway", "Panama", "Peru", "Poland", "Portugal", "Qatar", "Saudi Arabia", "Senegal", "Serbia", "South Korea", "Spain", "Sweden", "Switzerland", "Tunisia", "Turkey", "USA", "Uruguay", "Venezuela", "Wales"];
   final List<String> _hostCities = ["Dallas", "Los Angeles", "New York/New Jersey", "San Francisco Bay Area", "Seattle", "Kansas City", "Boston", "Miami", "Atlanta", "Houston", "Philadelphia", "Vancouver", "Toronto", "Guadalajara", "Mexico City", "Monterrey"];
 
   // STEP 3 STATE
@@ -243,20 +243,7 @@ class _SignupScreenState extends State<SignupScreen> {
               );
             }),
           ),
-          if (_currentPage < 2)
-            TextButton(
-              onPressed: _nextStep,
-              child: Text(
-                'Skip',
-                style: GoogleFonts.spaceMono(
-                  fontSize: 11, 
-                  color: const Color(0xFFE8437A),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          else
-            const SizedBox(width: 48), 
+          const SizedBox(width: 48),
         ],
       ),
     );
@@ -273,7 +260,8 @@ class _SignupScreenState extends State<SignupScreen> {
   
   Widget _buildStep1(BuildContext context) {
     final theme = Theme.of(context);
-    bool canContinue = _nameController.text.isNotEmpty && 
+    bool canContinue = _profileImageBytes != null &&
+                       _nameController.text.isNotEmpty && 
                        (int.tryParse(_ageController.text) ?? 0) >= 18 && 
                        _selectedGender != null;
 
@@ -327,7 +315,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  "Add Photo (optional)", 
+                  "Add Photo", 
                   style: GoogleFonts.spaceMono(
                     fontSize: 11, 
                     color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.8),
