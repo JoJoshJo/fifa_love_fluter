@@ -936,8 +936,8 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
       child: _isLoading 
         ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-        : Text("Create My Profile 🎉", 
-             style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold)),
+        : Text("Create My Profile", 
+             style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
     );
   }
 }
