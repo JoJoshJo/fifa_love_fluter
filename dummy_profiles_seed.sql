@@ -325,19 +325,3 @@ ON CONFLICT (id) DO UPDATE SET
   avatar_url = EXCLUDED.avatar_url,
   last_active_at = now();
 
--- Make sure all 5 profiles appear 
--- in the admin user's feed
--- by adding their nationalities to
--- admin's countries_to_match
-UPDATE public.profiles
-SET countries_to_match = ARRAY[
-  'Brazil','France','Argentina',
-  'United States','England','Germany',
-  'Spain','Portugal','Morocco','Japan',
-  'Nigeria','Mexico','Colombia','Senegal',
-  'Australia','South Korea','Netherlands',
-  'Italy','Belgium','Canada','Benin',
-  'Ghana','Cameroon','Uruguay',
-  'South Africa','Iran','Saudi Arabia'
-]
-WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001';
