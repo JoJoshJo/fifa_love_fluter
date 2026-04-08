@@ -118,20 +118,26 @@ class _SignupScreenState extends State<SignupScreen> {
       final user = response.user;
       
       if (user != null) {
-        // 2. Immediately create the database profile record
-        // This prevents the user from being stuck in the "Setup" screen later.
-        await SupabaseConfig.client.from('profiles').upsert({
-          'id': user.id,
-          'name': _nameController.text.trim(),
-          'age': int.tryParse(_ageController.text) ?? 18,
-          'gender': _selectedGender,
-          'nationality': _nationality,
-          'team_supported': _teamSupported,
-          'is_local': _isLocal,
-          'city': _isLocal ? _city : null,
-          'match_type_preference': _selectedIntentions,
-          'countries_to_match': _countriesToMatch,
-        });
+        debugPrint('SIGNUP SUCCESS: User ID = ${user.id}');
+        debugPrint('SESSION STATUS: ${response.session != null ? "ACTIVE" : "NONE"}');
+
+        try {
+          await SupabaseConfig.client.from('profiles').upsert({
+            'id': user.id,
+            'name': _nameController.text.trim(),
+            'age': int.tryParse(_ageController.text) ?? 18,
+            'gender': _selectedGender,
+            'nationality': _nationality,
+            'team_supported': _teamSupported,
+            'is_local': _isLocal,
+            'city': _isLocal ? _city : null,
+            'match_type_preference': _selectedIntentions,
+            'countries_to_match': _countriesToMatch,
+          });
+          debugPrint('PROFILE UPSERT SUCCESS');
+        } catch (e) {
+          debugPrint('PROFILE UPSERT BLOCKED/FAILED: $e');
+        }
 
         if (mounted) {
           if (response.session != null) {

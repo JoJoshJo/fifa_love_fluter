@@ -22,8 +22,8 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "SUPABASE_URL=https://xzzsursuurcsrlmjwrwh.supabase.co" >> .env
-          echo "SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6enN1cnN1dXJjc3JsbWp3cndoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzEwOTUsImV4cCI6MjA4NzU0NzA5NX0.6b8XMyLRaukKu0xO4cNokrwXNw_qGaDwdhLg9ej08DY" >> .env
+          echo "SUPABASE_URL=https://tgwbdaoptufxxygiyplg.supabase.co" >> .env
+          echo "SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnd2JkYW9wdHVmeHh5Z2l5cGxnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2MTkyNjYsImV4cCI6MjA5MTE5NTI2Nn0.VqKkta9Zja2w-tEwRUkrhuxOPGPxXM3maAWN8u39bE0" >> .env
 
       - name: Install Dependencies
         run: flutter pub get
@@ -31,7 +31,7 @@ jobs:
       - name: Build Web
         run: |
           flutter build web --base-href /fifa_love_fluter/ --release
-          cp .nojekyll build/web/
+          touch build/web/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
