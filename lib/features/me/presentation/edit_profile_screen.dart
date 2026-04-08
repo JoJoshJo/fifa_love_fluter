@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -56,7 +56,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   
   // Media
   String? _avatarUrl;
-  File? _localImage;
+  XFile? _pickedFile;
+  Uint8List? _imageBytes;
 
   final List<String> _cities = [
     'Doha', 'Al Khor', 'Al Wakrah', 'Lusail', 'Rayyan', 'Dallas'
@@ -143,7 +144,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (picked != null) {
-      setState(() => _localImage = File(picked.path));
+      final bytes = await picked.readAsBytes();
+      setState(() {
+        _pickedFile = picked;
+        _imageBytes = bytes;
+      });
     }
   }
 
@@ -167,8 +172,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
       final userId = SupabaseConfig.client.auth.currentUser!.id;
       
       String? finalAvatarUrl = _avatarUrl;
-      if (_localImage != null) {
-        finalAvatarUrl = await _repo.uploadAvatar(userId, _localImage!);
+      if (_pickedFile != null) {
+        finalAvatarUrl = await _repo.uploadAvatar(userId, _pickedFile!);
       }
 
       final updates = {
@@ -336,8 +341,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: textColor.withValues(alpha: 0.1),
-                  backgroundImage: _localImage != null ? FileImage(_localImage!) : (_avatarUrl != null ? NetworkImage(_avatarUrl!) : null) as ImageProvider?,
-                  child: (_localImage == null && _avatarUrl == null) ? Icon(LucideIcons.user, size: 50, color: textMuted) : null,
+                  backgroundImage: _imageBytes != null 
+                      ? MemoryImage(_imageBytes!) 
+                      : (_avatarUrl != null ? NetworkImage(_avatarUrl!) : null) as ImageProvider?,
+                  child: (_imageBytes == null && _avatarUrl == null) ? Icon(LucideIcons.user, size: 50, color: textMuted) : null,
                 ),
                 Positioned(
                   bottom: 0, right: 0,

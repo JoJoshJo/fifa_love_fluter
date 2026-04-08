@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase/supabase_config.dart';
 
@@ -19,13 +19,14 @@ class MeRepository {
     await _client.from('profiles').update(updates).eq('id', userId);
   }
 
-  Future<String?> uploadAvatar(String userId, File imageFile) async {
-    final ext = imageFile.path.split('.').last;
+  Future<String?> uploadAvatar(String userId, XFile imageFile) async {
+    final bytes = await imageFile.readAsBytes();
+    final ext = imageFile.name.split('.').last;
     final path = '$userId/avatar.$ext';
 
-    await _client.storage.from('avatars').upload(
+    await _client.storage.from('avatars').uploadBinary(
           path,
-          imageFile,
+          bytes,
           fileOptions: const FileOptions(upsert: true),
         );
 
@@ -44,20 +45,22 @@ class MeRepository {
 
   Future<void> submitVerificationRequest({
     required String userId,
-    required File idPhoto,
-    required File selfie,
+    required XFile idPhoto,
+    required XFile selfie,
   }) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     
     // 1. Upload ID Photo
     final idPath = '$userId/verification/id_$timestamp.jpg';
-    await _client.storage.from('verification-docs').upload(idPath, idPhoto);
-    final idUrl = await _client.storage.from('verification-docs').createSignedUrl(idPath, 604800); // 7 days expiry
+    final idBytes = await idPhoto.readAsBytes();
+    await _client.storage.from('verification-docs').uploadBinary(idPath, idBytes);
+    final idUrl = await _client.storage.from('verification-docs').createSignedUrl(idPath, 604800);
 
     // 2. Upload Selfie
     final selfiePath = '$userId/verification/selfie_$timestamp.jpg';
-    await _client.storage.from('verification-docs').upload(selfiePath, selfie);
-    final selfieUrl = await _client.storage.from('verification-docs').createSignedUrl(selfiePath, 604800); // 7 days expiry
+    final selfieBytes = await selfie.readAsBytes();
+    await _client.storage.from('verification-docs').uploadBinary(selfiePath, selfieBytes);
+    final selfieUrl = await _client.storage.from('verification-docs').createSignedUrl(selfiePath, 604800);
 
     // 3. Insert into verification_requests
     await _client.from('verification_requests').insert({

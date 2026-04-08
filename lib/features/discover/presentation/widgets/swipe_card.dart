@@ -335,7 +335,11 @@ class _SwipeCardState extends State<SwipeCard> {
                               ),
                             ),
                           ],
-                                        // ── DYNAMIC SWIPE OVERLAYS ──
+                        ),
+                      ),
+                    ),
+
+                  // ── DYNAMIC SWIPE OVERLAYS ──
                   if (widget.isFront && widget.dragOffset.dx != 0)
                     Positioned.fill(
                       child: AnimatedContainer(
@@ -393,9 +397,6 @@ class _SwipeCardState extends State<SwipeCard> {
                                 letterSpacing: 3,
                               )),
                         ),
-                      ),
-                    ),
-   ),
                       ),
                     ),
                 ],
