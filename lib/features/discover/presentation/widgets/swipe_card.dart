@@ -335,55 +335,67 @@ class _SwipeCardState extends State<SwipeCard> {
                               ),
                             ),
                           ],
+                                        // ── DYNAMIC SWIPE OVERLAYS ──
+                  if (widget.isFront && widget.dragOffset.dx != 0)
+                    Positioned.fill(
+                      child: AnimatedContainer(
+                        duration: Duration.zero,
+                        decoration: BoxDecoration(
+                          color: widget.dragOffset.dx > 0 
+                            ? const Color(0xFF4CB572).withValues(alpha: (widget.dragOffset.dx / 150).clamp(0.0, 0.4)) // Green tint for LIKE
+                            : const Color(0xFFE8437A).withValues(alpha: (widget.dragOffset.dx.abs() / 150).clamp(0.0, 0.4)), // Pink tint for NOPE
                         ),
                       ),
                     ),
 
                   // LIKE label on right drag
-                  if (widget.isFront && widget.dragOffset.dx > 20)
+                  if (widget.isFront && widget.dragOffset.dx > 12)
                     Positioned(
-                      top: 24,
-                      left: 20,
+                      top: 40,
+                      left: 24,
                       child: Transform.rotate(
-                        angle: -0.1,
+                        angle: -0.15,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            border: Border.all(color: const Color(0xFF4CB572), width: 2.5),
-                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFF4CB572), width: 3.5),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text('LIKE',
                               style: GoogleFonts.spaceGrotesk(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
                                 color: const Color(0xFF4CB572),
-                                letterSpacing: 2,
+                                letterSpacing: 3,
                               )),
                         ),
                       ),
                     ),
 
                   // NOPE label on left drag
-                  if (widget.isFront && widget.dragOffset.dx < -20)
+                  if (widget.isFront && widget.dragOffset.dx < -12)
                     Positioned(
-                      top: 24,
-                      right: 20,
+                      top: 40,
+                      right: 24,
                       child: Transform.rotate(
-                        angle: 0.1,
+                        angle: 0.15,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            border: Border.all(color: const Color(0xFFE8437A), width: 2.5),
-                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFE8437A), width: 3.5),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text('NOPE',
                               style: GoogleFonts.spaceGrotesk(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
                                 color: const Color(0xFFE8437A),
-                                letterSpacing: 2,
+                                letterSpacing: 3,
                               )),
                         ),
+                      ),
+                    ),
+   ),
                       ),
                     ),
                 ],

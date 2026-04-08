@@ -59,10 +59,10 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
           AnimatedPositioned(
             duration: const Duration(milliseconds: 400),
             curve: Curves.elasticOut,
-            left: (MediaQuery.of(context).size.width / 4) * widget.currentIndex + (MediaQuery.of(context).size.width / 8) - 2,
+            left: (MediaQuery.of(context).size.width / 4) * widget.currentIndex + (MediaQuery.of(context).size.width / 8) - 12,
             bottom: 8,
             child: Container(
-              width: 4,
+              width: 24,
               height: 4,
               decoration: BoxDecoration(
                 color: widget.currentIndex == 0 || widget.currentIndex == 1
@@ -70,7 +70,19 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
                     : widget.currentIndex == 2
                         ? const Color(0xFFF2C233) // Gold for World Cup
                         : const Color(0xFF4CB572), // Green for Me
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(2),
+                boxShadow: [
+                  BoxShadow(
+                    color: (widget.currentIndex == 0 || widget.currentIndex == 1
+                            ? const Color(0xFFE8437A)
+                            : widget.currentIndex == 2
+                                ? const Color(0xFFF2C233)
+                                : const Color(0xFF4CB572))
+                        .withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
               ),
             ),
           ),
@@ -82,7 +94,10 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
                 icon: LucideIcons.home,
                 label: 'DISCOVER',
                 activeColor: const Color(0xFFE8437A),
-                onTap: () => widget.onTap(0),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  widget.onTap(0);
+                },
               ),
               _AnimatedNavItem(
                 index: 1,
@@ -90,7 +105,10 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
                 icon: LucideIcons.messageCircle,
                 label: 'CHAT',
                 activeColor: const Color(0xFFE8437A),
-                onTap: () => widget.onTap(1),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  widget.onTap(1);
+                },
                 showBadge: true,
                 unreadStream: _unreadCountStream,
               ),
@@ -100,7 +118,10 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
                 icon: LucideIcons.trophy,
                 label: 'WORLD CUP',
                 activeColor: const Color(0xFFF2C233),
-                onTap: () => widget.onTap(2),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  widget.onTap(2);
+                },
               ),
               _AnimatedNavItem(
                 index: 3,
@@ -108,7 +129,10 @@ class _FifaBottomNavState extends State<FifaBottomNav> {
                 icon: LucideIcons.user,
                 label: 'ME',
                 activeColor: const Color(0xFF4CB572),
-                onTap: () => widget.onTap(3),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  widget.onTap(3);
+                },
               ),
             ],
           ),

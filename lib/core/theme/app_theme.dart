@@ -135,13 +135,13 @@ class AppTheme {
       bodyMedium: GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: const Color(0xFF4A5D55),
+        color: const Color(0xFF2C3E35), // Darkened from 4A5D55 for better contrast
       ),
       labelSmall: GoogleFonts.spaceMono(
         fontSize: 10,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500, // Slightly bolder
         letterSpacing: 2,
-        color: const Color(0xFF4A5D55),
+        color: const Color(0xFF2C3E35), // Darkened from 4A5D55
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -179,12 +179,12 @@ class AppTheme {
     ),
     cardTheme: CardThemeData(
       color: Colors.white,
-      elevation: 2,
-      shadowColor: Colors.black.withValues(alpha: 0.05),
+      elevation: 4, // Increased from 2 for better depth
+      shadowColor: Colors.black.withValues(alpha: 0.08), // Slightly stronger shadow
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: const Color(0xFF4CB572).withValues(alpha: 0.1),
+          color: const Color(0xFF4CB572).withValues(alpha: 0.15), // Slightly more visible border
           width: 1,
         ),
       ),

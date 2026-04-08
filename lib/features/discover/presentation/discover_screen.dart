@@ -40,6 +40,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   int _dailySwipes = 0;
   late AnimationController _hintController;
   late Animation<Offset> _hintAnimation;
+  bool _showTutorial = false;
 
   static const int _freeLimit = 20;
   static const int _hardLimit = 25;
@@ -133,6 +134,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
           });
         }
       });
+    }
+
+    
+    final hasSeenTutorial = prefs.getBool('has_seen_tutorial_v1') ?? false;
+    if (!hasSeenTutorial && mounted) {
+      setState(() => _showTutorial = true);
     }
 
     await _fetchMyAvatar();
@@ -866,6 +873,17 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
               },
               onKeepSwiping: () => setState(() => _showMatch = false),
             ),
+
+          if (_showTutorial)
+            _TutorialOverlay(
+              onDismiss: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('has_seen_tutorial_v1', true);
+                if (mounted) {
+                  setState(() => _showTutorial = false);
+                }
+              },
+            ),
         ],
       ),
     );
@@ -1334,6 +1352,145 @@ class _PulsingDotState extends State<PulsingDot>
               BoxDecoration(shape: BoxShape.circle, color: widget.color),
         ),
       ),
+    );
+  }
+}
+
+class _TutorialOverlay extends StatelessWidget {
+  final VoidCallback onDismiss;
+
+  const _TutorialOverlay({required this.onDismiss});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Material(
+        color: Colors.transparent,
+        child: GestureDetector(
+          onTap: onDismiss,
+          child: Container(
+            color: Colors.black.withValues(alpha: 0.9),
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'WELCOME TO TURF&ARDOR',
+                  style: GoogleFonts.spaceMono(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFF2C233),
+                    letterSpacing: 3,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'How to score a match',
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 60),
+                _TutorialRow(
+                  icon: LucideIcons.arrowRight,
+                  label: 'SWIPE RIGHT',
+                  sub: 'to like a fan',
+                  color: const Color(0xFF4CB572),
+                ),
+                const SizedBox(height: 48),
+                _TutorialRow(
+                  icon: LucideIcons.arrowLeft,
+                  label: 'SWIPE LEFT',
+                  sub: 'to pass',
+                  color: const Color(0xFFE8437A),
+                ),
+                const SizedBox(height: 48),
+                _TutorialRow(
+                  icon: LucideIcons.mousePointer2,
+                  label: 'TAP CARDS',
+                  sub: 'to see more photos',
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 80),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 42, vertical: 16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white30),
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  child: Text(
+                    'GOT IT',
+                    style: GoogleFonts.spaceMono(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TutorialRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String sub;
+  final Color color;
+
+  const _TutorialRow({
+    required this.icon,
+    required this.label,
+    required this.sub,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withValues(alpha: 0.15),
+            border: Border.all(color: color.withValues(alpha: 0.5)),
+          ),
+          child: Icon(icon, color: color, size: 22),
+        ),
+        const SizedBox(width: 20),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.spaceMono(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: color,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              sub,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                color: Colors.white.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
