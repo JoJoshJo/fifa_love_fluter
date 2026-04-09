@@ -350,7 +350,7 @@ class _MeScreenState extends ConsumerState<MeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(name,
+                Text('$name, ${_profile['age'] ?? 24}',
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 28,
                     fontWeight: FontWeight.w700,
@@ -371,26 +371,51 @@ class _MeScreenState extends ConsumerState<MeScreen> {
               builder: (context) {
                 final nationality = _profile['nationality'] as String? ?? '';
                 final team = _profile['team_supported'] as String? ?? '';
-                if (nationality.isEmpty) return const SizedBox.shrink();
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                final city = _profile['city'] as String? ?? '';
+                final gender = _profile['gender'] as String? ?? '';
+                
+                if (nationality.isEmpty && city.isEmpty) return const SizedBox.shrink();
+                
+                return Column(
                   children: [
-                    Builder(builder: (context) {
-                      final f = _flag(nationality);
-                      return f is IconData
-                          ? Icon(f, size: 14, color: muted)
-                          : Text(f as String, style: const TextStyle(fontSize: 14));
-                    }),
-                    const SizedBox(width: 8),
-                    Text(
-                      [
-                        nationality,
-                        if (team.isNotEmpty) team,
-                      ].join('  ·  '),
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: muted,
-                      )),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Builder(builder: (context) {
+                          final f = _flag(nationality);
+                          return f is IconData
+                              ? Icon(f, size: 14, color: muted)
+                              : Text(f as String, style: const TextStyle(fontSize: 14));
+                        }),
+                        const SizedBox(width: 8),
+                        Text(
+                          [
+                            nationality,
+                            if (team.isNotEmpty) team,
+                          ].join('  ·  '),
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: muted,
+                          )),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(LucideIcons.mapPin, size: 12, color: accentGreen.withValues(alpha: 0.6)),
+                        const SizedBox(width: 4),
+                        Text(
+                          [
+                            if (city.isNotEmpty) 'Currently in $city',
+                            if (gender.isNotEmpty) gender,
+                          ].join('  ·  '),
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: muted.withValues(alpha: 0.7),
+                          )),
+                      ],
+                    ),
                   ],
                 );
               },
@@ -398,7 +423,26 @@ class _MeScreenState extends ConsumerState<MeScreen> {
 
             const SizedBox(height: 24),
 
-            // ── Profile Activity (Positive Feedback) ──
+            const SizedBox(height: 20),
+            
+            // ── BIO ────────────────────────────
+            if (_profile['bio'] != null && (_profile['bio'] as String).isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  _profile['bio'],
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: text.withValues(alpha: 0.8),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+
+            // ── ACTIVITY STATS ─────────────────
+            const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Container(
@@ -445,10 +489,51 @@ class _MeScreenState extends ConsumerState<MeScreen> {
 
             const SizedBox(height: 20),
 
+            // ── MATCHING PREFERENCES ────────────
+            Builder(
+              builder: (context) {
+                final preferences = _profile['match_type_preference'] as List? ?? [];
+                if (preferences.isEmpty) return const SizedBox.shrink();
+                
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _sectionLabel('LOOKING FOR', color: accentGreen),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: preferences.map((p) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: accentGreen.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: accentGreen.withValues(alpha: 0.2)),
+                            ),
+                            child: Text(
+                              p.toString(),
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: accentGreen,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                );
+              },
+            ),
+
             // ── PROFILE STRENGTH ───────────────
             Padding(
-              padding: const EdgeInsets
-                .symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -498,64 +583,6 @@ class _MeScreenState extends ConsumerState<MeScreen> {
                         valueColor: AlwaysStoppedAnimation(score < 50 ? const Color(0xFFE8437A) : (score < 85 ? const Color(0xFFF2C233) : const Color(0xFF4CB572))),
                       ),
                     ),
-                    if (missing.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      ...missing.take(2).map((tip) {
-                        final String tipText = tip as String;
-                        int initialTab = 0;
-                        final String lowerTip = tipText.toLowerCase();
-                        
-                        if (lowerTip.contains('interests') || lowerTip.contains('match')) {
-                          initialTab = 2; // MATCHING tab
-                        } else if (lowerTip.contains('team')) {
-                          initialTab = 1; // FOOTBALL tab
-                        } else {
-                          initialTab = 0; // ABOUT tab
-                        }
-                        
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => EditProfileScreen(
-                                  initialProfile: _profile,
-                                  initialTab: initialTab,
-                                ),
-                              ),
-                            ).then((updated) {
-                              if (updated == true) _loadProfile();
-                            }),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  LucideIcons.plusCircle,
-                                  size: 14,
-                                  color: Color(0xFFE8437A),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    tipText,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color(0xFFE8437A),
-                                    ),
-                                  ),
-                                ),
-                                Icon(
-                                  LucideIcons.chevronRight,
-                                  size: 14,
-                                  color: const Color(0xFFE8437A).withValues(alpha: 0.5),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
                   ],
                 ),
               ),
