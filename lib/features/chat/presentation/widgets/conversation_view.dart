@@ -146,12 +146,14 @@ class _ConversationViewState extends State<ConversationView> {
     final yesterday = today.subtract(const Duration(days: 1));
     final checkDate = DateTime(date.year, date.month, date.day);
 
-    if (checkDate == today) return "Today";
-    if (checkDate == yesterday) return "Yesterday";
-    
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}';
+    if (checkDate == today) return 'TODAY';
+    if (checkDate == yesterday) return 'YESTERDAY';
+
+    const months = [
+      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
   bool _shouldShowTime(List<Map<String, dynamic>> messages, int index) {
@@ -508,9 +510,16 @@ class _ConversationViewState extends State<ConversationView> {
 
                 final messages = snapshot.data ?? [];
 
+                // Capture the count BEFORE the update — itemBuilder uses this
+                // to determine which messages are brand-new vs historical.
+                final previousCount = _lastMessageCount;
+
                 if (messages.isNotEmpty && messages.length > _lastMessageCount) {
+                  final isInitialLoad = _lastMessageCount == 0;
                   final newMsg = messages.last;
-                  if (newMsg['sender_id'] != widget.currentUserId) {
+
+                  if (!isInitialLoad && newMsg['sender_id'] != widget.currentUserId) {
+                    // Only notify for incremental new messages, not history on load
                     final otherName = other['name'] ?? 'Match';
                     NotificationService().showMessageNotification(
                       senderName: otherName,
@@ -518,6 +527,9 @@ class _ConversationViewState extends State<ConversationView> {
                       matchId: widget.match['id'] as String,
                     );
                   }
+
+                  // On initial load, snapshot all existing messages as non-new
+                  // so they don't all animate at once. Only true increments animate.
                   _lastMessageCount = messages.length;
                 }
 
@@ -676,7 +688,7 @@ class _ConversationViewState extends State<ConversationView> {
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 1.5,
-                                  color: const Color(0xFF6B9E8A),
+                                  color: const Color(0xFF9BB3AF),
                                 ),
                               ),
                             ),
@@ -687,6 +699,8 @@ class _ConversationViewState extends State<ConversationView> {
                           showTime: _shouldShowTime(messages, index),
                           status: msg['status'] ?? 'sent',
                           showStatus: showStatus,
+                          // Animate only if this message arrived after the previous load
+                          isNew: messageIndex >= previousCount,
                         ),
                       ],
                     );

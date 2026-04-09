@@ -9,6 +9,7 @@ class MessageBubble extends StatelessWidget {
   final bool showTime;
   final String? status; // 'sent', 'read', or null
   final bool showStatus;
+  final bool isNew; // When true, plays the slide+fade entrance animation
 
   const MessageBubble({
     super.key,
@@ -17,6 +18,7 @@ class MessageBubble extends StatelessWidget {
     required this.showTime,
     this.status,
     this.showStatus = false,
+    this.isNew = false,
   });
 
   String _formatTime(String? isoString) {
@@ -65,23 +67,9 @@ class MessageBubble extends StatelessWidget {
                 ),
               ),
             ),
-          TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOutCubic,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, value, child) {
-              return Opacity(
-                opacity: value,
-                child: Transform.translate(
-                  offset: Offset(
-                    isMe ? (1.0 - value) * 30 : (value - 1.0) * 30,
-                    0,
-                  ),
-                  child: child,
-                ),
-              );
-            },
-            child: Row(
+          // Entrance animation — only plays for new messages, not history
+          Builder(builder: (context) {
+            final bubble = Row(
               mainAxisAlignment:
                   isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
               children: [
@@ -140,8 +128,24 @@ class MessageBubble extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
+            );
+
+            if (!isNew) return bubble;
+
+            // Only animate brand-new messages
+            return TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              tween: Tween(begin: 0.0, end: 1.0),
+              builder: (context, value, child) {
+                return Transform.translate(
+                  offset: Offset(0, (1 - value) * 12),
+                  child: Opacity(opacity: value, child: child),
+                );
+              },
+              child: bubble,
+            );
+          }),
           if (isMe && showStatus)
             Padding(
               padding: const EdgeInsets.only(top: 4, right: 4),
