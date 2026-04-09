@@ -78,6 +78,25 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    try {
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'https://jojoshjo.github.io/fifa_love_fluter/',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google sign-in failed: $e'),
+            backgroundColor: const Color(0xFFC62828),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildLabel(BuildContext context, String text) {
     final theme = Theme.of(context);
     final isLight = theme.brightness == Brightness.light;
@@ -224,21 +243,81 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 24),
                 
                 // DIVIDER
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: theme.dividerColor.withValues(alpha: 0.2))),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        "or",
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: isLight
+                              ? const Color(0xFFE8DDD0).withValues(alpha: 0.5)
+                              : const Color(0xFF1E4A33).withValues(alpha: 0.5),
                         ),
                       ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'or',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: isLight
+                                ? const Color(0xFF6B9E8A)
+                                : const Color(0xFF9BB3AF).withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: isLight
+                              ? const Color(0xFFE8DDD0).withValues(alpha: 0.5)
+                              : const Color(0xFF1E4A33).withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // GOOGLE BUTTON
+                GestureDetector(
+                  onTap: _signInWithGoogle,
+                  child: Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(26),
+                      color: isLight
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.08),
+                      border: Border.all(
+                        color: isLight
+                            ? const Color(0xFFE8DDD0)
+                            : Colors.white.withValues(alpha: 0.12),
+                        width: 1,
+                      ),
                     ),
-                    Expanded(child: Divider(color: theme.dividerColor.withValues(alpha: 0.2))),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: Image.asset('assets/images/google_g.png'),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Continue with Google',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isLight
+                                ? const Color(0xFF0D2B1E)
+                                : const Color(0xFFEBF2EE),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/widgets/particle_background.dart';
@@ -33,6 +34,24 @@ class _LandingScreenState extends State<LandingScreen>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'https://jojoshjo.github.io/fifa_love_fluter/',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google sign-in failed: $e'),
+            backgroundColor: const Color(0xFFC62828),
+          ),
+        );
+      }
+    }
   }
 
   Widget _animatedElement({
@@ -127,12 +146,13 @@ class _LandingScreenState extends State<LandingScreen>
                       slideOffset: -0.3,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 6),
+                            horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(20),
+                          color: const Color(0xFF080F0C).withValues(alpha: 0.7),
                           border: Border.all(
-                              color: const Color(0xFFF2C233).withValues(alpha: 0.3)),
+                            color: const Color(0xFFF2C233).withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -197,9 +217,15 @@ class _LandingScreenState extends State<LandingScreen>
                               Text(
                                 '  16 cities  ·  48 nations  ·  1 summer',
                                 style: GoogleFonts.spaceMono(
-                                  fontSize: 8,
-                                  color: Colors.white.withValues(alpha: 0.5),
-                                  letterSpacing: 0.8,
+                                  fontSize: 11,
+                                  color: const Color(0xFF9BB3AF),
+                                  letterSpacing: 1.5,
+                                  shadows: [
+                                    Shadow(
+                                      color: const Color(0xFF080F0C).withValues(alpha: 0.8),
+                                      blurRadius: 8,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -240,7 +266,76 @@ class _LandingScreenState extends State<LandingScreen>
                             ),
                             showShadow: true,
                           ),
-                          const SizedBox(height: 8),
+
+                          // DIVIDER
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    height: 1,
+                                    color: const Color(0xFF1E4A33).withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  child: Text(
+                                    'or',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13,
+                                      color: const Color(0xFF9BB3AF).withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    height: 1,
+                                    color: const Color(0xFF1E4A33).withValues(alpha: 0.5),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // GOOGLE BUTTON
+                          GestureDetector(
+                            onTap: _signInWithGoogle,
+                            child: Container(
+                              height: 52,
+                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(26),
+                                color: Colors.white.withValues(alpha: 0.08),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.12),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: Image.asset('assets/images/google_g.png'),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Continue with Google',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFFEBF2EE),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
                           _actionButton(
                             onTap: () => Navigator.push(
                               context,

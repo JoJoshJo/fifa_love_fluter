@@ -94,6 +94,7 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/images/google_g.png
     - assets/icon/
     - assets/splash/
 
