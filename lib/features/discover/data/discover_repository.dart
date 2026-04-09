@@ -56,7 +56,13 @@ class DiscoverRepository {
       return finalProfiles;
     } catch (e) {
       debugPrint('Error fetching profiles via smart match: $e');
-      return _mockProfiles();
+      // Only use mock profiles in debug/development — never show fake data to real users
+      assert(() {
+        // ignore: avoid_print
+        print('[DISCOVER] Using mock profiles (debug only)');
+        return true;
+      }());
+      return const bool.fromEnvironment('dart.vm.product') ? [] : _mockProfiles();
     }
   }
 

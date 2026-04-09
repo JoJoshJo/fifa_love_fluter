@@ -107,24 +107,8 @@ class _LandingScreenState extends State<LandingScreen>
             ),
           ),
 
-          // DEBUG VERSION TAG
-          Positioned(
-            top: 10,
-            right: 10,
-            child: SafeArea(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Text(
-                  'DEBUG v1.1.0',
-                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
+
+
 
           // 2. PARTICLE SYSTEM (Sitting on image)
           const ParticleBackground(),
