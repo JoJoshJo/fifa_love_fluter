@@ -118,6 +118,24 @@ class _SignupScreenState extends State<SignupScreen> {
       
       final user = response.user;
       
+      // Supabase returns a user with identities = [] if email already exists
+      if (user != null && (user.identities == null || user.identities!.isEmpty)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account already exists. Check your email or try signing in.'),
+              backgroundColor: Color(0xFFF2C233),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => EmailConfirmScreen(email: email)),
+          );
+        }
+        return;
+      }
+      
       if (user != null) {
         debugPrint('SIGNUP SUCCESS: User ID = ${user.id}');
         debugPrint('SESSION STATUS: ${response.session != null ? "ACTIVE" : "NONE"}');

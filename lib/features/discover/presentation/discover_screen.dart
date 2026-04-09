@@ -388,13 +388,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
       matchScore: (profile['match_score'] as int?) ?? 20,
     );
 
-    if (!mounted) return;
-
-    if (result != null) {
-      setState(() {
-        _matchedProfile = profile;
-        _showMatch = true;
-      });
+    if (result != null && result['matched'] == true && mounted) {
+      _showMatchReveal(profile);
     }
 
     setState(() => _currentIndex++);

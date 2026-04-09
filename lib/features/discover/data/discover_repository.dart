@@ -69,7 +69,7 @@ class DiscoverRepository {
     int matchScore = 20,
   }) async {
     try {
-      // 1. Insert swipe action
+      // 1. Insert swipe action (Trigger in DB will handle match creation)
       await SupabaseConfig.client.from('swipe_actions').insert({
         'swiper_id': swiperId,
         'swiped_id': swipedId,
@@ -95,43 +95,31 @@ class DiscoverRepository {
       // 3. Only check for match on likes
       if (action == 'nope') return null;
 
-      // 4. Check for mutual like
-      final mutual = await SupabaseConfig.client
-          .from('swipe_actions')
+      // 4. Check for just-created match in the matches table
+      final ids = [swiperId, swipedId]..sort();
+      final match = await SupabaseConfig.client
+          .from('matches')
           .select('id')
-          .eq('swiper_id', swipedId)
-          .eq('swiped_id', swiperId)
-          .inFilter('action', ['like', 'superlike']);
+          .eq('user_a', ids[0])
+          .eq('user_b', ids[1])
+          .eq('status', 'active')
+          .maybeSingle();
 
-      if (mutual.isNotEmpty) {
-        // Create a match record
-        final ids = [swiperId, swipedId]..sort();
-        String? matchId;
-        try {
-          final match = await SupabaseConfig.client.from('matches').insert({
-            'user_a': ids[0],
-            'user_b': ids[1],
-            'match_score': matchScore,
-            'status': 'active',
-            'created_at': DateTime.now().toIso8601String(),
-          }).select().single();
-          matchId = match['id'] as String?;
-        } catch (_) {
-          // Match might already exist
-          final existing = await SupabaseConfig.client.from('matches').select('id').eq('user_a', ids[0]).eq('user_b', ids[1]).maybeSingle();
-          matchId = existing?['id'] as String?;
-        }
-        
+      if (match != null) {
+        // Notification logic
         try {
           final matchedProfile = await SupabaseConfig.client.from('profiles').select('name').eq('id', swipedId).single();
           await NotificationService()
             .showMatchNotification(
               matchName: matchedProfile['name'],
-              matchId: matchId ?? 'unknown',
+              matchId: match['id'],
             );
         } catch (_) {}
         
-        return {'matched': true};
+        return {
+          'matched': true,
+          'match_id': match['id']
+        };
       }
       return null;
     } catch (e) {
@@ -170,26 +158,21 @@ class DiscoverRepository {
         'p_action': 'like',
       }).catchError((e) => debugPrint('Behavioral learning error: $e')));
 
-      // 3. Check for mutual like
-      final mutual = await SupabaseConfig.client
-          .from('swipe_actions')
+      // 3. Check for match
+      final ids = [swiperId, swipedId]..sort();
+      final match = await SupabaseConfig.client
+          .from('matches')
           .select('id')
-          .eq('swiper_id', swipedId)
-          .eq('swiped_id', swiperId)
-          .inFilter('action', ['like', 'superlike']);
+          .eq('user_a', ids[0])
+          .eq('user_b', ids[1])
+          .eq('status', 'active')
+          .maybeSingle();
 
-      if (mutual.isNotEmpty) {
-        // Create match
-        final ids = [swiperId, swipedId]..sort();
-        final match = await SupabaseConfig.client.from('matches').insert({
-          'user_a': ids[0],
-          'user_b': ids[1],
-          'match_score': matchScore,
-          'status': 'active',
-          'created_at': DateTime.now().toIso8601String(),
-        }).select().single();
-
-        return {'matched': true, 'match_id': match['id']};
+      if (match != null) {
+        return {
+          'matched': true,
+          'match_id': match['id']
+        };
       }
       return null;
     } catch (e) {

@@ -229,3 +229,53 @@ BEGIN
   -- Dummy function to satisfy flutter calls.
 END;
 $$;
+-- ==============================================================================
+-- Match Creation Trigger
+-- ==============================================================================
+
+-- 1. Function to check for mutual likes and create a match
+CREATE OR REPLACE FUNCTION public.handle_mutual_swipe()
+RETURNS trigger AS $$
+DECLARE
+    has_mutual BOOLEAN;
+    user_a_id UUID;
+    user_b_id UUID;
+BEGIN
+    -- Only proceed if the action is a like/superlike
+    IF NEW.action = 'nope' THEN
+        RETURN NEW;
+    END IF;
+
+    -- Check if the other person has already liked the current swiper
+    SELECT EXISTS (
+        SELECT 1 FROM public.swipe_actions
+        WHERE swiper_id = NEW.swiped_id
+        AND swiped_id = NEW.swiper_id
+        AND action IN ('like', 'superlike')
+    ) INTO has_mutual;
+
+    IF has_mutual THEN
+        -- Standardize order: user_a is always the smaller UUID
+        IF NEW.swiper_id < NEW.swiped_id THEN
+            user_a_id := NEW.swiper_id;
+            user_b_id := NEW.swiped_id;
+        ELSE
+            user_a_id := NEW.swiped_id;
+            user_b_id := NEW.swiper_id;
+        END IF;
+
+        -- Insert the match if it doesn't already exist
+        INSERT INTO public.matches (user_a, user_b, status, created_at)
+        VALUES (user_a_id, user_b_id, 'active', NOW())
+        ON CONFLICT (LEAST(user_a, user_b), GREATEST(user_a, user_b)) DO NOTHING;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 2. Trigger to execute function on swipe
+DROP TRIGGER IF EXISTS on_swipe_inserted ON public.swipe_actions;
+CREATE TRIGGER on_swipe_inserted
+  AFTER INSERT ON public.swipe_actions
+  FOR EACH ROW EXECUTE FUNCTION public.handle_mutual_swipe();
