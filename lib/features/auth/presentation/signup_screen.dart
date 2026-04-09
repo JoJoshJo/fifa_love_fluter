@@ -153,17 +153,18 @@ class _SignupScreenState extends State<SignupScreen> {
           }
         }
       }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('An unexpected error occurred. Please try again.'),
-            backgroundColor: Color(0xFFE8437A),
-            behavior: SnackBarBehavior.floating,
-          )
-        );
-      }
-    } finally {
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Debug Error: ${e.toString()}'),
+              backgroundColor: const Color(0xFFE83535),
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 10),
+            ),
+          );
+        }
+      } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
