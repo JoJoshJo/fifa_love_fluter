@@ -23,14 +23,42 @@ void main() async {
     ),
     NotificationService().initialize(),
   ]);
+
+  // Early Deep Link Check for Password Recovery or signup confirmation
+  final uri = Uri.base;
+  bool showResetScreen = false;
   
-  runApp(const ProviderScope(child: TurfAndArdorApp()));
+  if (uri.fragment.contains('code=')) {
+    try {
+      final fragmentPath = uri.fragment.startsWith('/') ? uri.fragment : '/${uri.fragment}';
+      final fragmentUri = Uri.parse(fragmentPath);
+      final code = fragmentUri.queryParameters['code'];
+      final type = fragmentUri.queryParameters['type'];
+
+      if (code != null) {
+        await Supabase.instance.client.auth.exchangeCodeForSession(code);
+        if (type == 'recovery' || fragmentPath.contains('reset-password')) {
+          showResetScreen = true;
+        }
+      }
+    } catch (e) {
+      debugPrint('[INIT_DEEP_LINK_ERROR] $e');
+    }
+  }
+  
+  runApp(ProviderScope(
+    child: TurfAndArdorApp(showResetScreen: showResetScreen)
+  ));
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class TurfAndArdorApp extends ConsumerStatefulWidget {
-  const TurfAndArdorApp({super.key});
+  final bool showResetScreen;
+  const TurfAndArdorApp({
+    super.key,
+    this.showResetScreen = false,
+  });
 
   @override
   ConsumerState<TurfAndArdorApp> createState() => _TurfAndArdorAppState();
@@ -42,7 +70,6 @@ class _TurfAndArdorAppState extends ConsumerState<TurfAndArdorApp> {
   @override
   void initState() {
     super.initState();
-    _handleInitialDeepLink();
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.passwordRecovery) {
         navigatorKey.currentState?.push(
@@ -52,34 +79,6 @@ class _TurfAndArdorAppState extends ConsumerState<TurfAndArdorApp> {
         );
       }
     });
-  }
-
-  Future<void> _handleInitialDeepLink() async {
-    final uri = Uri.base;
-    if (uri.fragment.contains('code=')) {
-      try {
-        // The fragment might look like: /reset-password?code=xxx&type=recovery
-        final fragmentPath = uri.fragment.startsWith('/') ? uri.fragment : '/${uri.fragment}';
-        final fragmentUri = Uri.parse(fragmentPath);
-        final code = fragmentUri.queryParameters['code'];
-        final type = fragmentUri.queryParameters['type'];
-
-        if (code != null) {
-          await Supabase.instance.client.auth.exchangeCodeForSession(code);
-          
-          if (type == 'recovery' || fragmentPath.contains('reset-password')) {
-            navigatorKey.currentState?.pushReplacement(
-              MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
-            );
-          } else if (type == 'signup' || fragmentPath.contains('confirm')) {
-            // AuthGate will handle the established session
-            navigatorKey.currentState?.pushReplacementNamed('/');
-          }
-        }
-      } catch (e) {
-        debugPrint('[DEEP_LINK_ERROR] $e');
-      }
-    }
   }
 
   @override
@@ -99,7 +98,9 @@ class _TurfAndArdorAppState extends ConsumerState<TurfAndArdorApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      home: const SplashScreen(),
+      home: widget.showResetScreen 
+          ? const ResetPasswordScreen() 
+          : const SplashScreen(),
     );
   }
 }
