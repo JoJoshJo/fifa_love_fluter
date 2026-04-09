@@ -143,25 +143,22 @@ class _SignupScreenState extends State<SignupScreen> {
           if (response.session != null) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const MainScreen())
+              MaterialPageRoute(builder: (_) => const MainScreen()),
             );
           } else {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => EmailConfirmScreen(email: email))
+              MaterialPageRoute(builder: (_) => EmailConfirmScreen(email: email)),
             );
           }
         }
-            behavior: SnackBarBehavior.floating,
-          )
-        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('An unexpected error occurred. Please try again.'),
-            backgroundColor: const Color(0xFFE8437A),
+          const SnackBar(
+            content: Text('An unexpected error occurred. Please try again.'),
+            backgroundColor: Color(0xFFE8437A),
             behavior: SnackBarBehavior.floating,
           )
         );
