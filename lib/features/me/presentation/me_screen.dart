@@ -40,12 +40,39 @@ class _MeScreenState extends ConsumerState<MeScreen> {
   Future<void> _loadProfile() async {
     try {
       final profile = await _repo.fetchProfile(_userId);
-      setState(() {
-        _profile = profile;
-        _loading = false;
-      });
-    } catch (_) {
-      setState(() => _loading = false);
+      
+      // SELF-HEALING: If name is missing, try to repair it from session metadata
+      if (profile['name'] == null || profile['name'] == 'Your Name' || profile['name'] == '') {
+        final user = SupabaseConfig.client.auth.currentUser;
+        final metaName = user?.userMetadata?['name'];
+        if (metaName != null) {
+          await _repo.updateProfile(_userId, {'name': metaName});
+          // Reload after repair
+          final repaired = await _repo.fetchProfile(_userId);
+          if (mounted) setState(() => _profile = repaired);
+        } else {
+          if (mounted) setState(() => _profile = profile);
+        }
+      } else {
+        if (mounted) setState(() => _profile = profile);
+      }
+      
+      if (mounted) setState(() => _loading = false);
+    } catch (e) {
+      debugPrint('PROFILE LOAD ERROR: $e');
+      // Attempt to create profile if it's missing entirely
+      try {
+        final user = SupabaseConfig.client.auth.currentUser;
+        if (user != null) {
+          final metaName = user.userMetadata?['name'] ?? 'New Fan';
+          await _repo.updateProfile(user.id, {'name': metaName});
+          final newProfile = await _repo.fetchProfile(user.id);
+          if (mounted) setState(() => _profile = newProfile);
+        }
+      } catch (inner) {
+        debugPrint('PROFILE AUTOCREATE FAILED: $inner');
+      }
+      if (mounted) setState(() => _loading = false);
     }
   }
 
