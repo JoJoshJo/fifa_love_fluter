@@ -102,7 +102,7 @@ class AuthGate extends StatelessWidget {
         'match_type_preference': metadata['match_type_preference'] ?? [],
         'countries_to_match': metadata['countries_to_match'] ?? [],
       });
-      debugPrint('[AUTH_GATE] Profile repaired from metadata.');
+
     } catch (e) {
       debugPrint('[AUTH_GATE] Profile repair failed: $e');
     }

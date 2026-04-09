@@ -104,13 +104,14 @@ class _SignInScreenState extends State<SignInScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
         decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.bottomCenter,
-            radius: 1.5,
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              TurfArdorColors.emeraldForest.withValues(alpha: isLight ? 0.08 : 0.4),
               theme.scaffoldBackgroundColor,
+              TurfArdorColors.emeraldForest.withValues(alpha: isLight ? 0.05 : 0.2),
             ],
+            stops: const [0.7, 1.0],
           ),
         ),
         child: SafeArea(

@@ -42,7 +42,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
     if (_cooldown > 0 || _isResending) return;
 
     setState(() => _isResending = true);
-    debugPrint('RESEND_ATTEMPT: Starting resend for ${widget.email}');
+
 
     try {
       await SupabaseConfig.client.auth.resend(
@@ -50,7 +50,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
         email: widget.email,
       );
       
-      debugPrint('RESEND_SUCCESS: Confirmation email sent');
+
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

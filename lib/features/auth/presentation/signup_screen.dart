@@ -137,8 +137,8 @@ class _SignupScreenState extends State<SignupScreen> {
       }
       
       if (user != null) {
-        debugPrint('SIGNUP SUCCESS: User ID = ${user.id}');
-        debugPrint('SESSION STATUS: ${response.session != null ? "ACTIVE" : "NONE"}');
+        // Signup success - user metadata already stored in session
+
 
         try {
           await SupabaseConfig.client.from('profiles').upsert({
@@ -153,7 +153,7 @@ class _SignupScreenState extends State<SignupScreen> {
             'match_type_preference': _selectedIntentions,
             'countries_to_match': _countriesToMatch,
           });
-          debugPrint('PROFILE UPSERT SUCCESS');
+
         } catch (e) {
           debugPrint('PROFILE UPSERT BLOCKED/FAILED: $e');
         }

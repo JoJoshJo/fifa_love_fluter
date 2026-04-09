@@ -133,7 +133,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
       if (!kIsWeb) {
         // Standard XFile doesn't have delete, but if it's on mobile we could potentially find it.
         // However, it's safer to just let the system temp folder handle it or skip deletion.
-        debugPrint('Skipping local file deletion on current platform');
+
       }
 
       _nextPage(); // Move to success page

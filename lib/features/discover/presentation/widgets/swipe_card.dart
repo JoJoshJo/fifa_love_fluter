@@ -411,7 +411,7 @@ class _SwipeCardState extends State<SwipeCard> {
               child: Container(
                 width: double.infinity,
                 color: isLight ? const Color(0xFFF5F0E8) : const Color(0xFF0D1A13),
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -519,7 +519,7 @@ class _SwipeCardState extends State<SwipeCard> {
                         ),
                       ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
 
                     // ── INTEREST TAGS ──
                     if (interests.isNotEmpty)

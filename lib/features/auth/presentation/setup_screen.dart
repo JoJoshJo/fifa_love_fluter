@@ -292,7 +292,7 @@ class _SetupScreenState extends State<SetupScreen> {
 
       await SupabaseConfig.client.from('profiles').upsert(profileData);
 
-      debugPrint('[SETUP] Profile fully upserted: $profileData');
+
 
       if (mounted) {
         Navigator.pushAndRemoveUntil(
@@ -327,13 +327,14 @@ class _SetupScreenState extends State<SetupScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
         decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.bottomCenter,
-            radius: 1.5,
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              TurfArdorColors.emeraldForest.withValues(alpha: isLight ? 0.08 : 0.3),
               theme.scaffoldBackgroundColor,
+              TurfArdorColors.emeraldForest.withValues(alpha: isLight ? 0.05 : 0.15),
             ],
+            stops: const [0.7, 1.0],
           ),
         ),
         child: SafeArea(
@@ -503,30 +504,36 @@ class _SetupScreenState extends State<SetupScreen> {
         // Local or Visiting
         _label(context, 'ARE YOU...'),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _localVisitCard(
-                title: "I'm a Local",
-                subtitle: "I live here",
-                icon: LucideIcons.home,
-                iconColor: Colors.white,
-                isSelected: _isLocal == true,
-                onTap: () => setState(() => _isLocal = true),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.42,
+                child: _localVisitCard(
+                  title: "I'm a Local",
+                  subtitle: "I live here",
+                  icon: LucideIcons.home,
+                  iconColor: Colors.white,
+                  isSelected: _isLocal == true,
+                  onTap: () => setState(() => _isLocal = true),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _localVisitCard(
-                title: "Visiting",
-                subtitle: "In for the games",
-                icon: LucideIcons.plane,
-                iconColor: isLight ? const Color(0xFF0D2B1E) : Colors.white,
-                isSelected: _isLocal == false,
-                onTap: () => setState(() => _isLocal = false),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.42,
+                child: _localVisitCard(
+                  title: "Visiting",
+                  subtitle: "In for the games",
+                  icon: LucideIcons.plane,
+                  iconColor: isLight ? const Color(0xFF0D2B1E) : Colors.white,
+                  isSelected: _isLocal == false,
+                  onTap: () => setState(() => _isLocal = false),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
 
         const SizedBox(height: 24),
