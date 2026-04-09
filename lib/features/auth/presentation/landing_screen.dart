@@ -83,34 +83,33 @@ class _LandingScreenState extends State<LandingScreen>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // 1. BACKGROUND IMAGE — Full bleed with vignette
+          // LAYER 1: Full bleed background image
           Positioned.fill(
-            child: ShaderMask(
-              shaderCallback: (rect) {
-                return const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black12,
-                    Colors.black54,
-                    Color(0xFF080F0C), // deep green/black
-                  ],
-                  stops: [0.0, 0.45, 0.85],
-                ).createShader(rect);
-              },
-              blendMode: BlendMode.darken,
-              child: Image.asset(
-                'assets/images/hero_player.jpg',
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: Colors.black),
-              ),
+            child: Image.asset(
+              'assets/images/landing_hero.png',
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(color: Colors.black),
             ),
           ),
 
-
-
-
-          // 2. PARTICLE SYSTEM (Sitting on image)
+          // LAYER 2: Dark gradient overlay so text is readable
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF080F0C).withValues(alpha: 0.3),  // slight dark top
+                    const Color(0xFF080F0C).withValues(alpha: 0.0),  // clear middle (show the couple)
+                    const Color(0xFF080F0C).withValues(alpha: 0.7),  // darken below couple
+                    const Color(0xFF080F0C).withValues(alpha: 0.95), // near solid at bottom for buttons
+                  ],
+                  stops: const [0.0, 0.25, 0.55, 0.75],
+                ),
+              ),
+            ),
+          ),          // 2. PARTICLE SYSTEM (Sitting on image)
           const ParticleBackground(),
 
           // 3. FOREGROUND CONTENT — Proportional Layout
