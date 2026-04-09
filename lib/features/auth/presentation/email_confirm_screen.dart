@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'signin_screen.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/supabase/supabase_config.dart';
 
 class EmailConfirmScreen extends StatefulWidget {
   final String email;
