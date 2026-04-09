@@ -28,17 +28,27 @@ void main() async {
   final uri = Uri.base;
   bool showResetScreen = false;
   
+  // Debug logging for troubleshooting hash routes
+  debugPrint('DEBUG: Current URL: ${uri.toString()}');
+  debugPrint('DEBUG: Fragment: ${uri.fragment}');
+  
   if (uri.fragment.contains('code=')) {
     try {
-      final fragmentPath = uri.fragment.startsWith('/') ? uri.fragment : '/${uri.fragment}';
-      final fragmentUri = Uri.parse(fragmentPath);
-      final code = fragmentUri.queryParameters['code'];
-      final type = fragmentUri.queryParameters['type'];
+      // Use a dummy base URL to reliably parse the hash fragment as a path
+      final fragment = uri.fragment.startsWith('/') ? uri.fragment : '/${uri.fragment}';
+      final recoveryUri = Uri.parse('https://fifalove.app$fragment');
+      
+      final code = recoveryUri.queryParameters['code'];
+      final type = recoveryUri.queryParameters['type'];
 
       if (code != null) {
+        debugPrint('DEBUG: Exchanging code for session...');
         await Supabase.instance.client.auth.exchangeCodeForSession(code);
-        if (type == 'recovery' || fragmentPath.contains('reset-password')) {
+        debugPrint('DEBUG: Session exchange successful. Type: $type');
+        
+        if (type == 'recovery' || fragment.contains('reset-password')) {
           showResetScreen = true;
+          debugPrint('DEBUG: Recovery flow detected. Setting showResetScreen = true');
         }
       }
     } catch (e) {
