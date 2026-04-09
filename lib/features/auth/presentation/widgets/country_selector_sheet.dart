@@ -122,6 +122,8 @@ class _CountrySelectorSheetState extends State<CountrySelectorSheet> {
                         _tempSelected.remove(country);
                       }
                     });
+                    // Auto-save selection to parent state
+                    widget.onSelect(_tempSelected);
                   },
                   title: Text(
                     country,
@@ -147,25 +149,32 @@ class _CountrySelectorSheetState extends State<CountrySelectorSheet> {
             child: Row(
               children: [
                 TextButton(
-                  onPressed: () => setState(() => _tempSelected.clear()),
+                  onPressed: () {
+                    setState(() => _tempSelected.clear());
+                    widget.onSelect(_tempSelected);
+                  },
                   child: Text(
                     "Clear all",
                     style: GoogleFonts.inter(
-                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                      color: TurfArdorColors.error.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 const Spacer(),
                 ElevatedButton(
-                  onPressed: () {
-                    widget.onSelect(_tempSelected);
-                    Navigator.pop(context);
-                  },
+                  onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    backgroundColor: TurfArdorColors.emeraldForest,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
                   ),
-                  child: const Text("Apply Selection"),
+                  child: Text(
+                    "Done",
+                    style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
