@@ -125,14 +125,6 @@ class _LandingScreenState extends State<LandingScreen>
               ),
             ),
           ),
-              blendMode: BlendMode.darken,
-              child: Image.asset(
-                'assets/images/hero_couple.png',
-                fit: BoxFit.cover,
-                alignment: const Alignment(0, -0.2), // Focus more on faces
-              ),
-            ),
-          ),
 
           // 2. PARTICLE SYSTEM (Sitting on image)
           const ParticleBackground(),
