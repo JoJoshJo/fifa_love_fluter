@@ -36,7 +36,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     setState(() => _loading = true);
     try {
-      await SupabaseConfig.client.auth.resetPasswordForEmail(email);
+      await SupabaseConfig.client.auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'https://jojoshjo.github.io/fifa_love_fluter/',
+      );
       if (mounted) setState(() => _emailSent = true);
     } on AuthException catch (e) {
       if (mounted) {
