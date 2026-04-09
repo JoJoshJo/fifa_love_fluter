@@ -283,13 +283,14 @@ class _SetupScreenState extends State<SetupScreen> {
           (route) => false,
         );
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Something went wrong — please try again'),
-            backgroundColor: Color(0xFFE83535),
+          SnackBar(
+            content: Text('SETUP_ERROR: ${e.toString()}'),
+            backgroundColor: const Color(0xFFE83535),
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 10),
           ),
         );
         setState(() => _saving = false);
