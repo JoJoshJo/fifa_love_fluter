@@ -102,6 +102,7 @@ class _SignupScreenState extends State<SignupScreen> {
       final response = await SupabaseConfig.client.auth.signUp(
         email: email,
         password: password,
+        emailRedirectTo: 'https://jojoshjo.github.io/fifa_love_fluter/',
         data: {
           'name': _nameController.text.trim(),
           'age': int.tryParse(_ageController.text) ?? 18,
