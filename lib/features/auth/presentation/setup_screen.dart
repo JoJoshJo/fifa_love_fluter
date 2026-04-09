@@ -269,7 +269,11 @@ class _SetupScreenState extends State<SetupScreen> {
   Future<void> _finish() async {
     setState(() => _saving = true);
     try {
+      final user = SupabaseConfig.client.auth.currentUser;
+      final name = user?.userMetadata?['name'] ?? 'New Fan';
+      
       await _repo.updateProfile(_userId, {
+        'name': name,
         'nationality': _nationality,
         'team_supported': _team.isNotEmpty ? _team : null,
         'is_local': _isLocal,
