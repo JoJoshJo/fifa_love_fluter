@@ -205,7 +205,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                           child: SizedBox(height: 16, child: VerticalDivider(width: 1)),
                         ),
                       ),
-                      _buildStepRow(3, "Return here to signed in"),
+                      _buildStepRow(3, "Return here to sign in"),
                     ],
                   ),
                 ),
