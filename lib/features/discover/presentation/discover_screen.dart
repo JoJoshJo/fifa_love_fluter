@@ -41,6 +41,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   late AnimationController _hintController;
   late Animation<Offset> _hintAnimation;
   bool _showTutorial = false;
+  String? _mostCompatibleId; // ID of the daily Most Compatible card
 
   static const int _freeLimit = 20;
   static const int _hardLimit = 25;
@@ -177,11 +178,73 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
       countriesToMatch: _selectedCountries,
     );
 
+    // ── Most Compatible daily injection ──────────────────────────
+    String? compatibleId;
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final lastShown = prefs.getString('most_compatible_date');
+
+    if (profiles.isNotEmpty) {
+      if (lastShown == today) {
+        // Already determined today — reuse the saved ID
+        compatibleId = prefs.getString('most_compatible_id');
+      } else {
+        // Ask the algorithm for today's pick
+        try {
+          final result = await SupabaseConfig.client.rpc(
+            'get_most_compatible',
+            params: {'p_user_id': userId},
+          );
+          compatibleId = result as String?;
+
+          // If RPC returns nothing, fall back to top-ranked from feed
+          compatibleId ??= profiles.first['id'] as String?;
+
+          if (compatibleId != null) {
+            await prefs.setString('most_compatible_date', today);
+            await prefs.setString('most_compatible_id', compatibleId);
+          }
+        } catch (e) {
+          debugPrint('[DISCOVER] get_most_compatible error: $e');
+          compatibleId = profiles.isNotEmpty ? profiles.first['id'] as String? : null;
+        }
+      }
+
+      // Inject the most compatible profile at index 0
+      if (compatibleId != null) {
+        final existingIndex = profiles.indexWhere((p) => p['id'] == compatibleId);
+        if (existingIndex > 0) {
+          // Move it to front
+          final pick = profiles.removeAt(existingIndex);
+          profiles.insert(0, pick);
+        } else if (existingIndex < 0) {
+          // Not in feed — fetch it directly and prepend
+          try {
+            final fetched = await SupabaseConfig.client
+                .from('profiles')
+                .select('id, name, age, nationality, avatar_url, bio, interests, city, is_local, team_supported, languages, is_verified, last_active_at, created_at, countries_to_match')
+                .eq('id', compatibleId)
+                .maybeSingle();
+            if (fetched != null) {
+              final profileMap = Map<String, dynamic>.from(fetched);
+              profileMap['match_score'] = 99; // Top score for most compatible
+              profiles.insert(0, profileMap);
+            }
+          } catch (e) {
+            debugPrint('[DISCOVER] Failed to fetch most compatible profile: $e');
+          }
+        }
+        // If existingIndex == 0, already at front — nothing to do
+      }
+    }
+    // ─────────────────────────────────────────────────────────────
+
     if (mounted) {
       setState(() {
         _profiles = profiles;
         _currentIndex = 0;
         _loading = false;
+        _mostCompatibleId = compatibleId;
       });
       _handleDailyPickSelection();
     }
@@ -740,12 +803,18 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                                         if (profileIndex >= _profiles.length) {
                                           return const SizedBox.shrink();
                                         }
+                                        final cardProfile = _profiles[profileIndex];
                                         final cardWidth = MediaQuery.of(context).size.width - 32;
+                                        // First card shown today == Most Compatible
+                                        final isMC = _mostCompatibleId != null &&
+                                            cardProfile['id'] == _mostCompatibleId &&
+                                            profileIndex == 0;
                                         return RepaintBoundary(
                                           child: SwipeCard(
-                                            profile: _profiles[profileIndex],
+                                            profile: cardProfile,
                                             isFront: index == 0,
                                             stackPosition: index,
+                                            isMostCompatible: isMC,
                                             dragOffset: index == 0
                                                 ? Offset(percentThresholdX / 100 * cardWidth,
                                                     percentThresholdY / 100 * cardWidth)

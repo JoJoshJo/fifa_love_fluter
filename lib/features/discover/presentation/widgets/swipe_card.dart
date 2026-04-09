@@ -11,6 +11,7 @@ class SwipeCard extends StatefulWidget {
   final bool isFront;
   final int stackPosition; // 0 = front, 1 = middle, 2 = back
   final Offset dragOffset; // drag amount in pixels
+  final bool isMostCompatible; // Shows gold crown banner when true
 
   const SwipeCard({
     super.key,
@@ -18,6 +19,7 @@ class SwipeCard extends StatefulWidget {
     required this.isFront,
     this.stackPosition = 0,
     this.dragOffset = Offset.zero,
+    this.isMostCompatible = false,
   });
 
   @override
@@ -582,6 +584,72 @@ class _SwipeCardState extends State<SwipeCard> {
           ..setEntry(3, 2, 0.001) // perspective
           ..rotateZ(widget.dragOffset.dx * 0.0002), // subtle tilt
         child: card,
+      );
+    }
+
+    // Wrap with gold Most Compatible treatment
+    if (widget.isMostCompatible) {
+      card = Stack(
+        children: [
+          // Gold border outer container
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: const Color(0xFFF2C233),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF2C233).withValues(alpha: 0.25),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: card,
+            ),
+          ),
+          // Crown banner overlay at top of card
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2C233).withValues(alpha: 0.15),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(22),
+                  topRight: Radius.circular(22),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    LucideIcons.crown,
+                    size: 13,
+                    color: Color(0xFFF2C233),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'MOST COMPATIBLE',
+                    style: GoogleFonts.spaceMono(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFFF2C233),
+                      letterSpacing: 2.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       );
     }
 
