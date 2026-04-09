@@ -226,9 +226,63 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  -- Dummy function to satisfy flutter calls.
+  -- Stub: extend with ML signal logging when ready.
 END;
 $$;
+
+-- Returns the UUID of the most compatible candidate for the given user.
+-- Uses the same smart score logic: ranks unswiped profiles and returns the top one.
+CREATE OR REPLACE FUNCTION get_most_compatible(p_user_id UUID)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_result UUID;
+BEGIN
+  SELECT p.id INTO v_result
+  FROM public.profiles p
+  WHERE p.id != p_user_id
+    -- Exclude profiles already swiped by this user
+    AND NOT EXISTS (
+      SELECT 1 FROM public.swipe_actions sa
+      WHERE sa.swiper_id = p_user_id AND sa.swiped_id = p.id
+    )
+    -- Exclude already matched profiles
+    AND NOT EXISTS (
+      SELECT 1 FROM public.matches m
+      WHERE (m.user_a = p_user_id AND m.user_b = p.id)
+         OR (m.user_b = p_user_id AND m.user_a = p.id)
+    )
+  ORDER BY
+    -- Boost profiles that liked the current user (reciprocal signal)
+    (EXISTS (
+      SELECT 1 FROM public.swipe_actions sa2
+      WHERE sa2.swiper_id = p.id AND sa2.swiped_id = p_user_id
+        AND sa2.action IN ('like', 'superlike')
+    ))::int DESC,
+    -- Then by recency (active users first)
+    COALESCE(p.last_active_at, p.created_at) DESC
+  LIMIT 1;
+
+  RETURN v_result;
+END;
+$$;
+
+-- Updates the current authenticated user's last_active_at timestamp.
+-- Called fire-and-forget from the Flutter app on every app open.
+CREATE OR REPLACE FUNCTION update_last_active()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE public.profiles
+  SET last_active_at = NOW(), last_active = NOW()
+  WHERE id = auth.uid();
+END;
+$$;
+
 -- ==============================================================================
 -- Match Creation Trigger
 -- ==============================================================================

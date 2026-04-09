@@ -197,8 +197,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
     final wasSwiped = prefs.getBool('daily_pick_swiped_$today') ?? false;
 
     if (savedDate == today && savedId != null) {
-      // Find the pick in the loaded profiles or fetch it specifically if needed
-      // For now, if it's in the current feed, we highlight it
+      // Already picked today — find in loaded profiles
       final pick = _profiles.cast<Map<String, dynamic>?>().firstWhere(
         (p) => p?['id'] == savedId,
         orElse: () => null,
@@ -209,9 +208,33 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
           _dailyPickSwiped = wasSwiped;
         });
       }
-    } else if (_profiles.isNotEmpty) {
-      // Pick the top one as the daily most compatible
-      final newPick = _profiles.first;
+    } else {
+      // Ask the algorithm for today's best match
+      final userId = SupabaseConfig.client.auth.currentUser?.id;
+      Map<String, dynamic>? newPick;
+
+      if (userId != null) {
+        try {
+          final result = await SupabaseConfig.client.rpc(
+            'get_most_compatible',
+            params: {'p_user_id': userId},
+          );
+          // RPC returns a UUID string of the most compatible user
+          final compatibleId = result as String?;
+          if (compatibleId != null) {
+            newPick = _profiles.cast<Map<String, dynamic>?>().firstWhere(
+              (p) => p?['id'] == compatibleId,
+              orElse: () => null,
+            );
+          }
+        } catch (e) {
+          debugPrint('get_most_compatible error: $e');
+        }
+      }
+
+      // Fall back to top-ranked profile from smart score if RPC fails
+      newPick ??= _profiles.first;
+
       await prefs.setString('daily_pick_id', newPick['id']);
       await prefs.setString('daily_pick_date', today);
       if (mounted) {
@@ -1084,7 +1107,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                 children: [
                   Row(
                     children: [
-                      const Icon(LucideIcons.sparkles, size: 14, color: Colors.white),
+                      const Icon(LucideIcons.crown, size: 14, color: Colors.white),
                       const SizedBox(width: 6),
                       Text(
                         'MOST COMPATIBLE',
@@ -1092,7 +1115,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
-                          letterSpacing: 1.2,
+                          letterSpacing: 2.0,
                         ),
                       ),
                     ],

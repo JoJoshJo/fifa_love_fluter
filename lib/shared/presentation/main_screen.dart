@@ -30,16 +30,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
   }
 
-  Future<void> _updateLastActive() async {
+  void _updateLastActive() {
+    // Fire-and-forget: update last_active timestamp via RPC
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
-      try {
-        await Supabase.instance.client.rpc('update_last_active', params: {
-          'p_user_id': user.id,
-        });
-      } catch (e) {
-        debugPrint('Error updating last active: $e');
-      }
+      Supabase.instance.client
+          .rpc('update_last_active')
+          .then((_) {})
+          .catchError((e) => debugPrint('update_last_active error: $e'));
     }
   }
 
