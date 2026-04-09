@@ -151,24 +151,6 @@ class _LandingScreenState extends State<LandingScreen>
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _animatedElement(
-                      startPercent: 0.15,
-                      endPercent: 0.4,
-                      isScale: true,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(LucideIcons.heart,
-                              size: 28, color: Color(0xFFE8437A)),
-                          Transform.translate(
-                            offset: const Offset(-6, 0),
-                            child: const Icon(LucideIcons.trophy,
-                                size: 24, color: Color(0xFFF2C233)),
-                          ),
-                        ],
-                      ),
-                    ),
-
                     const Spacer(flex: 2),
 
                     // --- CENTER SECTION ---
