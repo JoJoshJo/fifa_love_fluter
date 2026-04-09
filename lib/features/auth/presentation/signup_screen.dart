@@ -156,12 +156,14 @@ class _SignupScreenState extends State<SignupScreen> {
       }
       } catch (e) {
         if (mounted) {
+          String message = 'An unexpected error occurred. Please try again.';
+          if (e is AuthException) message = e.message;
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Debug Error: ${e.toString()}'),
-              backgroundColor: const Color(0xFFE83535),
+              content: Text(message),
+              backgroundColor: TurfArdorColors.error,
               behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 10),
             ),
           );
         }
