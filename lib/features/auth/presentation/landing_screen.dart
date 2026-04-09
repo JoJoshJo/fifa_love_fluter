@@ -86,7 +86,7 @@ class _LandingScreenState extends State<LandingScreen>
           // LAYER 1: Full bleed background image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/hero_couple.png',
+              'assets/images/landing_hero.png',
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(color: Colors.black),
             ),
