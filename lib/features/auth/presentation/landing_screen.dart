@@ -100,6 +100,33 @@ class _LandingScreenState extends State<LandingScreen>
               },
               blendMode: BlendMode.darken,
               child: Image.asset(
+                'assets/images/hero_player.jpg',
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(color: Colors.black),
+              ),
+            ),
+          ),
+
+          // DEBUG VERSION TAG
+          Positioned(
+            top: 10,
+            right: 10,
+            child: SafeArea(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'DEBUG v1.1.0',
+                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ),
+              blendMode: BlendMode.darken,
+              child: Image.asset(
                 'assets/images/hero_couple.png',
                 fit: BoxFit.cover,
                 alignment: const Alignment(0, -0.2), // Focus more on faces
