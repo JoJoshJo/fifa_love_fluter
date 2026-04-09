@@ -18,6 +18,7 @@ class EmailConfirmScreen extends StatefulWidget {
 class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
   int _cooldown = 0;
   Timer? _timer;
+  bool _isResending = false;
 
   @override
   void dispose() {
@@ -29,7 +30,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
     setState(() => _cooldown = 60);
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_cooldown > 0) {
-        setState(() => _cooldown--);
+        if (mounted) setState(() => _cooldown--);
       } else {
         timer.cancel();
       }
@@ -37,17 +38,23 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
   }
 
   Future<void> _resendEmail() async {
-    if (_cooldown > 0) return;
+    if (_cooldown > 0 || _isResending) return;
+
+    setState(() => _isResending = true);
+    debugPrint('RESEND_ATTEMPT: Starting resend for ${widget.email}');
 
     try {
-      await Supabase.instance.client.auth.resend(
+      await SupabaseConfig.client.auth.resend(
         type: OtpType.signup,
         email: widget.email,
       );
+      
+      debugPrint('RESEND_SUCCESS: Confirmation email sent');
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Confirmation email sent!"),
+            content: Text("Confirmation email sent! Check your inbox."),
             backgroundColor: TurfArdorColors.emeraldForest,
             behavior: SnackBarBehavior.floating,
           ),
@@ -55,15 +62,22 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
       }
       _startCooldown();
     } catch (e) {
+      debugPrint('RESEND_ERROR: $e');
       if (mounted) {
+        String message = e.toString();
+        if (e is AuthException) message = e.message;
+        
         ScaffoldMessenger.of(context).showSnackBar(
            SnackBar(
-             content: Text("Error: $e"),
+             content: Text("Resend Failed: $message"),
              backgroundColor: TurfArdorColors.error,
              behavior: SnackBarBehavior.floating,
+             duration: const Duration(seconds: 5),
            ),
         );
       }
+    } finally {
+      if (mounted) setState(() => _isResending = false);
     }
   }
 
@@ -120,7 +134,7 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                 ),
                 
                 const SizedBox(height: 40),
-
+                
                 // SERIF HEADING
                 Text(
                   "Check your email",
@@ -202,17 +216,26 @@ class _EmailConfirmScreenState extends State<EmailConfirmScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _cooldown > 0 ? null : _resendEmail,
+                    onPressed: (_cooldown > 0 || _isResending) ? null : _resendEmail,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TurfArdorColors.emeraldForest,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       elevation: 0,
                     ),
-                    child: Text(
-                      _cooldown > 0 ? "Resend in ${_cooldown}s" : "Resend Email",
-                      style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
+                    child: _isResending 
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          _cooldown > 0 ? "Resend in ${_cooldown}s" : "Resend Email",
+                          style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
                   ),
                 ),
                 
