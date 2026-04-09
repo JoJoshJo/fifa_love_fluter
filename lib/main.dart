@@ -42,6 +42,7 @@ class _TurfAndArdorAppState extends ConsumerState<TurfAndArdorApp> {
   @override
   void initState() {
     super.initState();
+    _handleInitialDeepLink();
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.passwordRecovery) {
         navigatorKey.currentState?.push(
@@ -51,6 +52,34 @@ class _TurfAndArdorAppState extends ConsumerState<TurfAndArdorApp> {
         );
       }
     });
+  }
+
+  Future<void> _handleInitialDeepLink() async {
+    final uri = Uri.base;
+    if (uri.fragment.contains('code=')) {
+      try {
+        // The fragment might look like: /reset-password?code=xxx&type=recovery
+        final fragmentPath = uri.fragment.startsWith('/') ? uri.fragment : '/${uri.fragment}';
+        final fragmentUri = Uri.parse(fragmentPath);
+        final code = fragmentUri.queryParameters['code'];
+        final type = fragmentUri.queryParameters['type'];
+
+        if (code != null) {
+          await Supabase.instance.client.auth.exchangeCodeForSession(code);
+          
+          if (type == 'recovery' || fragmentPath.contains('reset-password')) {
+            navigatorKey.currentState?.pushReplacement(
+              MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+            );
+          } else if (type == 'signup' || fragmentPath.contains('confirm')) {
+            // AuthGate will handle the established session
+            navigatorKey.currentState?.pushReplacementNamed('/');
+          }
+        }
+      } catch (e) {
+        debugPrint('[DEEP_LINK_ERROR] $e');
+      }
+    }
   }
 
   @override
