@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/supabase/supabase_config.dart';
 import '../../../shared/presentation/main_screen.dart';
-import '../../me/data/me_repository.dart';
 import '../../../core/constants/colors.dart';
 import 'widgets/country_selector_sheet.dart';
 
@@ -15,7 +14,6 @@ class SetupScreen extends StatefulWidget {
 }
 
 class _SetupScreenState extends State<SetupScreen> {
-  final _repo = MeRepository();
   int _step = 0;
   String _nationality = '';
   String _nationalityFlag = '';
@@ -270,16 +268,32 @@ class _SetupScreenState extends State<SetupScreen> {
     setState(() => _saving = true);
     try {
       final user = SupabaseConfig.client.auth.currentUser;
-      final name = user?.userMetadata?['name'] ?? 'New Fan';
-      
-      await _repo.updateProfile(_userId, {
-        'name': name,
+      final meta = user?.userMetadata ?? {};
+
+      // Build the full profile upsert — merge metadata fields with setup fields.
+      // This guarantees the Me screen always has complete data, even if the
+      // pre-confirmation upsert in SignupScreen failed (unconfirmed RLS block).
+      final profileData = {
+        'id': _userId,
+        // Fields from signup metadata
+        'name': meta['name'] ?? 'New Fan',
+        'age': meta['age'],
+        'gender': meta['gender'],
+        'bio': meta['bio'],
+        'city': meta['city'],
+        'avatar_url': meta['avatar_url'],
+        // Fields from this setup screen
         'nationality': _nationality,
         'team_supported': _team.isNotEmpty ? _team : null,
         'is_local': _isLocal,
         'match_type_preference': _matchTypes,
         'countries_to_match': _selectedCountries,
-      });
+      }..removeWhere((_, v) => v == null); // don't overwrite existing nulls
+
+      await SupabaseConfig.client.from('profiles').upsert(profileData);
+
+      debugPrint('[SETUP] Profile fully upserted: $profileData');
+
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -288,10 +302,11 @@ class _SetupScreenState extends State<SetupScreen> {
         );
       }
     } catch (e) {
+      debugPrint('[SETUP] Upsert error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('SETUP_ERROR: ${e.toString()}'),
+            content: Text('Could not save profile. Please try again.\n${e.toString()}'),
             backgroundColor: const Color(0xFFE83535),
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 10),
