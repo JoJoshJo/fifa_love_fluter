@@ -152,26 +152,6 @@ class _SignupScreenState extends State<SignupScreen> {
             );
           }
         }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Sign up failed. Please try again.'),
-              behavior: SnackBarBehavior.floating,
-            )
-          );
-        }
-      }
-    } on AuthException catch (e) {
-      if (mounted) {
-        String msg = e.message;
-        if (msg.contains('already registered') || msg.contains('already_exists')) {
-          msg = "This email is already registered. Please login instead.";
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(msg),
-            backgroundColor: const Color(0xFFE8437A),
             behavior: SnackBarBehavior.floating,
           )
         );
