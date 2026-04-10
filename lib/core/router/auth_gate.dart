@@ -90,9 +90,15 @@ class AuthGate extends StatelessWidget {
     Map<String, dynamic> metadata,
   ) async {
     try {
+      // Google OAuth stores name differently across providers/configurations
+      final name = metadata['name'] 
+          ?? metadata['full_name'] 
+          ?? metadata['user_name']
+          ?? 'New Fan';
+          
       await SupabaseConfig.client.from('profiles').upsert({
         'id': userId,
-        'name': metadata['name'] ?? 'New Fan',
+        'name': name,
         'age': metadata['age'],
         'gender': metadata['gender'],
         'nationality': metadata['nationality'],
@@ -101,6 +107,7 @@ class AuthGate extends StatelessWidget {
         'city': metadata['city'],
         'match_type_preference': metadata['match_type_preference'] ?? [],
         'countries_to_match': metadata['countries_to_match'] ?? [],
+        'avatar_url': metadata['avatar_url'] ?? metadata['picture'],
       });
 
     } catch (e) {

@@ -23,7 +23,31 @@ class _SetupScreenState extends State<SetupScreen> {
   final List<String> _selectedCountries = [];
   bool _saving = false;
 
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+
   String get _userId => SupabaseConfig.client.auth.currentUser?.id ?? '';
+
+  @override
+  void initState() {
+    super.initState();
+    final user = SupabaseConfig.client.auth.currentUser;
+    if (user != null) {
+      final meta = user.userMetadata;
+      // Pre-fill from Google OAuth or previous signup
+      _nameController.text = meta?['name'] ?? meta?['full_name'] ?? meta?['user_name'] ?? '';
+      if (meta?['age'] != null) {
+        _ageController.text = meta!['age'].toString();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _ageController.dispose();
+    super.dispose();
+  }
 
   static const _worldCupTeams = [
     'Argentina', 'Australia', 'Belgium', 'Bolivia', 'Brazil',
@@ -275,13 +299,14 @@ class _SetupScreenState extends State<SetupScreen> {
       // pre-confirmation upsert in SignupScreen failed (unconfirmed RLS block).
       final profileData = {
         'id': _userId,
+        // Name and Age from controllers (prioritize over metadata)
+        'name': _nameController.text.trim().isNotEmpty ? _nameController.text.trim() : (meta['name'] ?? 'New Fan'),
+        'age': int.tryParse(_ageController.text.trim()) ?? meta['age'],
         // Fields from signup metadata
-        'name': meta['name'] ?? 'New Fan',
-        'age': meta['age'],
         'gender': meta['gender'],
         'bio': meta['bio'],
         'city': meta['city'],
-        'avatar_url': meta['avatar_url'],
+        'avatar_url': meta['avatar_url'] ?? meta['picture'],
         // Fields from this setup screen
         'nationality': _nationality,
         'team_supported': _team.isNotEmpty ? _team : null,
@@ -417,6 +442,37 @@ class _SetupScreenState extends State<SetupScreen> {
           ),
         ),
         const SizedBox(height: 32),
+
+        const SizedBox(height: 32),
+
+        // Name
+        _label(context, 'YOUR NAME'),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _nameController,
+          style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+          decoration: const InputDecoration(
+            hintText: 'Enter your name',
+            prefixIcon: Icon(Icons.person_outline, color: TurfArdorColors.emeraldSpring),
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Age
+        _label(context, 'YOUR AGE'),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _ageController,
+          keyboardType: TextInputType.number,
+          style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+          decoration: const InputDecoration(
+            hintText: 'e.g. 24',
+            prefixIcon: Icon(Icons.cake_outlined, color: TurfArdorColors.emeraldSpring),
+          ),
+        ),
+
+        const SizedBox(height: 20),
 
         // Nationality
         _label(context, 'YOUR NATIONALITY'),

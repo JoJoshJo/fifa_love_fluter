@@ -41,12 +41,24 @@ class _MeScreenState extends ConsumerState<MeScreen> {
     try {
       final profile = await _repo.fetchProfile(_userId);
       
-      // SELF-HEALING: If name is missing, try to repair it from session metadata
-      if (profile['name'] == null || profile['name'] == 'Your Name' || profile['name'] == '') {
+      // SELF-HEALING: If name or photo is missing, try to repair it from session metadata
+      if (profile['name'] == null || profile['name'] == 'Your Name' || profile['name'] == '' || profile['avatar_url'] == null) {
         final user = SupabaseConfig.client.auth.currentUser;
-        final metaName = user?.userMetadata?['name'];
-        if (metaName != null) {
-          await _repo.updateProfile(_userId, {'name': metaName});
+        final meta = user?.userMetadata;
+        
+        final metaName = meta?['name'] ?? meta?['full_name'] ?? meta?['user_name'];
+        final metaPhoto = meta?['avatar_url'] ?? meta?['picture'];
+        
+        Map<String, dynamic> updates = {};
+        if (metaName != null && (profile['name'] == null || profile['name'] == 'Your Name' || profile['name'] == '')) {
+          updates['name'] = metaName;
+        }
+        if (metaPhoto != null && profile['avatar_url'] == null) {
+          updates['avatar_url'] = metaPhoto;
+        }
+
+        if (updates.isNotEmpty) {
+          await _repo.updateProfile(_userId, updates);
           // Reload after repair
           final repaired = await _repo.fetchProfile(_userId);
           if (mounted) setState(() => _profile = repaired);
@@ -64,8 +76,14 @@ class _MeScreenState extends ConsumerState<MeScreen> {
       try {
         final user = SupabaseConfig.client.auth.currentUser;
         if (user != null) {
-          final metaName = user.userMetadata?['name'] ?? 'New Fan';
-          await _repo.updateProfile(user.id, {'name': metaName});
+          final meta = user.userMetadata;
+          final metaName = meta?['name'] ?? meta?['full_name'] ?? meta?['user_name'] ?? 'New Fan';
+          final metaPhoto = meta?['avatar_url'] ?? meta?['picture'];
+          
+          await _repo.updateProfile(user.id, {
+            'name': metaName,
+            if (metaPhoto != null) 'avatar_url': metaPhoto,
+          });
           final newProfile = await _repo.fetchProfile(user.id);
           if (mounted) setState(() => _profile = newProfile);
         }
