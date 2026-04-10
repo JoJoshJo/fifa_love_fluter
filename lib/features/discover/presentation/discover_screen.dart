@@ -38,9 +38,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   bool _dailyPickSwiped = false;
   List<String> _selectedCountries = [];
   int _dailySwipes = 0;
-  late AnimationController _hintController;
-  late Animation<Offset> _hintAnimation;
   bool _showTutorial = false;
+  bool _showSwipeHint = false;
   String? _mostCompatibleId; // ID of the daily Most Compatible card
   String? _matchComment; // Track comment to show in match overlay
   String? _commentForNextSwipe; // Pending comment from bottom sheet
@@ -60,7 +59,6 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   @override
   void dispose() {
     _swiperController.dispose();
-    _hintController.dispose();
     super.dispose();
   }
 
@@ -96,45 +94,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
       if (raw != null) _selectedCountries = raw;
     }
 
-    // Initialize swipe hint
-    _hintController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    );
-
-    _hintAnimation = TweenSequence<Offset>([
-      TweenSequenceItem(
-        tween: Tween<Offset>(begin: Offset.zero, end: const Offset(30, 0))
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 20, // Slide right (300ms)
-      ),
-      TweenSequenceItem(
-        tween: ConstantTween<Offset>(const Offset(30, 0)),
-        weight: 20, // Pause (300ms)
-      ),
-      TweenSequenceItem(
-        tween: Tween<Offset>(begin: const Offset(30, 0), end: const Offset(-30, 0))
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 20, // Slide left (300ms - goes to -30 relative to center)
-      ),
-      TweenSequenceItem(
-        tween: ConstantTween<Offset>(const Offset(-30, 0)),
-        weight: 20, // Pause (300ms)
-      ),
-      TweenSequenceItem(
-        tween: Tween<Offset>(begin: const Offset(-30, 0), end: Offset.zero)
-            .chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 20, // Return to center (300ms)
-      ),
-    ]).animate(_hintController);
-
     final hasSeenHint = prefs.getBool('has_seen_swipe_hint') ?? false;
     if (!hasSeenHint) {
-      Future.delayed(const Duration(milliseconds: 800), () {
+      Future.delayed(const Duration(seconds: 1), () {
         if (mounted && _profiles.isNotEmpty) {
-          _hintController.forward().then((_) {
-            prefs.setBool('has_seen_swipe_hint', true);
-          });
+          setState(() => _showSwipeHint = true);
+          prefs.setBool('has_seen_swipe_hint', true);
         }
       });
     }
@@ -635,71 +600,68 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                               child: SizedBox(
                                 height: MediaQuery.of(context).size.height * 0.68,
                                 width: MediaQuery.of(context).size.width - 32,
-                                  child: SlideTransition(
-                                    position: _hintAnimation,
-                                    child: CardSwiper(
-                                      controller: _swiperController,
-                                      cardsCount: min(3, remaining),
-                                      numberOfCardsDisplayed: 2,
-                                      backCardOffset: const Offset(0, -20),
-                                      scale: 0.94,
-                                      isLoop: false,
-                                      duration: const Duration(milliseconds: 200),
-                                      padding: EdgeInsets.zero,
-                                      onSwipe: (prevIndex, currentIndex, direction) {
-                                        String action = 'nope';
-                                        if (direction ==
-                                            CardSwiperDirection.right) {
-                                          action = 'like';
-                                          HapticFeedback.mediumImpact();
-                                        } else if (direction ==
-                                            CardSwiperDirection.left) {
-                                          action = 'nope';
-                                          HapticFeedback.lightImpact();
-                                        } else if (direction ==
-                                            CardSwiperDirection.top) {
-                                          action = 'superlike';
-                                          HapticFeedback.heavyImpact();
-                                        }
-                                        
-                                        // Defer heavier logic to let animation run
-                                        final profile = _profiles[_currentIndex + prevIndex];
-                                        final currentComment = _commentForNextSwipe;
-                                        _commentForNextSwipe = null; // Clear it immediately
+                                  child: CardSwiper(
+                                    controller: _swiperController,
+                                    cardsCount: min(3, remaining),
+                                    numberOfCardsDisplayed: 2,
+                                    backCardOffset: const Offset(0, -20),
+                                    scale: 0.94,
+                                    isLoop: false,
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: EdgeInsets.zero,
+                                    onSwipe: (prevIndex, currentIndex, direction) {
+                                      String action = 'nope';
+                                      if (direction ==
+                                          CardSwiperDirection.right) {
+                                        action = 'like';
+                                        HapticFeedback.mediumImpact();
+                                      } else if (direction ==
+                                          CardSwiperDirection.left) {
+                                        action = 'nope';
+                                        HapticFeedback.lightImpact();
+                                      } else if (direction ==
+                                          CardSwiperDirection.top) {
+                                        action = 'superlike';
+                                        HapticFeedback.heavyImpact();
+                                      }
+                                      
+                                      // Defer heavier logic to let animation run
+                                      final profile = _profiles[_currentIndex + prevIndex];
+                                      final currentComment = _commentForNextSwipe;
+                                      _commentForNextSwipe = null; // Clear it immediately
 
-                                        Future.delayed(const Duration(milliseconds: 250), () {
-                                          if (mounted) {
-                                            _handleSwipe(action, profile, comment: currentComment);
-                                          }
-                                        });
-                                        return true;
-                                      },
-                                      cardBuilder: (context, index,
-                                          percentThresholdX, percentThresholdY) {
-                                        final profileIndex = _currentIndex + index;
-                                        if (profileIndex >= _profiles.length) {
-                                          return const SizedBox.shrink();
+                                      Future.delayed(const Duration(milliseconds: 250), () {
+                                        if (mounted) {
+                                          _handleSwipe(action, profile, comment: currentComment);
                                         }
-                                        final cardProfile = _profiles[profileIndex];
-                                        final cardWidth = MediaQuery.of(context).size.width - 32;
-                                        // First card shown today == Most Compatible
-                                        final isMC = _mostCompatibleId != null &&
-                                            cardProfile['id'] == _mostCompatibleId &&
-                                            profileIndex == 0;
-                                        return RepaintBoundary(
-                                          child: SwipeCard(
-                                            profile: cardProfile,
-                                            isFront: index == 0,
-                                            stackPosition: index,
-                                            isMostCompatible: isMC,
-                                            dragOffset: index == 0
-                                                ? Offset(percentThresholdX / 100 * cardWidth,
-                                                    percentThresholdY / 100 * cardWidth)
-                                                : Offset.zero,
-                                          ),
-                                        );
-                                      },
-                                    ),
+                                      });
+                                      return true;
+                                    },
+                                    cardBuilder: (context, index,
+                                        percentThresholdX, percentThresholdY) {
+                                      final profileIndex = _currentIndex + index;
+                                      if (profileIndex >= _profiles.length) {
+                                        return const SizedBox.shrink();
+                                      }
+                                      final cardProfile = _profiles[profileIndex];
+                                      final cardWidth = MediaQuery.of(context).size.width - 32;
+                                      // First card shown today == Most Compatible
+                                      final isMC = _mostCompatibleId != null &&
+                                          cardProfile['id'] == _mostCompatibleId &&
+                                          profileIndex == 0;
+                                      return RepaintBoundary(
+                                        child: SwipeCard(
+                                          profile: cardProfile,
+                                          isFront: index == 0,
+                                          stackPosition: index,
+                                          isMostCompatible: isMC,
+                                          dragOffset: index == 0
+                                              ? Offset(percentThresholdX / 100 * cardWidth,
+                                                  percentThresholdY / 100 * cardWidth)
+                                              : Offset.zero,
+                                        ),
+                                      );
+                                    },
                                   ),
                             ),
                           ),
@@ -837,6 +799,13 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                   setState(() => _showTutorial = false);
                 }
               },
+            ),
+
+          if (_showSwipeHint)
+            Positioned.fill(
+              child: _SwipeHintOverlay(
+                onDismiss: () => setState(() => _showSwipeHint = false),
+              ),
             ),
         ],
       ),
@@ -1549,6 +1518,110 @@ class _CommentLikeSheetState extends State<_CommentLikeSheet> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SwipeHintOverlay extends StatefulWidget {
+  final VoidCallback onDismiss;
+  const _SwipeHintOverlay({required this.onDismiss});
+  
+  @override
+  State<_SwipeHintOverlay> createState() => _SwipeHintOverlayState();
+}
+
+class _SwipeHintOverlayState extends State<_SwipeHintOverlay>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<Offset> _slideRight;
+  late Animation<double> _fade;
+  
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    );
+    
+    // Slide right then left
+    _slideRight = TweenSequence<Offset>([
+      TweenSequenceItem(
+        tween: Tween(begin: Offset.zero, end: const Offset(0.15, 0))
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: const Offset(0.15, 0), end: Offset.zero)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: Offset.zero, end: const Offset(-0.15, 0))
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 25,
+      ),
+      TweenSequenceItem(
+        tween: Tween(begin: const Offset(-0.15, 0), end: Offset.zero)
+            .chain(CurveTween(curve: Curves.easeInOut)),
+        weight: 25,
+      ),
+    ]).animate(_ctrl);
+    
+    _fade = Tween(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: const Interval(0.85, 1.0)),
+    );
+    
+    _ctrl.forward().then((_) {
+      if (mounted) widget.onDismiss();
+    });
+  }
+  
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    // Wrap the whole overlay in a GestureDetector to dismiss immediately on tap
+    return GestureDetector(
+      onTap: widget.onDismiss,
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (_, __) => FadeTransition(
+          opacity: _fade,
+          child: Container(
+            color: const Color(0xFF080F0C).withValues(alpha: 0.6),
+            child: Center(
+              child: SlideTransition(
+                position: _slideRight,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(LucideIcons.moveHorizontal, 
+                      size: 48, color: Colors.white.withValues(alpha: 0.8)),
+                    const SizedBox(height: 16),
+                    Text('Swipe right to like',
+                      style: GoogleFonts.inter(
+                        fontSize: 16, fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Swipe left to pass',
+                      style: GoogleFonts.inter(
+                        fontSize: 14, color: const Color(0xFF9BB3AF),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
