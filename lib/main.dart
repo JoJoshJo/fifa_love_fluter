@@ -45,7 +45,7 @@ void main() async {
     if (isPasswordRecovery || isSignupConfirm) {
       try {
         final fragment = uri.fragment.startsWith('/') ? uri.fragment : '/${uri.fragment}';
-        final recoveryUri = Uri.parse('https://fifalove.app$fragment');
+        final recoveryUri = Uri.parse('https://placeholder.local$fragment');
         final code = recoveryUri.queryParameters['code'];
         
         if (code != null) {

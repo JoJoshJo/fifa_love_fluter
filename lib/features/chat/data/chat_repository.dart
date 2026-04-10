@@ -27,7 +27,7 @@ class ChatRepository {
       // 1. Batch fetch all other user profiles
       final profilesRaw = await _client
           .from('profiles')
-          .select('id, name, avatar_url, nationality, is_verified, interests, languages, countries_to_match, last_active')
+          .select('id, name, avatar_url, nationality, is_verified, interests, languages, countries_to_match, last_active_at')
           .inFilter('id', otherIds);
       
       final Map<String, dynamic> profilesMap = {

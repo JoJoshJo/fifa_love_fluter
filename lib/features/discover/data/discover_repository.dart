@@ -142,6 +142,9 @@ class DiscoverRepository {
         };
       }
       return null;
+    } catch (e) {
+      debugPrint('Error recording swipe: $e');
+      return null;
     }
   }
 

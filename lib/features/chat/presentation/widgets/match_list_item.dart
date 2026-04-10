@@ -43,8 +43,8 @@ class MatchListItem extends StatelessWidget {
     String previewText;
     TextStyle previewStyle;
     bool isActive = false;
-    if (other['last_active'] != null) {
-      final lastActive = DateTime.tryParse(other['last_active'] as String);
+    if (other['last_active_at'] != null) {
+      final lastActive = DateTime.tryParse(other['last_active_at'] as String);
       if (lastActive != null && DateTime.now().difference(lastActive).inMinutes <= 30) {
         isActive = true;
       }
