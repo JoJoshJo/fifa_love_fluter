@@ -19,6 +19,10 @@ class FieldTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final border = isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33);
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -27,7 +31,7 @@ class FieldTile extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: const Color(0xFF4CB572).withValues(alpha: 0.08),
+              color: border.withValues(alpha: 0.5),
               width: 1,
             ),
           ),
@@ -47,7 +51,7 @@ class FieldTile extends StatelessWidget {
                     label,
                     style: GoogleFonts.spaceMono(
                       fontSize: 9,
-                      color: const Color(0xFFEBF2EE).withValues(alpha: 0.35),
+                      color: text.withValues(alpha: 0.35),
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -58,8 +62,8 @@ class FieldTile extends StatelessWidget {
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
                       color: value.isEmpty
-                          ? const Color(0xFFEBF2EE).withValues(alpha: 0.25)
-                          : const Color(0xFFEBF2EE).withValues(alpha: 0.85),
+                          ? text.withValues(alpha: 0.25)
+                          : text.withValues(alpha: 0.85),
                     ),
                     maxLines: isMultiLine ? 3 : 1,
                     overflow: TextOverflow.ellipsis,
@@ -68,7 +72,7 @@ class FieldTile extends StatelessWidget {
               ),
             ),
             Icon(Icons.chevron_right,
-                size: 18, color: const Color(0xFFEBF2EE).withValues(alpha: 0.20)),
+                size: 18, color: text.withValues(alpha: 0.20)),
           ],
         ),
       ),

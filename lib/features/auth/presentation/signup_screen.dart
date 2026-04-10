@@ -232,9 +232,15 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bg = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF080F0C);
+    final card = isLight ? Colors.white : const Color(0xFF0D1A13);
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final muted = isLight ? const Color(0xFF6B9E8A) : const Color(0xFF9BB3AF);
+    final border = isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33);
+
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -258,7 +264,9 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildTopBar(BuildContext context) {
-    final theme = Theme.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+
     return Container(
       height: 56,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -266,7 +274,7 @@ class _SignupScreenState extends State<SignupScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, color: theme.textTheme.bodyLarge?.color),
+            icon: Icon(Icons.arrow_back, color: text),
             onPressed: _prevStep,
           ),
           Row(
@@ -279,7 +287,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 height: 8,
                 width: active ? 24 : 8,
                 decoration: BoxDecoration(
-                  color: active ? TurfArdorColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.2),
+                  color: active ? const Color(0xFF4CB572) : text.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(4),
                 ),
               );
@@ -292,16 +300,22 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildProgressBar(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+
     return LinearProgressIndicator(
       value: (_currentPage + 1) / 3,
-      backgroundColor: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+      backgroundColor: text.withValues(alpha: 0.05),
       valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFE8437A)),
       minHeight: 2,
     );
   }
   
   Widget _buildStep1(BuildContext context) {
-    final theme = Theme.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final card = isLight ? Colors.white : const Color(0xFF0D1A13);
+
     bool canContinue = _profileImageBytes != null &&
                        _nameController.text.isNotEmpty && 
                        (int.tryParse(_ageController.text) ?? 0) >= 18 && 
@@ -317,7 +331,7 @@ class _SignupScreenState extends State<SignupScreen> {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 28, 
               fontWeight: FontWeight.bold, 
-              color: theme.textTheme.displayLarge?.color,
+              color: text,
             ),
           ),
           const SizedBox(height: 8),
@@ -325,7 +339,7 @@ class _SignupScreenState extends State<SignupScreen> {
             "You can always change this later", 
             style: GoogleFonts.inter(
               fontSize: 14, 
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+              color: text.withValues(alpha: 0.7),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -360,7 +374,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   "Add Photo", 
                   style: GoogleFonts.spaceMono(
                     fontSize: 11, 
-                    color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.8),
+                    color: text.withValues(alpha: 0.8),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -373,7 +387,7 @@ class _SignupScreenState extends State<SignupScreen> {
           _buildLabel(context, "YOUR NAME"),
           TextFormField(
             controller: _nameController,
-            style: theme.textTheme.bodyLarge,
+            style: GoogleFonts.inter(color: text),
             onChanged: (v) => setState((){}),
             decoration: const InputDecoration(
               hintText: "What do people call you?",
@@ -386,7 +400,7 @@ class _SignupScreenState extends State<SignupScreen> {
           TextFormField(
             controller: _ageController,
             keyboardType: TextInputType.number,
-            style: theme.textTheme.bodyLarge,
+            style: GoogleFonts.inter(color: text),
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             onChanged: (v) => setState((){}),
             decoration: const InputDecoration(
@@ -408,10 +422,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFE8437A) : theme.cardColor,
+                    color: isSelected ? const Color(0xFFE8437A) : card,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? const Color(0xFFE8437A) : theme.dividerColor.withValues(alpha: 0.2),
+                      color: isSelected ? const Color(0xFFE8437A) : text.withValues(alpha: 0.2),
                     ),
                     boxShadow: isSelected ? [
                       BoxShadow(
@@ -426,7 +440,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 14, 
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
+                      color: isSelected ? Colors.white : text,
                     ),
                   ),
                 ),
@@ -442,7 +456,9 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildStep2(BuildContext context) {
-    final theme = Theme.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    
     bool canContinue = _nationality != null && _teamSupported != null && (!_isLocal || _city != null);
 
     return SingleChildScrollView(
@@ -455,7 +471,7 @@ class _SignupScreenState extends State<SignupScreen> {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 28, 
               fontWeight: FontWeight.bold, 
-              color: theme.textTheme.displayLarge?.color,
+              color: text,
             ),
           ),
           const SizedBox(height: 8),
@@ -463,7 +479,7 @@ class _SignupScreenState extends State<SignupScreen> {
             "This is how fans find you", 
             style: GoogleFonts.inter(
               fontSize: 14, 
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+              color: text.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 32),
@@ -474,10 +490,10 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.inputDecorationTheme.fillColor, 
+                color: isLight ? Colors.white : const Color(0xFF131F19), 
                 borderRadius: BorderRadius.circular(12),
                 border: _nationality != null 
-                  ? Border.all(color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.5))
+                  ? Border.all(color: const Color(0xFF4CB572).withValues(alpha: 0.5))
                   : null,
               ),
               child: Row(
@@ -485,12 +501,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   Text(
                     _nationality ?? "Select Nationality", 
                     style: GoogleFonts.inter(
-                      color: _nationality != null ? theme.textTheme.bodyLarge?.color : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                      color: _nationality != null ? text : text.withValues(alpha: 0.5),
                       fontWeight: _nationality != null ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                   const Spacer(),
-                  Icon(Icons.expand_more, color: theme.textTheme.bodySmall?.color),
+                  Icon(Icons.expand_more, color: text.withValues(alpha: 0.5)),
                 ],
               ),
             ),
@@ -503,10 +519,10 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.inputDecorationTheme.fillColor, 
+                color: isLight ? Colors.white : const Color(0xFF131F19), 
                 borderRadius: BorderRadius.circular(12),
                 border: _teamSupported != null 
-                  ? Border.all(color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.5))
+                  ? Border.all(color: const Color(0xFF4CB572).withValues(alpha: 0.5))
                   : null,
               ),
               child: Row(
@@ -514,12 +530,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   Text(
                     _teamSupported ?? "Select Team", 
                     style: GoogleFonts.inter(
-                      color: _teamSupported != null ? theme.textTheme.bodyLarge?.color : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                      color: _teamSupported != null ? text : text.withValues(alpha: 0.5),
                       fontWeight: _teamSupported != null ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                   const Spacer(),
-                  Icon(Icons.expand_more, color: theme.textTheme.bodySmall?.color),
+                  Icon(Icons.expand_more, color: text.withValues(alpha: 0.5)),
                 ],
               ),
             ),
@@ -542,10 +558,10 @@ class _SignupScreenState extends State<SignupScreen> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.inputDecorationTheme.fillColor, 
+                  color: isLight ? Colors.white : const Color(0xFF131F19), 
                   borderRadius: BorderRadius.circular(12),
                   border: _city != null 
-                    ? Border.all(color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.5))
+                    ? Border.all(color: const Color(0xFF4CB572).withValues(alpha: 0.5))
                     : null,
                 ),
                 child: Row(
@@ -553,12 +569,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     Text(
                       _city ?? "Select Host City", 
                       style: GoogleFonts.inter(
-                        color: _city != null ? theme.textTheme.bodyLarge?.color : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                        color: _city != null ? text : text.withValues(alpha: 0.5),
                         fontWeight: _city != null ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                     const Spacer(),
-                    Icon(Icons.expand_more, color: theme.textTheme.bodySmall?.color),
+                    Icon(Icons.expand_more, color: text.withValues(alpha: 0.5)),
                   ],
                 ),
               ),
@@ -573,7 +589,10 @@ class _SignupScreenState extends State<SignupScreen> {
   }
   
   Widget _buildToggleCard(bool isLocalValue, IconData icon, String title, String sub) {
-    final theme = Theme.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final card = isLight ? Colors.white : const Color(0xFF131F19);
+    
     bool isSelected = _isLocal == isLocalValue;
     return GestureDetector(
       onTap: () => setState(() {
@@ -585,10 +604,10 @@ class _SignupScreenState extends State<SignupScreen> {
         height: 100,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? TurfArdorColors.emeraldForest : theme.cardColor,
+          color: isSelected ? const Color(0xFF135E4B) : card,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? TurfArdorColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.1), 
+            color: isSelected ? const Color(0xFF4CB572) : text.withValues(alpha: 0.1), 
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected ? [
@@ -608,7 +627,7 @@ class _SignupScreenState extends State<SignupScreen> {
               title, 
               style: GoogleFonts.inter(
                 fontWeight: FontWeight.bold, 
-                color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color, 
+                color: isSelected ? Colors.white : text, 
                 fontSize: 14,
               ),
             ),
@@ -617,7 +636,7 @@ class _SignupScreenState extends State<SignupScreen> {
               sub, 
               style: GoogleFonts.inter(
                 fontSize: 12, 
-                color: isSelected ? Colors.white.withValues(alpha: 0.7) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                color: isSelected ? Colors.white.withValues(alpha: 0.7) : text.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -627,10 +646,13 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _showCountryPicker(Function(String) onSelect) {
-    final theme = Theme.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final bg = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF080F0C);
+
     showModalBottomSheet(
       context: context, 
-      backgroundColor: theme.scaffoldBackgroundColor, 
+      backgroundColor: bg, 
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) {
         return ListView.builder(
@@ -638,7 +660,7 @@ class _SignupScreenState extends State<SignupScreen> {
           itemCount: _topCountries.length,
           itemBuilder: (ctx, i) {
             return ListTile(
-              title: Text(_topCountries[i], style: theme.textTheme.bodyLarge),
+              title: Text(_topCountries[i], style: GoogleFonts.inter(color: text)),
               onTap: () {
                 onSelect(_topCountries[i]);
                 Navigator.pop(ctx);
@@ -651,10 +673,13 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _showCityPicker() {
-    final theme = Theme.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final bg = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF080F0C);
+
     showModalBottomSheet(
       context: context, 
-      backgroundColor: theme.scaffoldBackgroundColor, 
+      backgroundColor: bg, 
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) {
         return ListView.builder(
@@ -662,7 +687,7 @@ class _SignupScreenState extends State<SignupScreen> {
           itemCount: _hostCities.length,
           itemBuilder: (ctx, i) {
             return ListTile(
-              title: Text(_hostCities[i], style: theme.textTheme.bodyLarge),
+              title: Text(_hostCities[i], style: GoogleFonts.inter(color: text)),
               onTap: () {
                 setState(() => _city = _hostCities[i]);
                 Navigator.pop(ctx);
@@ -675,7 +700,10 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildStep3(BuildContext context) {
-    final theme = Theme.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final card = isLight ? Colors.white : const Color(0xFF0D1A13);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -686,7 +714,7 @@ class _SignupScreenState extends State<SignupScreen> {
             style: GoogleFonts.spaceGrotesk(
               fontSize: 28, 
               fontWeight: FontWeight.bold, 
-              color: theme.textTheme.displayLarge?.color,
+              color: text,
             ),
           ),
           const SizedBox(height: 8),
@@ -694,7 +722,7 @@ class _SignupScreenState extends State<SignupScreen> {
             "Select all that apply", 
             style: GoogleFonts.inter(
               fontSize: 14, 
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+              color: text.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 32),
@@ -711,7 +739,7 @@ class _SignupScreenState extends State<SignupScreen> {
             "Leave empty to meet everyone", 
             style: GoogleFonts.inter(
               fontSize: 13, 
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+              color: text.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 16),
@@ -736,10 +764,10 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.cardColor,
+                color: card,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: theme.dividerColor.withValues(alpha: 0.1),
+                  color: text.withValues(alpha: 0.1),
                 ),
               ),
               child: Row(
@@ -754,15 +782,15 @@ class _SignupScreenState extends State<SignupScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 15,
                         color: _countriesToMatch.isEmpty 
-                            ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5)
-                            : theme.textTheme.bodyLarge?.color,
+                            ? text.withValues(alpha: 0.5)
+                            : text,
                         fontWeight: _countriesToMatch.isEmpty ? FontWeight.normal : FontWeight.bold,
                       ),
                     ),
                   ),
                   Icon(LucideIcons.chevronRight, 
                     size: 18, 
-                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3)
+                    color: text.withValues(alpha: 0.3)
                   ),
                 ],
               ),
@@ -809,7 +837,7 @@ class _SignupScreenState extends State<SignupScreen> {
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            style: theme.textTheme.bodyLarge,
+            style: GoogleFonts.inter(color: text),
             decoration: const InputDecoration(
               hintText: 'email@domain.com',
               prefixIcon: Icon(Icons.email_outlined),
@@ -822,7 +850,7 @@ class _SignupScreenState extends State<SignupScreen> {
             controller: _passwordController,
             obscureText: true,
             onChanged: (v) => setState((){}),
-            style: theme.textTheme.bodyLarge,
+            style: GoogleFonts.inter(color: text),
             decoration: const InputDecoration(
               hintText: '••••••••',
               prefixIcon: Icon(Icons.lock_outline),
@@ -853,7 +881,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     text: TextSpan(
                       style: GoogleFonts.inter(
                         fontSize: 12, 
-                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6)
+                        color: text.withValues(alpha: 0.6)
                       ),
                       children: [
                         const TextSpan(text: 'I agree to the '),
@@ -890,7 +918,10 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildMultiSelectCard(String title, String subtitle, IconData icon, Color activeColor) {
-    final theme = Theme.of(context);
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final card = isLight ? Colors.white : const Color(0xFF131F19);
+    
     bool isSelected = _selectedIntentions.contains(title);
     return GestureDetector(
       onTap: () {
@@ -906,10 +937,10 @@ class _SignupScreenState extends State<SignupScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         decoration: BoxDecoration(
-          color: isSelected ? activeColor.withValues(alpha: 0.1) : theme.cardColor,
+          color: isSelected ? activeColor.withValues(alpha: 0.1) : card,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? activeColor : theme.dividerColor.withValues(alpha: 0.1), 
+            color: isSelected ? activeColor : text.withValues(alpha: 0.1), 
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -928,14 +959,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 16, 
                     fontWeight: FontWeight.bold, 
-                    color: isSelected ? activeColor : theme.textTheme.bodyLarge?.color,
+                    color: isSelected ? activeColor : text,
                   ),
                 ),
                 Text(
                   subtitle, 
                   style: GoogleFonts.inter(
                     fontSize: 13, 
-                    color: isSelected ? activeColor.withValues(alpha: 0.8) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                    color: isSelected ? activeColor.withValues(alpha: 0.8) : text.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -950,7 +981,7 @@ class _SignupScreenState extends State<SignupScreen> {
     int str = _getPasswordStrength(_passwordController.text);
     return Row(
       children: List.generate(4, (index) {
-        Color c = Theme.of(context).dividerColor.withValues(alpha: 0.1);
+        Color c = text.withValues(alpha: 0.1);
         if (str > index) {
           if (str == 1) {
             c = Colors.red;

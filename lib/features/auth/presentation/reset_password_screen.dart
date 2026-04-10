@@ -20,36 +20,23 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _obscureConfirm = true;
 
   Future<void> _updatePassword() async {
-    final password = _passwordController.text;
-    final confirm = _confirmController.text;
+    final password = _passwordController.text.trim();
+    final confirm = _confirmController.text.trim();
 
-    if (password.isEmpty || confirm.isEmpty) {
+    if (password.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please fill in all fields'),
-          behavior: SnackBarBehavior.floating,
+          content: Text('Password must be at least 8 characters'),
+          backgroundColor: Color(0xFFC62828),
         ),
       );
       return;
     }
-
     if (password != confirm) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Passwords do not match'),
           backgroundColor: Color(0xFFC62828),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    if (password.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password must be at least 6 characters'),
-          backgroundColor: Color(0xFFC62828),
-          behavior: SnackBarBehavior.floating,
         ),
       );
       return;

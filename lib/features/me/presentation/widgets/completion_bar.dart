@@ -19,13 +19,19 @@ class CompletionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bg = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF080F0C);
+    final card = isLight ? Colors.white : const Color(0xFF0D1A13);
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final border = isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33);
+
     if (score >= 100) {
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          color: const Color(0xFF135E4B).withValues(alpha: 0.3),
+          color: const Color(0xFF135E4B).withValues(alpha: isLight ? 0.1 : 0.3),
           border: Border.all(
               color: const Color(0xFF4CB572).withValues(alpha: 0.5)),
         ),
@@ -39,7 +45,7 @@ class CompletionBar extends StatelessWidget {
                 "Profile complete! You're getting more matches",
                 style: GoogleFonts.inter(
                     fontSize: 13,
-                    color: const Color(0xFFEBF2EE).withValues(alpha: 0.80)),
+                    color: text.withValues(alpha: 0.80)),
               ),
             ),
           ],
@@ -53,9 +59,9 @@ class CompletionBar extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0D1A13),
+        color: card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF4CB572).withValues(alpha: 0.15)),
+        border: Border.all(color: border.withValues(alpha: 0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,7 +75,7 @@ class CompletionBar extends StatelessWidget {
                     'PROFILE STRENGTH',
                     style: GoogleFonts.spaceMono(
                       fontSize: 9,
-                      color: const Color(0xFF4CB572),
+                      color: isLight ? const Color(0xFF135E4B) : const Color(0xFF4CB572),
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -91,7 +97,7 @@ class CompletionBar extends StatelessWidget {
                 child: CircularProgressIndicator(
                   value: score / 100,
                   strokeWidth: 4,
-                  backgroundColor: Colors.white.withValues(alpha: 0.08),
+                  backgroundColor: text.withValues(alpha: 0.08),
                   valueColor: AlwaysStoppedAnimation<Color>(barColor),
                 ),
               ),
@@ -102,7 +108,7 @@ class CompletionBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
               value: score / 100,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
+              backgroundColor: text.withValues(alpha: 0.08),
               valueColor: AlwaysStoppedAnimation<Color>(barColor),
               minHeight: 4,
             ),
@@ -113,7 +119,7 @@ class CompletionBar extends StatelessWidget {
               'Improve your match rate:',
               style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: const Color(0xFFEBF2EE).withValues(alpha: 0.40)),
+                  color: text.withValues(alpha: 0.40)),
             ),
             const SizedBox(height: 6),
             ...missing.map((tip) => Padding(
@@ -127,7 +133,7 @@ class CompletionBar extends StatelessWidget {
                         child: Text(tip,
                             style: GoogleFonts.inter(
                                 fontSize: 12,
-                                color: const Color(0xFFEBF2EE).withValues(alpha: 0.60))),
+                                color: text.withValues(alpha: 0.60))),
                       ),
                     ],
                   ),

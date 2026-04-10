@@ -104,14 +104,22 @@ class _MatchOverlayState extends State<MatchOverlay>
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final bg = isLight ? const Color(0xFFF5F0E8) : const Color(0xFF080F0C);
+    final card = isLight ? Colors.white : const Color(0xFF0D1A13);
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final muted = isLight ? const Color(0xFF6B9E8A) : const Color(0xFF9BB3AF);
+    final border = isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33);
+
     final size = MediaQuery.of(context).size;
     final matchedName = widget.matchedProfile['name'] ?? 'your match';
     final matchedAvatarUrl = widget.matchedProfile['avatar_url'] as String?;
 
     return Material(
       child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
+        decoration: BoxDecoration(
+          color: bg,
+          gradient: isLight ? null : const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
@@ -154,14 +162,14 @@ class _MatchOverlayState extends State<MatchOverlay>
                           left: 0,
                           child: ScaleTransition(
                             scale: _heartbeatAnimation,
-                            child: _buildAvatar(widget.myAvatarUrl),
+                            child: _buildAvatar(context, widget.myAvatarUrl),
                           ),
                         ),
                         Positioned(
                           right: 0,
                           child: ScaleTransition(
                             scale: _heartbeatAnimation,
-                            child: _buildAvatar(matchedAvatarUrl),
+                            child: _buildAvatar(context, matchedAvatarUrl),
                           ),
                         ),
                         // Small floating heart in middle
@@ -198,7 +206,7 @@ class _MatchOverlayState extends State<MatchOverlay>
                           style: GoogleFonts.playfairDisplay(
                             fontSize: 32,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: isLight ? const Color(0xFF135E4B) : Colors.white,
                             height: 1.0,
                             letterSpacing: -1,
                           ),
@@ -264,7 +272,7 @@ class _MatchOverlayState extends State<MatchOverlay>
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: isLight ? text : Colors.white.withValues(alpha: 0.85),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -275,7 +283,7 @@ class _MatchOverlayState extends State<MatchOverlay>
                       width: double.infinity,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isLight ? const Color(0xFF135E4B) : Colors.white,
                         borderRadius: BorderRadius.circular(22),
                         boxShadow: [
                           BoxShadow(
@@ -291,7 +299,7 @@ class _MatchOverlayState extends State<MatchOverlay>
                           style: GoogleFonts.spaceMono(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFFE8437A),
+                            color: isLight ? Colors.white : const Color(0xFFE8437A),
                             letterSpacing: 1.2,
                           ),
                         ),
@@ -310,7 +318,7 @@ class _MatchOverlayState extends State<MatchOverlay>
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: isLight ? muted : Colors.white.withValues(alpha: 0.7),
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -326,14 +334,17 @@ class _MatchOverlayState extends State<MatchOverlay>
     );
   }
 
-  Widget _buildAvatar(String? url) {
+  Widget _buildAvatar(BuildContext context, String? url) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    
     return Container(
       width: 72,
       height: 72,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 3),
-        color: const Color(0xFF152B1E),
+        border: Border.all(color: isLight ? text : Colors.white, width: 3),
+        color: isLight ? Colors.black.withValues(alpha: 0.1) : const Color(0xFF152B1E),
       ),
       child: ClipOval(
         child: url != null

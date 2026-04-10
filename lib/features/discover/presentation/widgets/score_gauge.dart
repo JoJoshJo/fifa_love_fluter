@@ -24,6 +24,9 @@ class ScoreGauge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    
     return GestureDetector(
       onTap: profile != null
           ? () => _showScoreBreakdown(context)
@@ -49,14 +52,14 @@ class ScoreGauge extends StatelessWidget {
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: text,
                   ),
                 ),
                 Text(
                   '%',
                   style: GoogleFonts.spaceMono(
                     fontSize: 8,
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: text.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -71,9 +74,12 @@ class ScoreGauge extends StatelessWidget {
     final currentUser = SupabaseConfig.client.auth.currentUser;
     if (currentUser == null || profile == null) return;
 
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final card = isLight ? Colors.white : const Color(0xFF0D1A13);
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF0D1A13),
+      backgroundColor: card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -100,7 +106,7 @@ class _GaugePainter extends CustomPainter {
     final bgPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4
-      ..color = Colors.white.withValues(alpha: 0.1);
+      ..color = (score > 0) ? color.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.2);
     canvas.drawCircle(center, radius, bgPaint);
 
     // Score arc
@@ -188,6 +194,9 @@ class _ScoreBreakdownSheetState extends State<_ScoreBreakdownSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -205,7 +214,7 @@ class _ScoreBreakdownSheetState extends State<_ScoreBreakdownSheet> {
               ),
               const Spacer(),
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.white54),
+                icon: Icon(Icons.close, color: text.withValues(alpha: 0.5)),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -243,7 +252,7 @@ class _ScoreBreakdownSheetState extends State<_ScoreBreakdownSheet> {
                           item['label'] ?? '',
                           style: GoogleFonts.inter(
                             fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.8),
+                            color: text.withValues(alpha: 0.8),
                           ),
                         ),
                       ),
