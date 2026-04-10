@@ -16,6 +16,7 @@ import 'widgets/match_overlay.dart';
 import 'widgets/country_filter_sheet.dart';
 import '../../../core/notifications/notification_service.dart';
 import '../../../core/widgets/shimmer_card.dart';
+import '../../me/presentation/edit_profile_screen.dart';
 
 class DiscoverScreen extends ConsumerStatefulWidget {
   const DiscoverScreen({super.key});
@@ -44,6 +45,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   String? _mostCompatibleId; // ID of the daily Most Compatible card
   String? _matchComment; // Track comment to show in match overlay
   String? _commentForNextSwipe; // Pending comment from bottom sheet
+  bool _needsPhoto = false;
 
   static const int _freeLimit = 20;
   static const int _hardLimit = 25;
@@ -119,8 +121,29 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
       setState(() => _showTutorial = true);
     }
 
+    await _checkPhotoRequirement();
     await _fetchMyAvatar();
     await _loadProfiles();
+  }
+
+  Future<void> _checkPhotoRequirement() async {
+    final user = SupabaseConfig.client.auth.currentUser;
+    if (user == null) return;
+    
+    try {
+      final profile = await SupabaseConfig.client
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', user.id)
+          .maybeSingle();
+      
+      final avatarUrl = profile?['avatar_url'] as String?;
+      if (mounted) {
+        setState(() => _needsPhoto = avatarUrl == null || avatarUrl.isEmpty);
+      }
+    } catch (e) {
+      debugPrint('[DISCOVER] Photo check error: $e');
+    }
   }
 
   Future<void> _fetchMyAvatar() async {
@@ -503,7 +526,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
       backgroundColor: isLight
           ? const Color(0xFFF5F0E8)
           : const Color(0xFF080F0C),
-      body: Stack(
+      body: _needsPhoto ? _buildPhotoPrompt(isLight) : Stack(
         children: [
           Column(
             children: [
@@ -1735,6 +1758,72 @@ class _SwipeHintOverlayState extends State<_SwipeHintOverlay>
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhotoPrompt(bool isLight) {
+    final textColor = isLight ? const Color(0xFF0D1410) : Colors.white;
+    final mutedColor = isLight ? Colors.black54 : Colors.white60;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(LucideIcons.camera, size: 48, color: Color(0xFFE8437A)),
+            const SizedBox(height: 24),
+            Text(
+              'Add a photo to start matching',
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Profiles with photos get 10x more matches',
+              style: GoogleFonts.inter(
+                fontSize: 14, 
+                color: mutedColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            GestureDetector(
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                );
+                _checkPhotoRequirement();
+              },
+              child: Container(
+                height: 52,
+                width: 220,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(26),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'Upload Photo',
+                    style: GoogleFonts.inter(
+                      fontSize: 16, 
+                      fontWeight: FontWeight.w600, 
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
