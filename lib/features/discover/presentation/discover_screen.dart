@@ -131,7 +131,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
 
   Future<void> _loadProfiles() async {
     if (!mounted) return;
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _profiles.clear();
+      _currentIndex = 0;
+    });
 
     final user = SupabaseConfig.client.auth.currentUser;
     if (user?.id == null) {
@@ -601,6 +605,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                                 height: MediaQuery.of(context).size.height * 0.68,
                                 width: MediaQuery.of(context).size.width - 32,
                                   child: CardSwiper(
+                                    key: ValueKey('swiper_${_selectedCountries.join('_')}'),
                                     controller: _swiperController,
                                     cardsCount: min(3, remaining),
                                     numberOfCardsDisplayed: 2,
