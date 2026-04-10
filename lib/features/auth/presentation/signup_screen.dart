@@ -44,6 +44,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final List<String> _countriesToMatch = [];
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _acceptedTerms = false;
 
   @override
   void dispose() {
@@ -82,33 +83,48 @@ class _SignupScreenState extends State<SignupScreen> {
   }
   
   void _submitProfile() async {
-    final age = int.tryParse(_ageController.text) ?? 0;
-    if (age < 18) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('You must be at least 18 years old to use Turf&Ardor'),
-            backgroundColor: Color(0xFFC62828),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-      return;
-    }
-
+    // 1. Validation
+    final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
+    final age = int.tryParse(_ageController.text) ?? 0;
 
-    if (email.isEmpty || password.length < 6) {
+    if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please provide a valid email and password (min 6 chars)'),
-          behavior: SnackBarBehavior.floating,
-        )
+        const SnackBar(content: Text('Please enter your name'), backgroundColor: Color(0xFFC62828)),
       );
       return;
     }
-    
+
+    if (age < 18) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You must be at least 18 years old'), backgroundColor: Color(0xFFC62828)),
+      );
+      return;
+    }
+
+    final emailRegex = RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address'), backgroundColor: Color(0xFFC62828)),
+      );
+      return;
+    }
+
+    if (!_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please accept the Terms of Service'), backgroundColor: Color(0xFFC62828)),
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must be at least 6 characters'), backgroundColor: Color(0xFFC62828)),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     
     try {
@@ -814,8 +830,59 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           const SizedBox(height: 12),
           _buildPasswordStrengthBar(),
+          const SizedBox(height: 24),
+
+          // TERMS CHECKBOX
+          Row(
+            children: [
+              SizedBox(
+                height: 24,
+                width: 24,
+                child: Checkbox(
+                  value: _acceptedTerms,
+                  onChanged: (v) => setState(() => _acceptedTerms = v ?? false),
+                  activeColor: const Color(0xFF4CB572),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _acceptedTerms = !_acceptedTerms),
+                  child: RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.inter(
+                        fontSize: 12, 
+                        color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6)
+                      ),
+                      children: [
+                        const TextSpan(text: 'I agree to the '),
+                        TextSpan(
+                          text: 'Terms of Service',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF4CB572),
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        const TextSpan(text: ' and '),
+                        TextSpan(
+                          text: 'Privacy Policy',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: const Color(0xFF4CB572),
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
           _buildSignUpBtn(),
         ],
       ),
@@ -941,18 +1008,30 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildSignUpBtn() {
-    return ElevatedButton(
-      onPressed: _isLoading ? null : _submitProfile,
-      style: ElevatedButton.styleFrom(
-        minimumSize: const Size(double.infinity, 60),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        backgroundColor: const Color(0xFFE8437A),
-        disabledBackgroundColor: const Color(0xFFE8437A).withValues(alpha: 0.1),
+    return Opacity(
+      opacity: _acceptedTerms ? 1.0 : 0.5,
+      child: ElevatedButton(
+        onPressed: (_isLoading || !_acceptedTerms) ? null : _submitProfile,
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(double.infinity, 60),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: const Color(0xFFE8437A),
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: const Color(0xFFE8437A).withValues(alpha: 0.1),
+          disabledForegroundColor: Colors.white.withValues(alpha: 0.3),
+          elevation: _acceptedTerms ? 4 : 0,
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+              )
+            : Text(
+                "Create Account", 
+                style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
       ),
-      child: _isLoading 
-        ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
-        : Text("Create My Profile", 
-             style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
     );
   }
 }
