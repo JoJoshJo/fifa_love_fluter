@@ -69,6 +69,7 @@ dependencies:
   share_plus: ^9.0.0
   flutter_local_notifications: ^17.0.0
   lucide_icons: ^0.257.0
+  sign_in_with_apple: ^6.1.1
 
 
 dev_dependencies:

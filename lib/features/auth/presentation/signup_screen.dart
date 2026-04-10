@@ -82,6 +82,20 @@ class _SignupScreenState extends State<SignupScreen> {
   }
   
   void _submitProfile() async {
+    final age = int.tryParse(_ageController.text) ?? 0;
+    if (age < 18) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('You must be at least 18 years old to use Turf&Ardor'),
+            backgroundColor: Color(0xFFC62828),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 

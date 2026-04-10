@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/widgets/particle_background.dart';
 import 'signup_screen.dart';
 import 'signin_screen.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
@@ -34,6 +35,24 @@ class _LandingScreenState extends State<LandingScreen>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _signInWithApple() async {
+    try {
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.apple,
+        redirectTo: 'https://jojoshjo.github.io/fifa_love_fluter/',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Apple sign-in failed: $e'),
+            backgroundColor: const Color(0xFFC62828),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _signInWithGoogle() async {
@@ -327,6 +346,40 @@ class _LandingScreenState extends State<LandingScreen>
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
                                       color: const Color(0xFFEBF2EE),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // APPLE BUTTON
+                          GestureDetector(
+                            onTap: _signInWithApple,
+                            child: Container(
+                              height: 52,
+                              margin: const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(26),
+                                color: Colors.white, // In dark theme, using white for Apple
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.apple,
+                                    size: 22,
+                                    color: Colors.black,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'Continue with Apple',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
                                     ),
                                   ),
                                 ],

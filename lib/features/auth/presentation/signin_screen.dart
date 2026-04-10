@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'forgot_password_screen.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'signup_screen.dart';
 import '../../../core/router/auth_gate.dart';
 import '../../../core/constants/colors.dart';
@@ -75,6 +76,25 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    try {
+      await Supabase.instance.client.auth.signInWithOAuth(
+        OAuthProvider.apple,
+        redirectTo: 'https://jojoshjo.github.io/fifa_love_fluter/',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Apple sign-in failed: $e'),
+            backgroundColor: const Color(0xFFC62828),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -313,6 +333,38 @@ class _SignInScreenState extends State<SignInScreen> {
                             color: isLight
                                 ? const Color(0xFF0D2B1E)
                                 : const Color(0xFFEBF2EE),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // APPLE BUTTON
+                GestureDetector(
+                  onTap: _signInWithApple,
+                  child: Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(26),
+                      color: isLight ? Colors.black : Colors.white,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.apple,
+                          size: 22,
+                          color: isLight ? Colors.white : Colors.black,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Continue with Apple',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isLight ? Colors.white : Colors.black,
                           ),
                         ),
                       ],
