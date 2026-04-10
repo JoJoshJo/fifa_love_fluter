@@ -40,6 +40,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   int _dailySwipes = 0;
   bool _showTutorial = false;
   bool _showSwipeHint = false;
+  int _likesRemaining = 10;
   String? _mostCompatibleId; // ID of the daily Most Compatible card
   String? _matchComment; // Track comment to show in match overlay
   String? _commentForNextSwipe; // Pending comment from bottom sheet
@@ -65,6 +66,14 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   Future<void> _init() async {
     final prefs = await SharedPreferences.getInstance();
     _dailySwipes = prefs.getInt(_swipePrefsKey) ?? 0;
+
+    final user = SupabaseConfig.client.auth.currentUser;
+    if (user != null) {
+      final likesCount = await _repo.getLikesTodayCount(user.id);
+      if (mounted) {
+        setState(() => _likesRemaining = max(0, 10 - likesCount));
+      }
+    }
 
     // Load countries from DB profile as the source of truth.
     // SharedPreferences only stores user's explicit filter-sheet overrides.
@@ -296,10 +305,13 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   }
 
   Future<void> _handleSwipe(String action, Map<String, dynamic> profile, {String? comment}) async {
-    if (_dailySwipes >= _hardLimit) {
-      _showPremiumSheet();
-      return;
+    if (action == 'like' || action == 'superlike') {
+      if (_likesRemaining <= 0) {
+        _showLikeLimitOverlay();
+        return;
+      }
     }
+
     _dailySwipes++;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_swipePrefsKey, _dailySwipes);
@@ -319,6 +331,10 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
 
     if (result != null && result['matched'] == true && mounted) {
       _showMatchReveal(profile, comment: comment);
+    }
+
+    if (action == 'like' || action == 'superlike') {
+      setState(() => _likesRemaining = max(0, _likesRemaining - 1));
     }
 
     setState(() => _currentIndex++);
@@ -373,6 +389,88 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
               onPressed: () => Navigator.pop(context),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showLikeLimitOverlay() {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.85),
+      builder: (_) => Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            margin: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(40),
+            decoration: BoxDecoration(
+              color: const Color(0xFF080F0C),
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: const Color(0xFFF2C233).withValues(alpha: 0.2)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(LucideIcons.heart, size: 64, color: Color(0xFFF2C233)),
+                const SizedBox(height: 32),
+                Text(
+                  "You've used all\nyour likes today",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "Come back tomorrow or upgrade\nfor unlimited likes.",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    color: Colors.white.withValues(alpha: 0.6),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF2C233),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'GO PREMIUM',
+                        style: GoogleFonts.spaceMono(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Maybe Later',
+                    style: GoogleFonts.inter(
+                      color: Colors.white24,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -443,6 +541,16 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                             fontWeight: FontWeight.w700,
                             color: isLight ? const Color(0xFF0D1410) : Colors.white,
                             height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '$_likesRemaining LIKES REMAINING TODAY',
+                          style: GoogleFonts.spaceMono(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFFF2C233),
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ],
@@ -858,8 +966,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
               hasFilters
-                  ? 'No fans from these\ncountries yet.'
-                  : 'You\'ve seen everyone\nnearby. Expand your search.',
+                  ? 'No more fans in ${_selectedCountries.length == 1 ? _selectedCountries.first : "these countries"}.\nTry expanding your search.'
+                  : 'You\'ve seen everyone for now.\nSkipped profiles return in 48 hours.',
               textAlign: TextAlign.center,
               style: GoogleFonts.playfairDisplay(
                 fontSize: 26,
@@ -896,7 +1004,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                 Text(
                   hasFilters
                       ? 'Fans from all over the world are joining every hour.'
-                      : 'New fans arrive every day as the tournament approaches.',
+                      : 'New fans arrive daily as the tournament approaches!',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: 12,

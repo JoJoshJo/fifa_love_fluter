@@ -22,9 +22,26 @@ class DiscoverRepository {
       final List<dynamic> rankedData = response as List<dynamic>;
       if (rankedData.isEmpty) return [];
 
-      final profileIds = rankedData.map((d) => d['profile_id'] as String).toList();
+      // 2. Fetch exclusion list (Likes are permanent, Skips recycle after 48h)
+      final exclusionCutoff = DateTime.now().subtract(const Duration(hours: 48)).toIso8601String();
+      final exclusionResponse = await SupabaseConfig.client
+          .from('swipe_actions')
+          .select('swiped_id')
+          .eq('swiper_id', userId)
+          .or('action.eq.like,and(action.eq.skip,created_at.gte.$exclusionCutoff)');
+      
+      final excludedIds = ((exclusionResponse as List<dynamic>?) ?? [])
+          .map((s) => s['swiped_id'] as String)
+          .toSet();
 
-      // 2. Fetch full profile details for these IDs
+      final profileIds = rankedData
+          .map((d) => d['profile_id'] as String)
+          .where((id) => !excludedIds.contains(id))
+          .toList();
+      
+      if (profileIds.isEmpty) return [];
+
+      // 3. Fetch full profile details for these IDs
       final profilesResponse = await SupabaseConfig.client
           .from('profiles')
           .select('id, name, age, nationality, avatar_url, bio, interests, city, is_local, team_supported, languages, is_verified, last_active_at, created_at, countries_to_match')
@@ -32,7 +49,7 @@ class DiscoverRepository {
 
       final List<dynamic> rawProfiles = profilesResponse as List<dynamic>;
       
-      // 3. Re-assemble with scores and sort by the rank provided by RPC
+      // 4. Re-assemble with scores and sort by the rank provided by RPC
       final List<Map<String, dynamic>> finalProfiles = [];
       for (var ranked in rankedData) {
         final profile = rawProfiles.firstWhere(
@@ -125,9 +142,24 @@ class DiscoverRepository {
         };
       }
       return null;
+    }
+  }
+
+  /// Counts how many likes the user has sent today.
+  Future<int> getLikesTodayCount(String userId) async {
+    try {
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      final response = await SupabaseConfig.client
+          .from('swipe_actions')
+          .select('id', const FetchOptions(count: CountOption.exact))
+          .eq('swiper_id', userId)
+          .eq('action', 'like')
+          .gte('created_at', '${today}T00:00:00');
+      
+      return response.count;
     } catch (e) {
-      debugPrint('Error recording swipe: $e');
-      return null;
+      debugPrint('Error fetching today like count: $e');
+      return 0;
     }
   }
 
