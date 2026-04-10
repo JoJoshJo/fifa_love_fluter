@@ -12,12 +12,15 @@ class MatchOverlay extends StatefulWidget {
   final VoidCallback onMessage;
   final VoidCallback onKeepSwiping;
 
+  final String? comment;
+
   const MatchOverlay({
     super.key,
     required this.matchedProfile,
     required this.myAvatarUrl,
     required this.onMessage,
     required this.onKeepSwiping,
+    this.comment,
   });
 
   @override
@@ -238,6 +241,22 @@ class _MatchOverlayState extends State<MatchOverlay>
                     ),
                   ),
                   const SizedBox(height: 8),
+
+                  if (widget.comment != null) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        '"${widget.comment}"',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                          color: const Color(0xFFF8BBD0),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Subtext
                   Text(

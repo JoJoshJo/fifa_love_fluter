@@ -232,15 +232,22 @@ class MatchListItem extends StatelessWidget {
                   ),
                 ),
 
-                // Unread dot
+                // Unread badge
                 if (unread > 0)
                   Container(
                     margin: const EdgeInsets.only(left: 12),
-                    width: 7,
-                    height: 7,
-                    decoration: const BoxDecoration(
-                      color: TurfArdorColors.gold,
-                      shape: BoxShape.circle,
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8437A),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '$unread',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
               ],

@@ -163,9 +163,9 @@ class MessageBubble extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Icon(
-                    status == 'read' ? LucideIcons.checkCheck : LucideIcons.checkCheck,
-                    size: 12,
-                    color: status == 'read'
+                    message['read_at'] != null ? LucideIcons.checkCheck : LucideIcons.check,
+                    size: 14,
+                    color: message['read_at'] != null
                         ? const Color(0xFF4CB572)
                         : (isLight ? const Color(0xFF9BB3AF) : Colors.white24),
                   ),

@@ -68,6 +68,7 @@ class DiscoverRepository {
     required String swipedId,
     required String action, // 'like', 'nope', 'superlike'
     int matchScore = 20,
+    String? comment,
   }) async {
     try {
       // 1. Insert swipe action (Trigger in DB will handle match creation)
@@ -75,6 +76,7 @@ class DiscoverRepository {
         'swiper_id': swiperId,
         'swiped_id': swipedId,
         'action': action,
+        'comment': comment,
         'created_at': DateTime.now().toIso8601String(),
       });
 

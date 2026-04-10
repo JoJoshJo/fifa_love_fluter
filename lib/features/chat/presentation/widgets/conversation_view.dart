@@ -518,18 +518,22 @@ class _ConversationViewState extends State<ConversationView> {
                   final isInitialLoad = _lastMessageCount == 0;
                   final newMsg = messages.last;
 
-                  if (!isInitialLoad && newMsg['sender_id'] != widget.currentUserId) {
-                    // Only notify for incremental new messages, not history on load
-                    final otherName = other['name'] ?? 'Match';
-                    NotificationService().showMessageNotification(
-                      senderName: otherName,
-                      message: newMsg['content'] as String,
-                      matchId: widget.match['id'] as String,
-                    );
+                  if (newMsg['sender_id'] != widget.currentUserId) {
+                    // Mark as read immediately when a new message from OTHER arrives
+                    _repo.markAsRead(widget.match['id'] as String, widget.currentUserId);
+                    
+                    if (!isInitialLoad) {
+                      // Only notify for incremental new messages, not history on load
+                      final otherName = other['name'] ?? 'Match';
+                      NotificationService().showMessageNotification(
+                        senderName: otherName,
+                        message: newMsg['content'] as String,
+                        matchId: widget.match['id'] as String,
+                      );
+                    }
                   }
 
-                  // On initial load, snapshot all existing messages as non-new
-                  // so they don't all animate at once. Only true increments animate.
+                  // Update tracking count
                   _lastMessageCount = messages.length;
                 }
 

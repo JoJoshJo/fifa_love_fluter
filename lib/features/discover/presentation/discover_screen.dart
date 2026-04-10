@@ -42,6 +42,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
   late Animation<Offset> _hintAnimation;
   bool _showTutorial = false;
   String? _mostCompatibleId; // ID of the daily Most Compatible card
+  String? _matchComment; // Track comment to show in match overlay
+  String? _commentForNextSwipe; // Pending comment from bottom sheet
 
   static const int _freeLimit = 20;
   static const int _hardLimit = 25;
@@ -308,152 +310,23 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
     }
   }
 
-  void _showCommentedLikeSheet() {
-    if (_currentIndex >= _profiles.length) return;
-    final profile = _profiles[_currentIndex];
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final TextEditingController commentController = TextEditingController();
-
+  void _onLikeTapped(Map<String, dynamic> profile) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isLight ? Colors.white : const Color(0xFF0D1A13),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isLight ? Colors.black12 : Colors.white10,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: NetworkImage(profile['avatar_url'] ?? ''),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'SEND A NOTE TO ${profile['name']?.toUpperCase()}',
-                          style: GoogleFonts.spaceMono(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFFE8437A),
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'They\'ll see this when you show up in their likes.',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: isLight ? Colors.black54 : Colors.white54,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Container(
-                decoration: BoxDecoration(
-                  color: isLight ? const Color(0xFFF5F0E8) : const Color(0xFF152B1E),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33),
-                  ),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: TextField(
-                  controller: commentController,
-                  autofocus: true,
-                  maxLines: 4,
-                  style: GoogleFonts.inter(fontSize: 15),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Say something about their team or bio...',
-                    hintStyle: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: isLight ? Colors.black26 : Colors.white24,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final comment = commentController.text.trim();
-                    if (comment.isEmpty) return;
-                    
-                    Navigator.pop(context);
-                    
-                    final result = await _repo.recordCommentedLike(
-                      swiperId: SupabaseConfig.client.auth.currentUser?.id ?? '',
-                      swipedId: profile['id'],
-                      comment: comment,
-                    );
-                    
-                    if (result != null && result['matched'] == true) {
-                      _showMatchReveal(profile);
-                    }
-                    
-                    _swiperController.swipe(CardSwiperDirection.right);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE8437A),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'SEND LIKE',
-                    style: GoogleFonts.spaceMono(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 2.0,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+      isScrollControlled: true,
+      builder: (_) => _CommentLikeSheet(
+        profile: profile,
+        onSend: (String? comment) {
+          Navigator.pop(context);
+          _commentForNextSwipe = comment;
+          _swiperController.swipe(CardSwiperDirection.right);
+        },
       ),
     );
   }
 
-  Future<void> _handleSwipe(String action, Map<String, dynamic> profile) async {
+  Future<void> _handleSwipe(String action, Map<String, dynamic> profile, {String? comment}) async {
     if (_dailySwipes >= _hardLimit) {
       _showPremiumSheet();
       return;
@@ -472,10 +345,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
       swipedId: swipedId,
       action: action,
       matchScore: (profile['match_score'] as int?) ?? 20,
+      comment: comment,
     );
 
     if (result != null && result['matched'] == true && mounted) {
-      _showMatchReveal(profile);
+      _showMatchReveal(profile, comment: comment);
     }
 
     setState(() => _currentIndex++);
@@ -790,9 +664,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                                         
                                         // Defer heavier logic to let animation run
                                         final profile = _profiles[_currentIndex + prevIndex];
+                                        final currentComment = _commentForNextSwipe;
+                                        _commentForNextSwipe = null; // Clear it immediately
+
                                         Future.delayed(const Duration(milliseconds: 250), () {
                                           if (mounted) {
-                                            _handleSwipe(action, profile);
+                                            _handleSwipe(action, profile, comment: currentComment);
                                           }
                                         });
                                         return true;
@@ -862,18 +739,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
                             ),
                           ],
                           offset: const Offset(0, -4),
-                          onTap: () => _swiperController.swipe(CardSwiperDirection.right),
-                        ),
-                        const SizedBox(width: 12),
-                        // COMMENTED LIKE (Heart + Msg)
-                        _ActionButton(
-                          icon: LucideIcons.messageSquare,
-                          color: TurfArdorColors.pink,
-                          size: 48,
-                          iconSize: 22,
-                          hasBorder: true,
-                          borderColor: TurfArdorColors.pink.withValues(alpha: 0.3),
-                          onTap: _showCommentedLikeSheet,
+                          onTap: () => _onLikeTapped(_profiles[_currentIndex]),
                         ),
                         const SizedBox(width: 12),
                         // SUPER LIKE (Star)
@@ -941,6 +807,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
             MatchOverlay(
               matchedProfile: _matchedProfile!,
               myAvatarUrl: _myAvatarUrl,
+              comment: _matchComment,
               onMessage: () async {
                 await NotificationService().requestPermissions();
                 // Pre-select the conversation and switch to Chat tab
@@ -1122,11 +989,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
     return const Center(child: ShimmerSwipeCard());
   }
 
-  void _showMatchReveal(Map<String, dynamic> profile) {
+  void _showMatchReveal(Map<String, dynamic> profile, {String? comment}) {
     if (!mounted) return;
     setState(() {
       _matchedProfile = profile;
       _showMatch = true;
+      _matchComment = comment;
     });
   }
 
@@ -1578,6 +1446,111 @@ class _TutorialRow extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _CommentLikeSheet extends StatefulWidget {
+  final Map<String, dynamic> profile;
+  final Function(String?) onSend;
+  const _CommentLikeSheet({required this.profile, required this.onSend});
+  
+  @override
+  State<_CommentLikeSheet> createState() => _CommentLikeSheetState();
+}
+
+class _CommentLikeSheetState extends State<_CommentLikeSheet> {
+  final _commentController = TextEditingController();
+  
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isLight ? Colors.white : const Color(0xFF0D1A13),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        padding: const EdgeInsets.fromLTRB(28, 16, 28, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Container(
+                  width: 48, height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(image: NetworkImage(widget.profile['avatar_url'] ?? ''), fit: BoxFit.cover),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    'Liked ${widget.profile['name']}',
+                    style: GoogleFonts.playfairDisplay(fontSize: 24, fontWeight: FontWeight.bold, color: isLight ? TurfArdorColors.textPrimaryLight : Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Container(
+              decoration: BoxDecoration(
+                color: isLight ? const Color(0xFFF5F0E8) : const Color(0xFF152B1E),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: isLight ? const Color(0xFFE8DDD0) : const Color(0xFF1E4A33)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: TextField(
+                controller: _commentController,
+                autofocus: true,
+                maxLength: 150,
+                maxLines: 3,
+                style: GoogleFonts.inter(fontSize: 15, color: isLight ? TurfArdorColors.textPrimaryLight : Colors.white),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Add a note...',
+                  counterStyle: GoogleFonts.spaceMono(fontSize: 10, color: Colors.white24),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => widget.onSend(null),
+                    child: Text('Just Like', style: GoogleFonts.spaceMono(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white54, letterSpacing: 1)),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: () => widget.onSend(_commentController.text.trim().isEmpty ? null : _commentController.text.trim()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: TurfArdorColors.pink,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text('SEND NOTE', style: GoogleFonts.spaceMono(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 2)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
