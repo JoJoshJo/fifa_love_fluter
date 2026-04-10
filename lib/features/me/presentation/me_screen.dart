@@ -96,41 +96,103 @@ class _MeScreenState extends ConsumerState<MeScreen> {
   }
 
   Future<void> _deleteAccount() async {
-    final controller = TextEditingController();
-    final confirmed = await showDialog<bool>(
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
+    final card = isLight ? Colors.white : const Color(0xFF0D1A13);
+    final muted = isLight ? const Color(0xFF9BB3AF) : const Color(0xFF9BB3AF);
+
+    // Step 1: Broad confirmation
+    final startDelete = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).cardColor,
-        title: Text('Delete Account', style: GoogleFonts.spaceGrotesk(color: Theme.of(context).textTheme.titleLarge?.color, fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('This action will permanently delete your account, profile data, photos, matches, and messages. This cannot be undone. Type DELETE to confirm.', style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodyMedium?.color)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
-              decoration: InputDecoration(
-                hintText: 'DELETE',
-                hintStyle: GoogleFonts.inter(color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3)),
-                fillColor: Theme.of(context).dividerColor.withValues(alpha: 0.05),
-                filled: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Theme.of(context).dividerColor)),
-              ),
-            ),
-          ],
+      builder: (_) => AlertDialog(
+        backgroundColor: card,
+        title: Text('Delete Account?',
+          style: GoogleFonts.playfairDisplay(fontSize: 22, fontWeight: FontWeight.w700, color: text)),
+        content: Text(
+          'This will permanently delete your profile, matches, and messages. This cannot be undone.',
+          style: GoogleFonts.inter(fontSize: 14, color: text.withValues(alpha: 0.7)),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel', style: GoogleFonts.inter(color: Theme.of(context).textTheme.bodySmall?.color))),
-          TextButton(onPressed: () {
-            if (controller.text.trim() == 'DELETE') Navigator.pop(context, true);
-          }, child: Text('Delete', style: GoogleFonts.inter(color: const Color(0xFFE83535)))),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: GoogleFonts.inter(color: muted)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Delete Account',
+              style: GoogleFonts.inter(color: const Color(0xFFE83535), fontWeight: FontWeight.w600)),
+          ),
         ],
       ),
     );
 
-    if (confirmed == true) {
-      await _repo.deleteAccount(_userId);
+    if (startDelete != true) return;
+
+    // Step 2: DELETE keyword confirmation
+    final controller = TextEditingController();
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: card,
+          title: Text('Are you absolutely sure?',
+            style: GoogleFonts.playfairDisplay(fontSize: 20, color: const Color(0xFFE83535), fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Type DELETE to confirm permanent deletion.',
+                style: GoogleFonts.inter(fontSize: 14, color: text.withValues(alpha: 0.7))),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                style: GoogleFonts.inter(color: text),
+                onChanged: (_) => setDialogState(() {}),
+                decoration: InputDecoration(
+                  hintText: 'DELETE',
+                  hintStyle: GoogleFonts.inter(color: text.withValues(alpha: 0.3)),
+                  fillColor: text.withValues(alpha: 0.05),
+                  filled: true,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: text.withValues(alpha: 0.1))),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('Cancel', style: GoogleFonts.inter(color: muted)),
+            ),
+            TextButton(
+              onPressed: controller.text.trim() == 'DELETE' 
+                ? () => Navigator.pop(ctx, true) 
+                : null,
+              child: Text('Delete Forever',
+                style: GoogleFonts.inter(
+                  color: controller.text.trim() == 'DELETE' ? const Color(0xFFE83535) : muted.withValues(alpha: 0.5), 
+                  fontWeight: FontWeight.w600
+                )),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirm == true) {
+      if (mounted) {
+        setState(() => _loading = true);
+      }
+      try {
+        await _repo.deleteAccount(_userId);
+      } catch (e) {
+        if (mounted) {
+          setState(() => _loading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error deleting account: $e'), backgroundColor: const Color(0xFFE83535)),
+          );
+        }
+      }
     }
   }
 

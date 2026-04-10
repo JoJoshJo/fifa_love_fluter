@@ -22,7 +22,7 @@ class DiscoverRepository {
       final List<dynamic> rankedData = response as List<dynamic>;
       if (rankedData.isEmpty) return [];
 
-      // 2. Fetch exclusion list (Likes are permanent, Skips recycle after 48h)
+      // 2. Fetch exclusion list (Likes are permanent, Skips recycle after 48h, Blocks are permanent)
       final exclusionCutoff = DateTime.now().subtract(const Duration(hours: 48)).toIso8601String();
       final exclusionResponse = await SupabaseConfig.client
           .from('swipe_actions')
@@ -30,9 +30,21 @@ class DiscoverRepository {
           .eq('swiper_id', userId)
           .or('action.eq.like,and(action.eq.skip,created_at.gte.$exclusionCutoff)');
       
-      final excludedIds = ((exclusionResponse as List<dynamic>?) ?? [])
+      final swipedIds = ((exclusionResponse as List<dynamic>?) ?? [])
           .map((s) => s['swiped_id'] as String)
           .toSet();
+
+      // Fetch blocked IDs
+      final blockedResponse = await SupabaseConfig.client
+          .from('blocks')
+          .select('blocked_id')
+          .eq('blocker_id', userId);
+      
+      final blockedIds = ((blockedResponse as List<dynamic>?) ?? [])
+          .map((b) => b['blocked_id'] as String)
+          .toSet();
+
+      final excludedIds = {...swipedIds, ...blockedIds};
 
       final profileIds = rankedData
           .map((d) => d['profile_id'] as String)

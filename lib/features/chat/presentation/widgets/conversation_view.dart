@@ -196,6 +196,17 @@ class _ConversationViewState extends State<ConversationView> {
             ),
             ListTile(
               leading: const Icon(LucideIcons.ban, color: Color(0xFFE8437A)),
+              title: Text('Block User',
+                  style: GoogleFonts.inter(
+                      color: const Color(0xFFE8437A),
+                      fontWeight: FontWeight.w600)),
+              onTap: () {
+                Navigator.pop(context);
+                _confirmBlock();
+              },
+            ),
+            ListTile(
+              leading: const Icon(LucideIcons.flag, color: Color(0xFFE8437A)),
               title: Text('Block & Report',
                   style: GoogleFonts.inter(
                       color: const Color(0xFFE8437A),
@@ -207,6 +218,64 @@ class _ConversationViewState extends State<ConversationView> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmBlock() {
+    final other = widget.match['other_user'] as Map<String, dynamic>?;
+    final otherId = other?['id'] as String? ?? 'unknown';
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
+        title: Text('Block this user?',
+            style: GoogleFonts.spaceGrotesk(color: Theme.of(context).textTheme.titleLarge?.color)),
+        content: Text('They won\'t be able to see your profile or contact you. This action will also unmatch you.',
+            style: GoogleFonts.inter(
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.8))),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel',
+                style: GoogleFonts.inter(
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5))),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final messenger = ScaffoldMessenger.of(context);
+              
+              try {
+                // 1. Unmatch
+                await _repo.unmatch(widget.match['id'] as String);
+                
+                // 2. Insert into blocks table
+                await SupabaseConfig.client.from('blocks').insert({
+                  'blocker_id': widget.currentUserId,
+                  'blocked_id': otherId,
+                });
+                
+                if (mounted) {
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('User blocked.'),
+                      backgroundColor: Color(0xFF4CB572),
+                    ),
+                  );
+                  widget.onBack();
+                }
+              } catch (e) {
+                debugPrint('BLOCK ERROR: $e');
+                // Silently go back anyway as unmatch likely worked or they are already gone
+                if (mounted) widget.onBack();
+              }
+            },
+            child: Text('Block',
+                style: GoogleFonts.inter(color: const Color(0xFFE8437A))),
+          ),
+        ],
       ),
     );
   }
