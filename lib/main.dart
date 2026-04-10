@@ -9,6 +9,7 @@ import 'features/auth/presentation/splash_screen.dart';
 import 'features/auth/presentation/reset_password_screen.dart';
 import 'core/notifications/notification_service.dart';
 import 'core/theme/theme_provider.dart';
+import 'core/utils/web_utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,7 @@ void main() async {
   final uri = Uri.base;
   bool isPasswordRecovery = false;
   bool isSignupConfirm = false;
+  String? deepLinkError;
   
   // Debug logging for troubleshooting hash routes
   debugPrint('DEBUG: Current URL: ${uri.toString()}');
@@ -50,9 +52,11 @@ void main() async {
           debugPrint('DEBUG: Exchanging code (fragment) for session...');
           await Supabase.instance.client.auth.exchangeCodeForSession(code);
           debugPrint('DEBUG: Fragment session exchange successful.');
+          WebUtils.clearUrl();
         }
       } catch (e) {
         debugPrint('[DEEP_LINK_FRAGMENT_ERROR] $e');
+        deepLinkError = 'This link has already been used or has expired. Please request a new one.';
       }
     }
   }
@@ -72,15 +76,20 @@ void main() async {
           debugPrint('DEBUG: Exchanging code (query) for session...');
           await Supabase.instance.client.auth.exchangeCodeForSession(code);
           debugPrint('DEBUG: Query session exchange successful.');
+          WebUtils.clearUrl();
         } catch (e) {
           debugPrint('[DEEP_LINK_QUERY_ERROR] $e');
+          deepLinkError = 'This link has already been used or has expired. Please request a new one.';
         }
       }
     }
   }
 
   runApp(ProviderScope(
-    child: TurfAndArdorApp(showPasswordReset: isPasswordRecovery)
+    child: TurfAndArdorApp(
+      showPasswordReset: isPasswordRecovery,
+      deepLinkError: deepLinkError,
+    )
   ));
 }
 
@@ -88,9 +97,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class TurfAndArdorApp extends ConsumerStatefulWidget {
   final bool showPasswordReset;
+  final String? deepLinkError;
   const TurfAndArdorApp({
     super.key,
     this.showPasswordReset = false,
+    this.deepLinkError,
   });
 
   @override
@@ -113,6 +124,21 @@ class _TurfAndArdorAppState extends ConsumerState<TurfAndArdorApp> {
         );
       }
     });
+
+    if (widget.deepLinkError != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final context = navigatorKey.currentContext;
+        if (context != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(widget.deepLinkError!),
+              backgroundColor: const Color(0xFFC62828),
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+      });
+    }
   }
 
   @override
