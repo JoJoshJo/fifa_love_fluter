@@ -37,7 +37,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       Supabase.instance.client
           .rpc('update_last_active')
           .then((_) {})
-          .catchError((e) => debugPrint('update_last_active error: $e'));
+          .catchError((e) {
+            debugPrint('update_last_active error: $e');
+            return null;
+          });
     }
   }
 

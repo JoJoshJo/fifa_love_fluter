@@ -146,6 +146,72 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> with TickerProv
     }
   }
 
+  Widget _buildPhotoPrompt(bool isLight) {
+    final textColor = isLight ? const Color(0xFF0D1410) : Colors.white;
+    final mutedColor = isLight ? Colors.black54 : Colors.white60;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(LucideIcons.camera, size: 48, color: Color(0xFFE8437A)),
+            const SizedBox(height: 24),
+            Text(
+              'Add a photo to start matching',
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Profiles with photos get 10x more matches',
+              style: GoogleFonts.inter(
+                fontSize: 14, 
+                color: mutedColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            GestureDetector(
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const EditProfileScreen(initialProfile: {})),
+                );
+                _checkPhotoRequirement();
+              },
+              child: Container(
+                height: 52,
+                width: 220,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(26),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'Upload Photo',
+                    style: GoogleFonts.inter(
+                      fontSize: 16, 
+                      fontWeight: FontWeight.w600, 
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _fetchMyAvatar() async {
     final user = SupabaseConfig.client.auth.currentUser;
     if (user == null) return;
@@ -1758,72 +1824,6 @@ class _SwipeHintOverlayState extends State<_SwipeHintOverlay>
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPhotoPrompt(bool isLight) {
-    final textColor = isLight ? const Color(0xFF0D1410) : Colors.white;
-    final mutedColor = isLight ? Colors.black54 : Colors.white60;
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(LucideIcons.camera, size: 48, color: Color(0xFFE8437A)),
-            const SizedBox(height: 24),
-            Text(
-              'Add a photo to start matching',
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: textColor,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Profiles with photos get 10x more matches',
-              style: GoogleFonts.inter(
-                fontSize: 14, 
-                color: mutedColor,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            GestureDetector(
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-                );
-                _checkPhotoRequirement();
-              },
-              child: Container(
-                height: 52,
-                width: 220,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(26),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF135E4B), Color(0xFF4CB572)],
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    'Upload Photo',
-                    style: GoogleFonts.inter(
-                      fontSize: 16, 
-                      fontWeight: FontWeight.w600, 
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

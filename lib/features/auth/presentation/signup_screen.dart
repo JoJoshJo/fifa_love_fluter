@@ -978,6 +978,8 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Widget _buildPasswordStrengthBar() {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final text = isLight ? const Color(0xFF0D2B1E) : const Color(0xFFEBF2EE);
     int str = _getPasswordStrength(_passwordController.text);
     return Row(
       children: List.generate(4, (index) {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../core/supabase/supabase_config.dart';
 import '../../../core/notifications/notification_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DiscoverRepository {
   /// Fetches profiles to display in the swipe feed.
@@ -166,10 +167,11 @@ class DiscoverRepository {
       final today = DateTime.now().toIso8601String().substring(0, 10);
       final response = await SupabaseConfig.client
           .from('swipe_actions')
-          .select('id', const FetchOptions(count: CountOption.exact))
+          .select('id')
           .eq('swiper_id', userId)
           .eq('action', 'like')
-          .gte('created_at', '${today}T00:00:00');
+          .gte('created_at', '${today}T00:00:00')
+          .count(CountOption.exact);
       
       return response.count;
     } catch (e) {
