@@ -8,7 +8,6 @@ import 'core/supabase/supabase_config.dart';
 import 'features/auth/presentation/splash_screen.dart';
 import 'features/auth/presentation/reset_password_screen.dart';
 import 'core/notifications/notification_service.dart';
-
 import 'core/theme/theme_provider.dart';
 
 void main() async {
@@ -24,50 +23,74 @@ void main() async {
     NotificationService().initialize(),
   ]);
 
-  // Early Deep Link Check for Password Recovery or signup confirmation
+  // Robust Deep Link Check for Password Recovery or signup confirmation
   final uri = Uri.base;
-  bool showResetScreen = false;
+  bool isPasswordRecovery = false;
+  bool isSignupConfirm = false;
   
   // Debug logging for troubleshooting hash routes
   debugPrint('DEBUG: Current URL: ${uri.toString()}');
   debugPrint('DEBUG: Fragment: ${uri.fragment}');
   
-  if (uri.fragment.contains('code=')) {
-    try {
-      // Use a dummy base URL to reliably parse the hash fragment as a path
-      final fragment = uri.fragment.startsWith('/') ? uri.fragment : '/${uri.fragment}';
-      final recoveryUri = Uri.parse('https://fifalove.app$fragment');
-      
-      final code = recoveryUri.queryParameters['code'];
-      final type = recoveryUri.queryParameters['type'];
+  // 1. Check fragments (standard for Supabase redirects)
+  if (uri.fragment.isNotEmpty) {
+    if (uri.fragment.contains('type=recovery') || uri.fragment.contains('reset-password')) {
+      isPasswordRecovery = true;
+    } else if (uri.fragment.contains('type=signup') || uri.fragment.contains('confirm')) {
+      isSignupConfirm = true;
+    }
 
-      if (code != null) {
-        debugPrint('DEBUG: Exchanging code for session...');
-        await Supabase.instance.client.auth.exchangeCodeForSession(code);
-        debugPrint('DEBUG: Session exchange successful. Type: $type');
+    if (isPasswordRecovery || isSignupConfirm) {
+      try {
+        final fragment = uri.fragment.startsWith('/') ? uri.fragment : '/${uri.fragment}';
+        final recoveryUri = Uri.parse('https://fifalove.app$fragment');
+        final code = recoveryUri.queryParameters['code'];
         
-        if (type == 'recovery' || fragment.contains('reset-password')) {
-          showResetScreen = true;
-          debugPrint('DEBUG: Recovery flow detected. Setting showResetScreen = true');
+        if (code != null) {
+          debugPrint('DEBUG: Exchanging code (fragment) for session...');
+          await Supabase.instance.client.auth.exchangeCodeForSession(code);
+          debugPrint('DEBUG: Fragment session exchange successful.');
         }
+      } catch (e) {
+        debugPrint('[DEEP_LINK_FRAGMENT_ERROR] $e');
       }
-    } catch (e) {
-      debugPrint('[INIT_DEEP_LINK_ERROR] $e');
     }
   }
-  
+
+  // 2. Check non-fragment query params (Supabase sometimes uses ?code= directly)
+  if (!isPasswordRecovery && !isSignupConfirm) {
+    if (uri.queryParameters['type'] == 'recovery' || uri.path.contains('reset-password')) {
+      isPasswordRecovery = true;
+    } else if (uri.queryParameters['type'] == 'signup' || uri.path.contains('confirm')) {
+      isSignupConfirm = true;
+    }
+
+    if (isPasswordRecovery || isSignupConfirm) {
+      final code = uri.queryParameters['code'];
+      if (code != null) {
+        try {
+          debugPrint('DEBUG: Exchanging code (query) for session...');
+          await Supabase.instance.client.auth.exchangeCodeForSession(code);
+          debugPrint('DEBUG: Query session exchange successful.');
+        } catch (e) {
+          debugPrint('[DEEP_LINK_QUERY_ERROR] $e');
+        }
+      }
+    }
+  }
+
   runApp(ProviderScope(
-    child: TurfAndArdorApp(showResetScreen: showResetScreen)
+    child: TurfAndArdorApp(showPasswordReset: isPasswordRecovery)
   ));
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class TurfAndArdorApp extends ConsumerStatefulWidget {
-  final bool showResetScreen;
+  final bool showPasswordReset;
   const TurfAndArdorApp({
     super.key,
-    this.showResetScreen = false,
+    this.showPasswordReset = false,
   });
 
   @override
@@ -80,6 +103,7 @@ class _TurfAndArdorAppState extends ConsumerState<TurfAndArdorApp> {
   @override
   void initState() {
     super.initState();
+    // Handle runtime recovery events if the app is already open
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.passwordRecovery) {
         navigatorKey.currentState?.push(
@@ -108,7 +132,8 @@ class _TurfAndArdorAppState extends ConsumerState<TurfAndArdorApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      home: widget.showResetScreen 
+      // If we landed on a recovery link, skip splash and go straight to reset form
+      home: widget.showPasswordReset 
           ? const ResetPasswordScreen() 
           : const SplashScreen(),
     );

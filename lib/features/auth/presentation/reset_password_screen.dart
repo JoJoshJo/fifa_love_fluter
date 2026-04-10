@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/utils/url_helper.dart';
+import '../../../core/router/auth_gate.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -67,7 +69,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.of(context).pushReplacementNamed('/');
+        
+        // Clear the URL fragment/hash on web
+        UrlHelper.clearUrlPath();
+        
+        // Final navigation to AuthGate and clear stack
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const AuthGate()),
+          (route) => false,
+        );
       }
     } catch (e) {
       if (mounted) {
