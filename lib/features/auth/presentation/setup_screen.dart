@@ -21,6 +21,7 @@ class _SetupScreenState extends State<SetupScreen> {
   bool _isLocal = false;
   final List<String> _matchTypes = [];
   final List<String> _selectedCountries = [];
+  final List<String> _selectedInterests = [];
   bool _saving = false;
 
   final TextEditingController _nameController = TextEditingController();
@@ -60,6 +61,13 @@ class _SetupScreenState extends State<SetupScreen> {
     'Portugal', 'Qatar', 'Saudi Arabia', 'Senegal', 'Serbia',
     'South Korea', 'Spain', 'Switzerland', 'Tunisia', 'Turkey',
     'USA', 'Uruguay', 'Venezuela',
+  ];
+
+  static const _availableInterests = [
+    'Football', 'Music', 'Travel', 'Foodie', 'Art', 'Dance',
+    'Photography', 'Fashion', 'Gym', 'Beach', 'Hiking', 'Culture',
+    'Nightlife', 'Cooking', 'Yoga', 'Coffee', 'Wine', 'Afrobeats',
+    'Samba', 'Pub Culture', 'History', 'Salsa',
   ];
 
   static const _countriesForNationality = [
@@ -294,30 +302,23 @@ class _SetupScreenState extends State<SetupScreen> {
       final user = SupabaseConfig.client.auth.currentUser;
       final meta = user?.userMetadata ?? {};
 
-      // Build the full profile upsert — merge metadata fields with setup fields.
-      // This guarantees the Me screen always has complete data, even if the
-      // pre-confirmation upsert in SignupScreen failed (unconfirmed RLS block).
       final profileData = {
         'id': _userId,
-        // Name and Age from controllers (prioritize over metadata)
         'name': _nameController.text.trim().isNotEmpty ? _nameController.text.trim() : (meta['name'] ?? 'New Fan'),
         'age': int.tryParse(_ageController.text.trim()) ?? meta['age'],
-        // Fields from signup metadata
         'gender': meta['gender'],
         'bio': meta['bio'],
         'city': meta['city'],
         'avatar_url': meta['avatar_url'] ?? meta['picture'],
-        // Fields from this setup screen
         'nationality': _nationality,
         'team_supported': _team.isNotEmpty ? _team : null,
         'is_local': _isLocal,
         'match_type_preference': _matchTypes,
+        'interests': _selectedInterests,
         'countries_to_match': _selectedCountries,
-      }..removeWhere((_, v) => v == null); // don't overwrite existing nulls
+      }..removeWhere((_, v) => v == null);
 
       await SupabaseConfig.client.from('profiles').upsert(profileData);
-
-
 
       if (mounted) {
         Navigator.pushAndRemoveUntil(
@@ -342,77 +343,92 @@ class _SetupScreenState extends State<SetupScreen> {
     }
   }
 
+  void _nextStep() {
+    if (_step == 0) {
+      if (_nameController.text.trim().isEmpty) return;
+      if (_nationality.isEmpty) return;
+      if (_team.isEmpty) return;
+      if (_matchTypes.isEmpty) return;
+      setState(() => _step = 1);
+    } else if (_step == 1) {
+      if (_selectedCountries.isEmpty) return;
+      setState(() => _step = 2);
+    } else if (_step == 2) {
+      if (_selectedInterests.length < 3) return;
+      _finish();
+    }
+  }
+
+  void _prevStep() {
+    if (_step > 0) {
+      setState(() => _step--);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isLight = theme.brightness == Brightness.light;
-    final bottomPad = MediaQuery.of(context).padding.bottom;
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              theme.scaffoldBackgroundColor,
-              TurfArdorColors.emeraldForest.withValues(alpha: isLight ? 0.05 : 0.15),
-            ],
-            stops: const [0.7, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Progress indicator
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          'STEP ${_step + 1} OF 2',
-                          style: GoogleFonts.spaceMono(
-                            fontSize: 9,
-                            color: TurfArdorColors.emeraldSpring,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        const Spacer(),
-                      ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+              child: Row(
+                children: [
+                  if (_step > 0)
+                    IconButton(
+                      icon: const Icon(LucideIcons.arrowLeft, size: 20),
+                      onPressed: _prevStep,
                     ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: (_step + 1) / 2,
-                        backgroundColor: theme.dividerColor.withValues(alpha: 0.05),
-                        valueColor: const AlwaysStoppedAnimation<Color>(TurfArdorColors.emeraldSpring),
-                        minHeight: 4,
+                  const Spacer(),
+                  // Progress
+                  Text(
+                    'Step ${_step + 1} of 3',
+                    style: GoogleFonts.spaceMono(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: TurfArdorColors.emeraldSpring,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: _step == 0 
+                  ? _buildStep0(context) 
+                  : (_step == 1 ? _buildStep1(context) : _buildStep2(context)),
+              ),
+            ),
+
+            // Bottom button
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _nextStep,
+                  child: Center(
+                    child: Text(
+                      _step == 2 ? 'Let\'s Go!' : 'Continue',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-
-              // Content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _step == 0 ? _buildStep0(context) : _buildStep1(context),
-                ),
-              ),
-
-              // Bottom buttons
-              Padding(
-                padding: EdgeInsets.fromLTRB(24, 12, 24, bottomPad + 32),
-                child: _step == 0 ? _buildStep0Button() : _buildStep1Buttons(),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -424,7 +440,6 @@ class _SetupScreenState extends State<SetupScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 32),
         Text(
           'Your football identity',
           style: GoogleFonts.playfairDisplay(
@@ -433,19 +448,7 @@ class _SetupScreenState extends State<SetupScreen> {
             color: theme.textTheme.displayLarge?.color,
           ),
         ),
-        const SizedBox(height: 6),
-        Text(
-          'This helps us find your perfect matches',
-          style: GoogleFonts.inter(
-            fontSize: 14, 
-            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
-          ),
-        ),
         const SizedBox(height: 32),
-
-        const SizedBox(height: 32),
-
-        // Name
         _label(context, 'YOUR NAME'),
         const SizedBox(height: 8),
         TextField(
@@ -456,10 +459,7 @@ class _SetupScreenState extends State<SetupScreen> {
             prefixIcon: Icon(Icons.person_outline, color: TurfArdorColors.emeraldSpring),
           ),
         ),
-
         const SizedBox(height: 20),
-
-        // Age
         _label(context, 'YOUR AGE'),
         const SizedBox(height: 8),
         TextField(
@@ -471,10 +471,7 @@ class _SetupScreenState extends State<SetupScreen> {
             prefixIcon: Icon(Icons.cake_outlined, color: TurfArdorColors.emeraldSpring),
           ),
         ),
-
         const SizedBox(height: 20),
-
-        // Nationality
         _label(context, 'YOUR NATIONALITY'),
         const SizedBox(height: 8),
         GestureDetector(
@@ -509,18 +506,12 @@ class _SetupScreenState extends State<SetupScreen> {
                     ),
                   ),
                 const Spacer(),
-                Icon(
-                  Icons.expand_more,
-                  color: theme.textTheme.bodySmall?.color,
-                ),
+                Icon(Icons.expand_more, color: theme.textTheme.bodySmall?.color),
               ],
             ),
           ),
         ),
-
         const SizedBox(height: 20),
-
-        // Team
         _label(context, 'TEAM YOU SUPPORT'),
         const SizedBox(height: 8),
         GestureDetector(
@@ -554,47 +545,35 @@ class _SetupScreenState extends State<SetupScreen> {
             ),
           ),
         ),
-
         const SizedBox(height: 24),
-
-        // Local or Visiting
         _label(context, 'ARE YOU...'),
         const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          child: Row(
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.42,
-                child: _localVisitCard(
-                  title: "I'm a Local",
-                  subtitle: "I live here",
-                  icon: LucideIcons.home,
-                  iconColor: Colors.white,
-                  isSelected: _isLocal == true,
-                  onTap: () => setState(() => _isLocal = true),
-                ),
+        Row(
+          children: [
+            Expanded(
+              child: _localVisitCard(
+                title: "I'm a Local",
+                subtitle: "I live here",
+                icon: LucideIcons.home,
+                iconColor: Colors.white,
+                isSelected: _isLocal == true,
+                onTap: () => setState(() => _isLocal = true),
               ),
-              const SizedBox(width: 12),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.42,
-                child: _localVisitCard(
-                  title: "Visiting",
-                  subtitle: "In for the games",
-                  icon: LucideIcons.plane,
-                  iconColor: isLight ? const Color(0xFF0D2B1E) : Colors.white,
-                  isSelected: _isLocal == false,
-                  onTap: () => setState(() => _isLocal = false),
-                ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _localVisitCard(
+                title: "Visiting",
+                subtitle: "In for the games",
+                icon: LucideIcons.plane,
+                iconColor: isLight ? const Color(0xFF0D2B1E) : Colors.white,
+                isSelected: _isLocal == false,
+                onTap: () => setState(() => _isLocal = false),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-
         const SizedBox(height: 24),
-
-        // Looking for
         _label(context, 'LOOKING FOR...'),
         const SizedBox(height: 8),
         ..._matchTypeOptions.map((opt) {
@@ -616,69 +595,32 @@ class _SetupScreenState extends State<SetupScreen> {
               height: 64,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? TurfArdorColors.emeraldForest
-                    : theme.cardColor,
+                color: isSelected ? TurfArdorColors.emeraldForest : theme.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected
-                      ? TurfArdorColors.emeraldSpring
-                      : theme.dividerColor.withValues(alpha: 0.1),
+                  color: isSelected ? TurfArdorColors.emeraldSpring : theme.dividerColor.withValues(alpha: 0.1),
                 ),
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: TurfArdorColors.emeraldSpring.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  )
-                ] : null,
               ),
               child: Row(
                 children: [
-                  Icon(
-                    opt['icon'] as IconData,
-                    size: 22,
-                    color: isSelected ? Colors.white : TurfArdorColors.accent,
-                  ),
+                  Icon(opt['icon'] as IconData, size: 22, color: isSelected ? Colors.white : TurfArdorColors.accent),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          label,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color,
-                          ),
-                        ),
-                        Text(
-                          opt['sub'] as String,
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: isSelected ? Colors.white.withValues(alpha: 0.7) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
-                          ),
-                        ),
+                        Text(label, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : theme.textTheme.bodyLarge?.color)),
+                        Text(opt['sub'] as String, style: GoogleFonts.inter(fontSize: 12, color: isSelected ? Colors.white.withValues(alpha: 0.7) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5))),
                       ],
                     ),
                   ),
-                  Icon(
-                    isSelected ? Icons.check_circle : Icons.circle_outlined,
-                    size: 18,
-                    color: isSelected
-                        ? Colors.white
-                        : theme.textTheme.bodySmall?.color?.withValues(alpha: 0.2),
-                  ),
+                  Icon(isSelected ? Icons.check_circle : Icons.circle_outlined, size: 18, color: isSelected ? Colors.white : theme.textTheme.bodySmall?.color?.withValues(alpha: 0.2)),
                 ],
               ),
             ),
           );
         }),
-
-        const SizedBox(height: 16),
-        SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
       ],
     );
   }
@@ -689,33 +631,11 @@ class _SetupScreenState extends State<SetupScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 32),
         Text(
           'Who do you want to meet?',
-          style: GoogleFonts.playfairDisplay(
-            fontSize: 26, 
-            fontWeight: FontWeight.bold, 
-            color: theme.textTheme.displayLarge?.color,
-          ),
+          style: GoogleFonts.playfairDisplay(fontSize: 26, fontWeight: FontWeight.bold, color: theme.textTheme.displayLarge?.color),
         ),
-        const SizedBox(height: 6),
-        Text(
-          'Select countries you want to match with',
-          style: GoogleFonts.inter(
-            fontSize: 14, 
-            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Leave empty to meet fans from everywhere',
-          style: GoogleFonts.inter(
-            fontSize: 13, 
-            color: TurfArdorColors.emeraldSpring,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        // Country selection button
+        const SizedBox(height: 16),
         GestureDetector(
           onTap: () {
             showModalBottomSheet(
@@ -725,9 +645,7 @@ class _SetupScreenState extends State<SetupScreen> {
               builder: (context) => CountrySelectorSheet(
                 selectedCountries: _selectedCountries,
                 onSelect: (selected) {
-                  setState(() => _selectedCountries
-                    ..clear()
-                    ..addAll(selected));
+                  setState(() => _selectedCountries..clear()..addAll(selected));
                 },
               ),
             );
@@ -737,43 +655,24 @@ class _SetupScreenState extends State<SetupScreen> {
             decoration: BoxDecoration(
               color: isLight ? const Color(0xFFF2F2F2) : theme.cardColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: theme.dividerColor.withValues(alpha: 0.1),
-              ),
+              border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
             ),
             child: Row(
               children: [
-                Icon(LucideIcons.globe, 
-                  size: 20, 
-                  color: isLight ? TurfArdorColors.emeraldForest : TurfArdorColors.emeraldSpring
-                ),
+                Icon(LucideIcons.globe, size: 20, color: isLight ? TurfArdorColors.emeraldForest : TurfArdorColors.emeraldSpring),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    _selectedCountries.isEmpty 
-                        ? "Select countries to match with..." 
-                        : "${_selectedCountries.length} countries selected",
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      color: _selectedCountries.isEmpty 
-                          ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5)
-                          : theme.textTheme.bodyLarge?.color,
-                      fontWeight: _selectedCountries.isEmpty ? FontWeight.normal : FontWeight.bold,
-                    ),
+                    _selectedCountries.isEmpty ? "Select countries to match with..." : "${_selectedCountries.length} countries selected",
+                    style: GoogleFonts.inter(fontSize: 15, color: _selectedCountries.isEmpty ? theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5) : theme.textTheme.bodyLarge?.color, fontWeight: _selectedCountries.isEmpty ? FontWeight.normal : FontWeight.bold),
                   ),
                 ),
-                Icon(LucideIcons.chevronRight, 
-                  size: 18, 
-                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3)
-                ),
+                Icon(LucideIcons.chevronRight, size: 18, color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.3)),
               ],
             ),
           ),
         ),
-
         const SizedBox(height: 16),
-
-        // Selected country chips (smaller Wrap)
         if (_selectedCountries.isNotEmpty)
           Wrap(
             spacing: 6,
@@ -788,14 +687,7 @@ class _SetupScreenState extends State<SetupScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    c,
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: TurfArdorColors.emeraldSpring,
-                    ),
-                  ),
+                  Text(c, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: TurfArdorColors.emeraldSpring)),
                   const SizedBox(width: 4),
                   GestureDetector(
                     onTap: () => setState(() => _selectedCountries.remove(c)),
@@ -968,6 +860,114 @@ class _SetupScreenState extends State<SetupScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStep2(BuildContext context) {
+    final theme = Theme.of(context);
+    final isLight = theme.brightness == Brightness.light;
+    final textColor = theme.textTheme.displayLarge?.color;
+    final mutedText = isLight ? TurfArdorColors.mutedTextLight : TurfArdorColors.textMuted;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'YOUR INTERESTS',
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: textColor,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Beyond the pitch, what brings you joy? Select at least 3 things to round out your profile.',
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            color: mutedText,
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 32),
+        Wrap(
+          spacing: 8,
+          runSpacing: 12,
+          children: _availableInterests.map((interest) {
+            final isSelected = _selectedInterests.contains(interest);
+            
+            // Categorical styling
+            Color bg;
+            Color txt;
+            
+            if (['Football', 'Gym', 'Yoga'].contains(interest)) {
+              bg = isSelected ? const Color(0xFF135E4B) : const Color(0xFFA4E4C1);
+              txt = isSelected ? Colors.white : const Color(0xFF004B3A);
+            } else if (['Samba', 'Music', 'Art', 'Dance', 'Afrobeats', 'Salsa', 'History', 'Culture'].contains(interest)) {
+              bg = isSelected ? const Color(0xFF8A3058) : const Color(0xFFFFF0F5);
+              txt = isSelected ? Colors.white : const Color(0xFF8A3058);
+            } else if (['Beach', 'Hiking', 'Travel'].contains(interest)) {
+              bg = isSelected ? const Color(0xFF5A4500) : const Color(0xFFFFF8E1);
+              txt = isSelected ? Colors.white : const Color(0xFF5A4500);
+            } else {
+              bg = isSelected ? const Color(0xFF135E4B) : const Color(0xFFA4E4C1);
+              txt = isSelected ? Colors.white : const Color(0xFF004B3A);
+            }
+
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (isSelected) {
+                    _selectedInterests.remove(interest);
+                  } else {
+                    _selectedInterests.add(interest);
+                  }
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: BorderRadius.circular(24),
+                  border: isSelected ? Border.all(color: Colors.white.withValues(alpha: 0.3)) : null,
+                  boxShadow: isSelected ? [
+                    BoxShadow(
+                      color: bg.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ] : null,
+                ),
+                child: Text(
+                  interest,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: txt,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 40),
+        if (_selectedInterests.length < 3 && _selectedInterests.isNotEmpty)
+          Row(
+            children: [
+              const Icon(LucideIcons.info, size: 16, color: TurfArdorColors.emeraldSpring),
+              const SizedBox(width: 8),
+              Text(
+                'Please select ${3 - _selectedInterests.length} more...',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: TurfArdorColors.emeraldSpring,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+      ],
     );
   }
 }

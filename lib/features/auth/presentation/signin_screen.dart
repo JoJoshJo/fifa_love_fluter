@@ -52,16 +52,21 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     } on AuthException catch (e) {
       if (mounted) {
-        String msg = "Something went wrong — please try again";
-        if (e.message.contains("Email not confirmed")) {
-          msg = "Please check your inbox and confirm your email";
-        } else if (e.message.toLowerCase().contains("invalid login credentials")) {
-          msg = "Incorrect email or password — please try again";
+        String msg;
+        final lower = e.message.toLowerCase();
+        if (lower.contains('email not confirmed') || lower.contains('not confirmed') || lower.contains('confirm')) {
+          msg = 'Your email is not confirmed yet. Check your inbox (and spam folder) or use Forgot Password to reset.';
+        } else if (lower.contains('invalid') || lower.contains('credentials') || lower.contains('wrong password')) {
+          msg = 'Incorrect email or password. Please try again.';
+        } else {
+          msg = 'Sign-in failed: ${e.message}';
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(msg),
+            backgroundColor: const Color(0xFFC62828),
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 5),
           ),
         );
       }

@@ -40,6 +40,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
   late String _city;
   late List<String> _matchTypes;
   late List<String> _countriesToMatch;
+  late List<String> _interests;
+
+  static const _availableInterests = [
+    'Football', 'Music', 'Travel', 'Foodie', 'Art', 'Dance',
+    'Photography', 'Fashion', 'Gym', 'Beach', 'Hiking', 'Culture',
+    'Nightlife', 'Cooking', 'Yoga', 'Coffee', 'Wine', 'Afrobeats',
+    'Samba', 'Pub Culture', 'History', 'Salsa',
+  ];
   
   static const _worldCupTeams = [
     'Argentina', 'Australia', 'Belgium', 'Bolivia', 'Brazil',
@@ -110,6 +118,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         _city = 'Dallas';
       }
       _countriesToMatch = List<String>.from(_profile['countries_to_match'] ?? []);
+      _interests = List<String>.from(_profile['interests'] ?? []);
       
       _teamSupported = _profile['team_supported'] as String? ?? '';
       if (!_worldCupTeams.contains(_teamSupported)) {
@@ -184,7 +193,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
         'nationality': _nationality,
         'team_supported': _teamSupported.isEmpty ? null : _teamSupported,
         'avatar_url': finalAvatarUrl,
-        'interests': _matchTypes,
+        'match_type_preference': _matchTypes,
+        'interests': _interests,
         'is_local': _isLocal,
         'city': _city,
         'countries_to_match': _countriesToMatch,
@@ -502,6 +512,76 @@ class _EditProfileScreenState extends State<EditProfileScreen> with SingleTicker
           () => _toggleMatchType('Local Guide'),
           isLight, textColor
         ),
+        const SizedBox(height: 32),
+        Text(
+          "MY INTERESTS",
+          style: GoogleFonts.spaceMono(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF4CB572),
+            letterSpacing: 2),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          "Select things you enjoy beyond the pitch.",
+          style: GoogleFonts.inter(fontSize: 14, color: textMuted),
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _availableInterests.map((interest) {
+            final isSelected = _interests.contains(interest);
+            
+            // Categorical styling
+            Color bg;
+            Color txt;
+            
+            if (['Football', 'Gym', 'Yoga'].contains(interest)) {
+              bg = isSelected ? const Color(0xFF135E4B) : const Color(0xFFA4E4C1);
+              txt = isSelected ? Colors.white : const Color(0xFF004B3A);
+            } else if (['Samba', 'Music', 'Art', 'Dance', 'Afrobeats', 'Salsa', 'History', 'Culture'].contains(interest)) {
+              bg = isSelected ? const Color(0xFF8A3058) : const Color(0xFFFFF0F5);
+              txt = isSelected ? Colors.white : const Color(0xFF8A3058);
+            } else if (['Beach', 'Hiking', 'Travel'].contains(interest)) {
+              bg = isSelected ? const Color(0xFF5A4500) : const Color(0xFFFFF8E1);
+              txt = isSelected ? Colors.white : const Color(0xFF5A4500);
+            } else {
+              bg = isSelected ? const Color(0xFF135E4B) : const Color(0xFFA4E4C1);
+              txt = isSelected ? Colors.white : const Color(0xFF004B3A);
+            }
+
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (isSelected) {
+                    _interests.remove(interest);
+                  } else {
+                    _interests.add(interest);
+                  }
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: bg,
+                  borderRadius: BorderRadius.circular(20),
+                  border: isSelected ? Border.all(color: Colors.white.withValues(alpha: 0.3)) : null,
+                ),
+                child: Text(
+                  interest,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: txt,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 24),
       ],
     );
   }
