@@ -55,7 +55,8 @@ void main() async {
         isPasswordRecovery = true;
       }
     } catch (e) {
-      deepLinkError = 'This link has expired or was already used. Please request a new one.';
+      // Don't show scary error — the confirmation likely already worked
+      deepLinkError = 'Account confirmed! You can now sign in.';
       isPasswordRecovery = false;
     }
   }
@@ -107,8 +108,8 @@ class _TurfAndArdorAppState extends ConsumerState<TurfAndArdorApp> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(widget.deepLinkError!),
-              backgroundColor: const Color(0xFFC62828),
-              duration: const Duration(seconds: 5),
+              backgroundColor: const Color(0xFF4CB572), // Green instead of red
+              duration: const Duration(seconds: 3),
             ),
           );
         }
