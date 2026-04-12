@@ -13,7 +13,6 @@ import 'core/utils/web_utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
   await dotenv.load(fileName: ".env");
   
   await Future.wait([
@@ -24,64 +23,40 @@ void main() async {
     NotificationService().initialize(),
   ]);
 
-  // Robust Deep Link Check for Password Recovery or signup confirmation
-  final uri = Uri.base;
   bool isPasswordRecovery = false;
-  bool isSignupConfirm = false;
   String? deepLinkError;
   
-  // Debug logging for troubleshooting hash routes
-  debugPrint('DEBUG: Current URL: ${uri.toString()}');
-  debugPrint('DEBUG: Fragment: ${uri.fragment}');
+  // ONLY check for deep links if URL has actual parameters
+  final uri = Uri.base;
   
-  // 1. Check fragments (standard for Supabase redirects)
-  if (uri.fragment.isNotEmpty) {
-    if (uri.fragment.contains('type=recovery') || uri.fragment.contains('reset-password')) {
-      isPasswordRecovery = true;
-    } else if (uri.fragment.contains('type=signup') || uri.fragment.contains('confirm')) {
-      isSignupConfirm = true;
-    }
-
-    if (isPasswordRecovery || isSignupConfirm) {
-      try {
-        final fragment = uri.fragment.startsWith('/') ? uri.fragment : '/${uri.fragment}';
-        final recoveryUri = Uri.parse('https://placeholder.local$fragment');
-        final code = recoveryUri.queryParameters['code'];
-        
-        if (code != null) {
-          debugPrint('DEBUG: Exchanging code (fragment) for session...');
-          await Supabase.instance.client.auth.exchangeCodeForSession(code);
-          debugPrint('DEBUG: Fragment session exchange successful.');
-          WebUtils.clearUrl();
-        }
-      } catch (e) {
-        debugPrint('[DEEP_LINK_FRAGMENT_ERROR] $e');
-        deepLinkError = 'This link has already been used or has expired. Please request a new one.';
-      }
-    }
+  // Simple check: does the URL contain a code parameter?
+  String? code;
+  String? type;
+  
+  // Check fragment (hash route)
+  if (uri.fragment.contains('code=')) {
+    final fragmentUri = Uri.parse('https://x.com/${uri.fragment.startsWith('/') ? uri.fragment.substring(1) : uri.fragment}');
+    code = fragmentUri.queryParameters['code'];
+    type = fragmentUri.queryParameters['type'];
   }
-
-  // 2. Check non-fragment query params (Supabase sometimes uses ?code= directly)
-  if (!isPasswordRecovery && !isSignupConfirm) {
-    if (uri.queryParameters['type'] == 'recovery' || uri.path.contains('reset-password')) {
-      isPasswordRecovery = true;
-    } else if (uri.queryParameters['type'] == 'signup' || uri.path.contains('confirm')) {
-      isSignupConfirm = true;
-    }
-
-    if (isPasswordRecovery || isSignupConfirm) {
-      final code = uri.queryParameters['code'];
-      if (code != null) {
-        try {
-          debugPrint('DEBUG: Exchanging code (query) for session...');
-          await Supabase.instance.client.auth.exchangeCodeForSession(code);
-          debugPrint('DEBUG: Query session exchange successful.');
-          WebUtils.clearUrl();
-        } catch (e) {
-          debugPrint('[DEEP_LINK_QUERY_ERROR] $e');
-          deepLinkError = 'This link has already been used or has expired. Please request a new one.';
-        }
+  // Check query params
+  else if (uri.queryParameters.containsKey('code')) {
+    code = uri.queryParameters['code'];
+    type = uri.queryParameters['type'];
+  }
+  
+  // Only process if we actually have a code
+  if (code != null && code.isNotEmpty) {
+    try {
+      await Supabase.instance.client.auth.exchangeCodeForSession(code);
+      WebUtils.clearUrl();
+      
+      if (type == 'recovery') {
+        isPasswordRecovery = true;
       }
+    } catch (e) {
+      deepLinkError = 'This link has expired or was already used. Please request a new one.';
+      isPasswordRecovery = false;
     }
   }
 
@@ -89,7 +64,7 @@ void main() async {
     child: TurfAndArdorApp(
       showPasswordReset: isPasswordRecovery,
       deepLinkError: deepLinkError,
-    )
+    ),
   ));
 }
 
